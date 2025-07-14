@@ -180,11 +180,11 @@ export default function Home() {
           <aside className="lg:w-64 flex-shrink-0">
             <Card className="lg:sticky lg:top-20">
               <CardContent className="p-3 lg:p-4">
-                <h3 className="text-sm lg:text-md font-semibold text-slate-800 mb-2 lg:mb-3">Filters</h3>
+                <h3 className="text-sm lg:text-md font-semibold text-foreground mb-2 lg:mb-3">Filters</h3>
                 
                 {/* Skills Filter Dropdown */}
                 <div className="mb-2 lg:mb-3">
-                  <label className="text-xs lg:text-sm font-medium text-slate-700 mb-1 block">Skills</label>
+                  <label className="text-xs lg:text-sm font-medium text-foreground mb-1 block">Skills</label>
                   <Select 
                     value={selectedSkillFilters.length > 0 ? selectedSkillFilters[0] : ""} 
                     onValueChange={(value) => {
@@ -224,7 +224,7 @@ export default function Home() {
 
                 {/* Available Dates Dropdown */}
                 <div className="mb-2 lg:mb-3">
-                  <label className="text-xs lg:text-sm font-medium text-slate-700 mb-1 block">Dates</label>
+                  <label className="text-xs lg:text-sm font-medium text-foreground mb-1 block">Dates</label>
                   <Select 
                     value={selectedDateFilters.length > 0 ? selectedDateFilters[0] : ""} 
                     onValueChange={(value) => {
@@ -264,7 +264,7 @@ export default function Home() {
 
                 {/* Available Times Dropdown */}
                 <div className="mb-2 lg:mb-3">
-                  <label className="text-xs lg:text-sm font-medium text-slate-700 mb-1 block">Times</label>
+                  <label className="text-xs lg:text-sm font-medium text-foreground mb-1 block">Times</label>
                   <Select 
                     value={selectedTimeFilters.length > 0 ? selectedTimeFilters[0] : ""} 
                     onValueChange={(value) => {
@@ -310,7 +310,7 @@ export default function Home() {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-[#0053d6]">Available Users</h2>
-                <p className="text-slate-600 mt-1 text-sm sm:text-base">
+                <p className="text-muted-foreground mt-1 text-sm sm:text-base">
                   Showing {displayUsers.length} user{displayUsers.length !== 1 ? 's' : ''}
                 </p>
               </div>
@@ -361,8 +361,8 @@ export default function Home() {
               <div className="text-center py-12">
                 <div className="max-w-md mx-auto">
                   <Search className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-                  <h3 className="text-lg font-medium text-slate-800 mb-2">No users found</h3>
-                  <p className="text-slate-600">Try adjusting your search criteria or filters to find more users.</p>
+                  <h3 className="text-lg font-medium text-foreground mb-2">No users found</h3>
+                  <p className="text-muted-foreground">Try adjusting your search criteria or filters to find more users.</p>
                 </div>
               </div>
             )}
