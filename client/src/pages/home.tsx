@@ -109,38 +109,39 @@ export default function Home() {
       {/* Header */}
       <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
-              <h1 className="text-2xl font-bold text-slate-800">SkillSwap</h1>
-              <div className="hidden md:block text-sm text-slate-500">Browse & Connect</div>
+          <div className="flex items-center justify-between h-16 gap-4">
+            <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800">SkillSwap</h1>
+              <div className="hidden lg:block text-sm text-slate-500">Browse & Connect</div>
             </div>
             
             {/* Search Bar */}
-            <div className="flex-1 max-w-md mx-8">
+            <div className="flex-1 max-w-sm sm:max-w-md mx-2 sm:mx-4 lg:mx-8">
               <div className="relative">
                 <Input
                   type="text"
-                  placeholder="Search skills (e.g., Photoshop, Excel)..."
+                  placeholder="Search skills..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  className="pl-10 text-sm"
                 />
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
               </div>
             </div>
 
-            <div className="flex items-center space-x-3">
-              <Button className="bg-primary hover:bg-blue-600">
-                <Plus className="w-4 h-4 mr-2" />
-                Add Profile
+            <div className="flex items-center flex-shrink-0">
+              <Button className="bg-primary hover:bg-blue-600 text-sm px-3 sm:px-4">
+                <Plus className="w-4 h-4 mr-1 sm:mr-2" />
+                <span className="hidden sm:inline">Add Profile</span>
+                <span className="sm:hidden">Add</span>
               </Button>
             </div>
           </div>
         </div>
       </header>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="flex flex-col lg:flex-row gap-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           
           {/* Sidebar Filters */}
           <aside className="lg:w-64 flex-shrink-0">
@@ -185,16 +186,16 @@ export default function Home() {
 
           {/* Main Content */}
           <main className="flex-1">
-            <div className="flex items-center justify-between mb-6">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
               <div>
-                <h2 className="text-2xl font-bold text-slate-800">Available Users</h2>
-                <p className="text-slate-600 mt-1">
+                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Available Users</h2>
+                <p className="text-slate-600 mt-1 text-sm sm:text-base">
                   Showing {displayUsers.length} user{displayUsers.length !== 1 ? 's' : ''}
                 </p>
               </div>
               
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-full sm:w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
@@ -247,7 +248,7 @@ export default function Home() {
 
             {/* User Cards Grid */}
             {!isLoading && displayUsers.length > 0 && (
-              <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
                 {displayUsers.map((user, index) => (
                   <UserCard key={user.id || `user-${index}`} user={user} />
                 ))}
