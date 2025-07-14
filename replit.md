@@ -28,6 +28,10 @@ Preferred communication style: Simple, everyday language.
 - ✓ Optimized profile page loading performance by reducing database queries and adding indexes
 - ✓ Combined skill queries into single database call to reduce API response time
 - ✓ Added database indexes for faster user profile lookups
+- ✓ Fixed database column name mismatch in swap_requests table (sender_id/receiver_id vs requester_id/target_id)
+- ✓ Replaced "Add Profile" button with login/logout functionality using UserMenu component
+- ✓ Created UserMenu component with profile avatar dropdown for authenticated users
+- ✓ Fixed authentication state synchronization for swap request functionality
 
 ## System Architecture
 

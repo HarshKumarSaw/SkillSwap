@@ -592,8 +592,8 @@ export class DatabaseStorage implements IStorage {
     const client = await pool.connect();
     try {
       const result = await client.query(
-        'INSERT INTO swap_requests (requester_id, target_id, status, message) VALUES ($1, $2, $3, $4) RETURNING *',
-        [request.requesterId, request.targetId, request.status, request.message]
+        'INSERT INTO swap_requests (sender_id, receiver_id, status, message) VALUES ($1, $2, $3, $4) RETURNING *',
+        [request.requesterId, request.targetId, request.status || 'pending', request.message]
       );
       return result.rows[0];
     } finally {
@@ -605,7 +605,7 @@ export class DatabaseStorage implements IStorage {
     const client = await pool.connect();
     try {
       const result = await client.query(
-        'SELECT * FROM swap_requests WHERE requester_id = $1 OR target_id = $1',
+        'SELECT * FROM swap_requests WHERE sender_id = $1 OR receiver_id = $1',
         [userId]
       );
       return result.rows;

@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Search, Plus, Loader2, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
 import { UserWithSkills } from "@shared/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { UserMenu } from "@/components/user-menu";
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -203,11 +204,7 @@ export default function Home() {
 
             <div className="flex items-center space-x-2 flex-shrink-0">
               <ThemeToggle />
-              <Button className="bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90 text-sm px-3 sm:px-4">
-                <Plus className="w-4 h-4 mr-1 sm:mr-2" />
-                <span className="hidden sm:inline">Add Profile</span>
-                <span className="sm:hidden">Add</span>
-              </Button>
+              <UserMenu />
             </div>
           </div>
         </div>
