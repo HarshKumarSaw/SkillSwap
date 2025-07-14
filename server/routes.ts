@@ -3,16 +3,37 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { insertSwapRequestSchema } from "@shared/schema";
 import { z } from "zod";
+import { pool } from "./db";
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Database test route
+  app.get("/api/test-db", async (req, res) => {
+    try {
+      const client = await pool.connect();
+      const tablesResult = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'");
+      const usersSchemaResult = await client.query("SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'users'");
+      client.release();
+      res.json({ 
+        tables: tablesResult.rows, 
+        usersSchema: usersSchemaResult.rows,
+        connection: "success" 
+      });
+    } catch (error) {
+      console.error("Database test error:", error);
+      res.status(500).json({ error: error instanceof Error ? error.message : String(error) });
+    }
+  });
+
   // Get all users with their skills
   app.get("/api/users", async (req, res) => {
     try {
+      console.log("API endpoint /api/users called");
       const users = await storage.getUsersWithSkills();
+      console.log("Successfully fetched users:", users.length);
       res.json(users);
     } catch (error) {
       console.error("Error fetching users:", error);
-      res.status(500).json({ message: "Failed to fetch users" });
+      res.status(500).json({ message: "Failed to fetch users", error: error instanceof Error ? error.message : String(error) });
     }
   });
 
