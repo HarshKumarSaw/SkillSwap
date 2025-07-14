@@ -4,11 +4,13 @@ import { UserWithSkills } from "@shared/schema";
 import { SkillTag } from "@/components/skill-tag";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Clock, Star, ArrowLeft } from "lucide-react";
+import { MapPin, Clock, Star, ArrowLeft, MessageSquare, Loader2, User } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { AuthPopup } from "@/components/auth-popup";
 
 // Helper function to format availability
 const formatAvailability = (availability: any): string => {
@@ -60,6 +62,7 @@ const formatAvailability = (availability: any): string => {
 export default function UserProfile() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
+  const { user: currentUser, isAuthenticated } = useAuth();
   
   // Get the page parameter from URL to know where to return
   const urlParams = new URLSearchParams(window.location.search);
@@ -67,6 +70,7 @@ export default function UserProfile() {
   
 
   const [isRequesting, setIsRequesting] = useState(false);
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -107,8 +111,11 @@ export default function UserProfile() {
 
   const createSwapRequestMutation = useMutation({
     mutationFn: async (targetId: string) => {
+      if (!currentUser) {
+        throw new Error("Not authenticated");
+      }
       const response = await apiRequest("POST", "/api/swap-requests", {
-        requesterId: "user1", // This would come from auth context in a real app
+        requesterId: currentUser.id,
         targetId,
         message: `I'd like to swap skills with you!`,
       });
@@ -134,6 +141,22 @@ export default function UserProfile() {
 
   const handleSwapRequest = () => {
     if (!user) return;
+    
+    if (!isAuthenticated) {
+      setShowAuthPopup(true);
+      return;
+    }
+    
+    // Prevent users from requesting swap with themselves
+    if (currentUser?.id === user.id) {
+      toast({
+        title: "Cannot request swap",
+        description: "You cannot request a skill swap with yourself.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsRequesting(true);
     createSwapRequestMutation.mutate(user.id);
   };
@@ -284,16 +307,41 @@ export default function UserProfile() {
             <div className="pt-4 border-t border-border">
               <Button
                 onClick={handleSwapRequest}
-                disabled={isRequesting || createSwapRequestMutation.isPending}
-                className="w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90"
+                disabled={isRequesting || createSwapRequestMutation.isPending || currentUser?.id === user.id}
+                className="w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90 disabled:opacity-50"
                 size="lg"
               >
-                {isRequesting || createSwapRequestMutation.isPending ? "Requesting..." : "Request Skill Swap"}
+                {isRequesting || createSwapRequestMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Requesting...
+                  </>
+                ) : currentUser?.id === user.id ? (
+                  <>
+                    <User className="mr-2 h-4 w-4" />
+                    Your Profile
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Request Skill Swap
+                  </>
+                )}
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
+      
+      <AuthPopup
+        isOpen={showAuthPopup}
+        onOpenChange={setShowAuthPopup}
+        onAuthSuccess={() => {
+          setShowAuthPopup(false);
+          // Refresh the page after successful authentication
+          window.location.reload();
+        }}
+      />
     </div>
   );
 }

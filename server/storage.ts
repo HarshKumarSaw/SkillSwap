@@ -688,7 +688,7 @@ export class DatabaseStorage implements IStorage {
       const requestId = `swap_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       const result = await client.query(
-        'INSERT INTO swap_requests (id, sender_id, receiver_id, status, message) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        'INSERT INTO swap_requests (id, requester_id, target_id, status, message) VALUES ($1, $2, $3, $4, $5) RETURNING *',
         [requestId, request.requesterId, request.targetId, request.status || 'pending', request.message]
       );
       return result.rows[0];
