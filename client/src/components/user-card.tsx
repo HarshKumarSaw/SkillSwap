@@ -170,7 +170,7 @@ export function UserCard({ user }: UserCardProps) {
             <Button
               onClick={handleSwapRequest}
               disabled={isRequesting || createSwapRequestMutation.isPending}
-              className="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 text-primary-foreground hover:bg-primary/90 h-10 px-4 py-2 text-sm w-full sm:w-auto bg-[#0b3675]"
+              className="px-4 py-2 text-sm w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90"
             >
               {isRequesting || createSwapRequestMutation.isPending ? "Requesting..." : "Request Swap"}
             </Button>
