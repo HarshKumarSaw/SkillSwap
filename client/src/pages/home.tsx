@@ -4,7 +4,7 @@ import { UserCard } from "@/components/user-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
+import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Loader2 } from "lucide-react";
 import { UserWithSkills } from "@shared/schema";
@@ -177,54 +177,128 @@ export default function Home() {
           
           {/* Sidebar Filters */}
           <aside className="lg:w-64 flex-shrink-0">
-            <Card>
-              <CardContent className="p-4">
-                <h3 className="text-md font-semibold text-slate-800 mb-3">Filter by Skills</h3>
+            <Card className="lg:sticky lg:top-20">
+              <CardContent className="p-3 lg:p-4">
+                <h3 className="text-sm lg:text-md font-semibold text-slate-800 mb-2 lg:mb-3">Filters</h3>
                 
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {skillCategories.map((category) => (
-                    <Button
-                      key={category}
-                      variant={selectedSkillFilters.includes(category) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleSkillFilterToggle(category)}
-                      className="text-xs h-7"
-                    >
-                      {category}
-                    </Button>
-                  ))}
+                {/* Skills Filter Dropdown */}
+                <div className="mb-2 lg:mb-3">
+                  <label className="text-xs lg:text-sm font-medium text-slate-700 mb-1 block">Skills</label>
+                  <Select 
+                    value={selectedSkillFilters.length > 0 ? selectedSkillFilters[0] : ""} 
+                    onValueChange={(value) => {
+                      if (value && !selectedSkillFilters.includes(value)) {
+                        setSelectedSkillFilters(prev => [...prev, value]);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full h-7 lg:h-8 text-xs">
+                      <SelectValue placeholder="Select skill" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {skillCategories.map((category) => (
+                        <SelectItem key={category} value={category} className="text-xs">
+                          {category}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {/* Selected Skills Tags */}
+                  {selectedSkillFilters.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {selectedSkillFilters.map((skill) => (
+                        <Badge 
+                          key={skill} 
+                          variant="secondary" 
+                          className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                          onClick={() => handleSkillFilterToggle(skill)}
+                        >
+                          {skill} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <hr className="my-3 border-slate-200" />
-
-                <h4 className="text-sm font-medium text-slate-800 mb-2">Available Dates</h4>
-                <div className="flex flex-wrap gap-1 mb-4">
-                  {["weekends", "weekdays", "everyday"].map((date) => (
-                    <Button
-                      key={date}
-                      variant={selectedDateFilters.includes(date) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleDateFilterToggle(date)}
-                      className="text-xs h-7 px-2 sm:px-3"
-                    >
-                      {date.charAt(0).toUpperCase() + date.slice(1)}
-                    </Button>
-                  ))}
+                {/* Available Dates Dropdown */}
+                <div className="mb-2 lg:mb-3">
+                  <label className="text-xs lg:text-sm font-medium text-slate-700 mb-1 block">Dates</label>
+                  <Select 
+                    value={selectedDateFilters.length > 0 ? selectedDateFilters[0] : ""} 
+                    onValueChange={(value) => {
+                      if (value) {
+                        handleDateFilterToggle(value);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full h-7 lg:h-8 text-xs">
+                      <SelectValue placeholder="Select dates" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["weekends", "weekdays", "everyday"].map((date) => (
+                        <SelectItem key={date} value={date} className="text-xs">
+                          {date.charAt(0).toUpperCase() + date.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {/* Selected Dates Tags */}
+                  {selectedDateFilters.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {selectedDateFilters.map((date) => (
+                        <Badge 
+                          key={date} 
+                          variant="outline" 
+                          className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                          onClick={() => handleDateFilterToggle(date)}
+                        >
+                          {date.charAt(0).toUpperCase() + date.slice(1)} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <h4 className="text-sm font-medium text-slate-800 mb-2">Available Times</h4>
-                <div className="flex flex-wrap gap-1">
-                  {["morning", "evening", "night"].map((time) => (
-                    <Button
-                      key={time}
-                      variant={selectedTimeFilters.includes(time) ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => handleTimeFilterToggle(time)}
-                      className="text-xs h-7 px-2 sm:px-3"
-                    >
-                      {time.charAt(0).toUpperCase() + time.slice(1)}
-                    </Button>
-                  ))}
+                {/* Available Times Dropdown */}
+                <div className="mb-2 lg:mb-3">
+                  <label className="text-xs lg:text-sm font-medium text-slate-700 mb-1 block">Times</label>
+                  <Select 
+                    value={selectedTimeFilters.length > 0 ? selectedTimeFilters[0] : ""} 
+                    onValueChange={(value) => {
+                      if (value && !selectedTimeFilters.includes(value)) {
+                        setSelectedTimeFilters(prev => [...prev, value]);
+                      }
+                    }}
+                  >
+                    <SelectTrigger className="w-full h-7 lg:h-8 text-xs">
+                      <SelectValue placeholder="Select times" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {["morning", "evening", "night"].map((time) => (
+                        <SelectItem key={time} value={time} className="text-xs">
+                          {time.charAt(0).toUpperCase() + time.slice(1)}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  {/* Selected Times Tags */}
+                  {selectedTimeFilters.length > 0 && (
+                    <div className="flex flex-wrap gap-1 mt-2">
+                      {selectedTimeFilters.map((time) => (
+                        <Badge 
+                          key={time} 
+                          variant="outline" 
+                          className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                          onClick={() => handleTimeFilterToggle(time)}
+                        >
+                          {time.charAt(0).toUpperCase() + time.slice(1)} ×
+                        </Badge>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
