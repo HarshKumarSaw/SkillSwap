@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Search, Plus, Loader2, ChevronLeft, ChevronRight, Filter, X } from "lucide-react";
 import { UserWithSkills } from "@shared/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -18,6 +19,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(8); // 8 users per page for optimized loading
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
 
   // Fetch users with pagination
   const { data: paginatedUsers, isLoading: usersLoading, isFetching } = useQuery<{
@@ -202,17 +204,37 @@ export default function Home() {
         </div>
       </header>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
-          
-          {/* Sidebar Filters */}
-          <aside className="lg:w-64 flex-shrink-0">
-            <Card className="lg:sticky lg:top-20">
-              <CardContent className="p-3 lg:p-4">
-                <h3 className="text-sm lg:text-md font-semibold text-foreground mb-2 lg:mb-3">Filters</h3>
+        {/* Filter Button and Active Filters */}
+        <div className="flex items-center gap-4 mb-4">
+          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+            <PopoverTrigger asChild>
+              <Button variant="outline" size="sm" className="flex items-center gap-2">
+                <Filter className="h-4 w-4" />
+                Filters
+                {(selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) && (
+                  <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
+                    {selectedSkillFilters.length + selectedDateFilters.length + selectedTimeFilters.length}
+                  </span>
+                )}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-80 p-4" align="start">
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-semibold text-foreground">Filters</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setIsFilterOpen(false)}
+                    className="h-6 w-6 p-0"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
                 
-                {/* Skills Filter Dropdown */}
-                <div className="mb-2 lg:mb-3">
-                  <label className="text-xs lg:text-sm font-medium text-foreground mb-1 block">Skills</label>
+                {/* Skills Filter */}
+                <div>
+                  <label className="text-xs font-medium text-foreground mb-1 block">Skills</label>
                   <Select 
                     value={selectedSkillFilters.length > 0 ? selectedSkillFilters[0] : ""} 
                     onValueChange={(value) => {
@@ -221,7 +243,7 @@ export default function Home() {
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full h-7 lg:h-8 text-xs">
+                    <SelectTrigger className="w-full h-8 text-xs">
                       <SelectValue placeholder="Select skill" />
                     </SelectTrigger>
                     <SelectContent>
@@ -232,27 +254,11 @@ export default function Home() {
                       ))}
                     </SelectContent>
                   </Select>
-                  
-                  {/* Selected Skills Tags */}
-                  {selectedSkillFilters.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {selectedSkillFilters.map((skill) => (
-                        <Badge 
-                          key={skill} 
-                          variant="secondary" 
-                          className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
-                          onClick={() => handleSkillFilterToggle(skill)}
-                        >
-                          {skill} ×
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
-                {/* Available Dates Dropdown */}
-                <div className="mb-2 lg:mb-3">
-                  <label className="text-xs lg:text-sm font-medium text-foreground mb-1 block">Dates</label>
+                {/* Dates Filter */}
+                <div>
+                  <label className="text-xs font-medium text-foreground mb-1 block">Dates</label>
                   <Select 
                     value={selectedDateFilters.length > 0 ? selectedDateFilters[0] : ""} 
                     onValueChange={(value) => {
@@ -261,7 +267,7 @@ export default function Home() {
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full h-7 lg:h-8 text-xs">
+                    <SelectTrigger className="w-full h-8 text-xs">
                       <SelectValue placeholder="Select dates" />
                     </SelectTrigger>
                     <SelectContent>
@@ -272,27 +278,11 @@ export default function Home() {
                       ))}
                     </SelectContent>
                   </Select>
-                  
-                  {/* Selected Dates Tags */}
-                  {selectedDateFilters.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {selectedDateFilters.map((date) => (
-                        <Badge 
-                          key={date} 
-                          variant="outline" 
-                          className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
-                          onClick={() => handleDateFilterToggle(date)}
-                        >
-                          {date.charAt(0).toUpperCase() + date.slice(1)} ×
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
                 </div>
 
-                {/* Available Times Dropdown */}
-                <div className="mb-2 lg:mb-3">
-                  <label className="text-xs lg:text-sm font-medium text-foreground mb-1 block">Times</label>
+                {/* Times Filter */}
+                <div>
+                  <label className="text-xs font-medium text-foreground mb-1 block">Times</label>
                   <Select 
                     value={selectedTimeFilters.length > 0 ? selectedTimeFilters[0] : ""} 
                     onValueChange={(value) => {
@@ -301,7 +291,7 @@ export default function Home() {
                       }
                     }}
                   >
-                    <SelectTrigger className="w-full h-7 lg:h-8 text-xs">
+                    <SelectTrigger className="w-full h-8 text-xs">
                       <SelectValue placeholder="Select times" />
                     </SelectTrigger>
                     <SelectContent>
@@ -312,144 +302,178 @@ export default function Home() {
                       ))}
                     </SelectContent>
                   </Select>
-                  
-                  {/* Selected Times Tags */}
-                  {selectedTimeFilters.length > 0 && (
-                    <div className="flex flex-wrap gap-1 mt-2">
-                      {selectedTimeFilters.map((time) => (
-                        <Badge 
-                          key={time} 
-                          variant="outline" 
-                          className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
-                          onClick={() => handleTimeFilterToggle(time)}
-                        >
-                          {time.charAt(0).toUpperCase() + time.slice(1)} ×
-                        </Badge>
-                      ))}
-                    </div>
-                  )}
                 </div>
-              </CardContent>
-            </Card>
-          </aside>
 
-          {/* Main Content */}
-          <main className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-[#0053d6]">Available Users</h2>
-                <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-                  {paginatedUsers && !searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0
-                    ? `Showing ${((currentPage - 1) * usersPerPage) + 1}-${Math.min(currentPage * usersPerPage, paginatedUsers.totalCount)} of ${paginatedUsers.totalCount} users`
-                    : `Showing ${displayUsers.length} user${displayUsers.length !== 1 ? 's' : ''}`
-                  }
-                </p>
+                {/* Clear All Filters */}
+                {(selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) && (
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => {
+                      setSelectedSkillFilters([]);
+                      setSelectedDateFilters([]);
+                      setSelectedTimeFilters([]);
+                    }}
+                    className="w-full"
+                  >
+                    Clear All Filters
+                  </Button>
+                )}
               </div>
-              
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-48">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Most Recent</SelectItem>
-                  <SelectItem value="skills">Most Skills</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="location">Nearest Location</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            </PopoverContent>
+          </Popover>
 
-            {/* Loading State with Skeleton */}
-            {isLoading && (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(8)].map((_, i) => (
-                  <Card key={i} className="animate-pulse">
-                    <CardContent className="p-6">
-                      <div className="flex items-center space-x-4 mb-4">
-                        <div className="h-12 w-12 bg-slate-200 rounded-full"></div>
-                        <div className="flex-1 space-y-2">
-                          <div className="h-4 bg-slate-200 rounded w-3/4"></div>
-                          <div className="h-3 bg-slate-200 rounded w-1/2"></div>
-                        </div>
-                      </div>
-                      <div className="space-y-2">
-                        <div className="h-3 bg-slate-200 rounded w-full"></div>
-                        <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+          {/* Active Filter Tags */}
+          <div className="flex flex-wrap gap-1">
+            {selectedSkillFilters.map((skill) => (
+              <Badge 
+                key={skill} 
+                variant="secondary" 
+                className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                onClick={() => handleSkillFilterToggle(skill)}
+              >
+                {skill} ×
+              </Badge>
+            ))}
+            {selectedDateFilters.map((date) => (
+              <Badge 
+                key={date} 
+                variant="outline" 
+                className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                onClick={() => handleDateFilterToggle(date)}
+              >
+                {date.charAt(0).toUpperCase() + date.slice(1)} ×
+              </Badge>
+            ))}
+            {selectedTimeFilters.map((time) => (
+              <Badge 
+                key={time} 
+                variant="outline" 
+                className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                onClick={() => handleTimeFilterToggle(time)}
+              >
+                {time.charAt(0).toUpperCase() + time.slice(1)} ×
+              </Badge>
+            ))}
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <main className="w-full">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
+            <div>
+              <h2 className="text-xl sm:text-2xl font-bold text-[#0053d6]">Available Users</h2>
+              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+                {paginatedUsers && !searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0
+                  ? `Showing ${((currentPage - 1) * usersPerPage) + 1}-${Math.min(currentPage * usersPerPage, paginatedUsers.totalCount)} of ${paginatedUsers.totalCount} users`
+                  : `Showing ${displayUsers.length} user${displayUsers.length !== 1 ? 's' : ''}`
+                }
+              </p>
+            </div>
+            
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-full sm:w-48">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most Recent</SelectItem>
+                <SelectItem value="skills">Most Skills</SelectItem>
+                <SelectItem value="rating">Highest Rated</SelectItem>
+                <SelectItem value="location">Nearest Location</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Loading State with Skeleton */}
+          {isLoading && (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {[...Array(8)].map((_, i) => (
+                <Card key={i} className="animate-pulse">
+                  <CardContent className="p-6">
+                    <div className="flex items-center space-x-4 mb-4">
+                      <div className="h-12 w-12 bg-slate-200 rounded-full"></div>
+                      <div className="flex-1 space-y-2">
+                        <div className="h-4 bg-slate-200 rounded w-3/4"></div>
                         <div className="h-3 bg-slate-200 rounded w-1/2"></div>
                       </div>
-                      <div className="mt-4 flex space-x-2">
-                        <div className="h-6 bg-slate-200 rounded w-16"></div>
-                        <div className="h-6 bg-slate-200 rounded w-20"></div>
-                      </div>
-                    </CardContent>
-                  </Card>
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-3 bg-slate-200 rounded w-full"></div>
+                      <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+                      <div className="h-3 bg-slate-200 rounded w-1/2"></div>
+                    </div>
+                    <div className="mt-4 flex space-x-2">
+                      <div className="h-6 bg-slate-200 rounded w-16"></div>
+                      <div className="h-6 bg-slate-200 rounded w-20"></div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {/* No Results State */}
+          {!isLoading && displayUsers.length === 0 && (
+            <div className="text-center py-12">
+              <div className="max-w-md mx-auto">
+                <Search className="mx-auto h-12 w-12 text-slate-400 mb-4" />
+                <h3 className="text-lg font-medium text-foreground mb-2">No users found</h3>
+                <p className="text-muted-foreground">Try adjusting your search criteria or filters to find more users.</p>
+              </div>
+            </div>
+          )}
+
+          {/* User Cards Grid - Optimized for 8 users */}
+          {!isLoading && displayUsers.length > 0 && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+              {displayUsers.map((user, index) => (
+                <UserCard key={user.id || `user-${index}`} user={user} />
+              ))}
+            </div>
+          )}
+
+          {/* Pagination Controls - only show when not filtering */}
+          {!isLoading && paginatedUsers && !searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0 && paginatedUsers.totalPages > 1 && (
+            <div className="flex items-center justify-center space-x-2 mt-8">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={!paginatedUsers.hasPreviousPage || isFetching}
+                className="flex items-center gap-1 dark:hover:bg-[#0b3675]/20"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                Previous
+              </Button>
+              
+              <div className="flex items-center space-x-1">
+                {Array.from({ length: paginatedUsers.totalPages }, (_, i) => i + 1).map(page => (
+                  <Button
+                    key={page}
+                    variant={page === currentPage ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(page)}
+                    disabled={isFetching}
+                    className={`w-8 h-8 p-0 ${page === currentPage ? 'bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90' : 'dark:hover:bg-[#0b3675]/20'}`}
+                  >
+                    {page}
+                  </Button>
                 ))}
               </div>
-            )}
-
-            {/* No Results State */}
-            {!isLoading && displayUsers.length === 0 && (
-              <div className="text-center py-12">
-                <div className="max-w-md mx-auto">
-                  <Search className="mx-auto h-12 w-12 text-slate-400 mb-4" />
-                  <h3 className="text-lg font-medium text-foreground mb-2">No users found</h3>
-                  <p className="text-muted-foreground">Try adjusting your search criteria or filters to find more users.</p>
-                </div>
-              </div>
-            )}
-
-            {/* User Cards Grid - Optimized for 8 users */}
-            {!isLoading && displayUsers.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {displayUsers.map((user, index) => (
-                  <UserCard key={user.id || `user-${index}`} user={user} />
-                ))}
-              </div>
-            )}
-
-            {/* Pagination Controls - only show when not filtering */}
-            {!isLoading && paginatedUsers && !searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0 && paginatedUsers.totalPages > 1 && (
-              <div className="flex items-center justify-center space-x-2 mt-8">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={!paginatedUsers.hasPreviousPage || isFetching}
-                  className="flex items-center gap-1 dark:hover:bg-[#0b3675]/20"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                  Previous
-                </Button>
-                
-                <div className="flex items-center space-x-1">
-                  {Array.from({ length: paginatedUsers.totalPages }, (_, i) => i + 1).map(page => (
-                    <Button
-                      key={page}
-                      variant={page === currentPage ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => setCurrentPage(page)}
-                      disabled={isFetching}
-                      className={`w-8 h-8 p-0 ${page === currentPage ? 'bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90' : 'dark:hover:bg-[#0b3675]/20'}`}
-                    >
-                      {page}
-                    </Button>
-                  ))}
-                </div>
-                
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(paginatedUsers.totalPages, prev + 1))}
-                  disabled={!paginatedUsers.hasNextPage || isFetching}
-                  className="flex items-center gap-1 dark:hover:bg-[#0b3675]/20"
-                >
-                  Next
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-              </div>
-            )}
-          </main>
-        </div>
+              
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(paginatedUsers.totalPages, prev + 1))}
+                disabled={!paginatedUsers.hasNextPage || isFetching}
+                className="flex items-center gap-1 dark:hover:bg-[#0b3675]/20"
+              >
+                Next
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

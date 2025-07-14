@@ -45,7 +45,7 @@ Preferred communication style: Simple, everyday language.
 ### Frontend Components
 - **UserCard**: Displays user profiles with offered/wanted skills and swap request functionality
 - **SkillTag**: Visual skill indicators with color coding for offered vs wanted skills
-- **Search & Filtering**: Real-time search with skill category and availability filters
+- **Search & Filtering**: Real-time search with skill category and availability filters in compact popover UI
 - **Toast Notifications**: User feedback for actions like sending swap requests
 
 ### API Endpoints
