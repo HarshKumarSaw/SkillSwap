@@ -192,8 +192,23 @@ export default function Home() {
         </div>
       </header>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Filter Button and Search Bar - Same Level */}
+        {/* Controls Panel - Mobile First Layout */}
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6 shadow-sm">
+          {/* Search Bar - Top on Mobile */}
+          <div className="mb-4 sm:hidden">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Search skills..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 text-sm w-full border-gray-300 dark:border-gray-600 focus:ring-[#0053d6] focus:border-[#0053d6]"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            </div>
+          </div>
+
+          {/* Filter and Sort Row - Below Search on Mobile */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-4 min-w-0 flex-1">
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
@@ -346,48 +361,50 @@ export default function Home() {
               </Badge>
             ))}
           </div>
-          </div>
+            </div>
 
-            {/* Search Bar - Right Side */}
-            <div className="flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search skills..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 text-sm w-full border-gray-300 dark:border-gray-600 focus:ring-[#0053d6] focus:border-[#0053d6]"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            {/* Sort Dropdown - Right Side on Mobile, Far Right on Desktop */}
+            <div className="flex items-center gap-4">
+              {/* Search Bar - Hidden on Mobile, Visible on Desktop */}
+              <div className="hidden sm:block flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
+                <div className="relative">
+                  <Input
+                    type="text"
+                    placeholder="Search skills..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="pl-10 text-sm w-full border-gray-300 dark:border-gray-600 focus:ring-[#0053d6] focus:border-[#0053d6]"
+                  />
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                </div>
               </div>
+
+              {/* Sort Button */}
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full sm:w-48">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="skills">Most Skills</SelectItem>
+                  <SelectItem value="rating">Highest Rated</SelectItem>
+                  <SelectItem value="location">Nearest Location</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
         <main className="w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3 sm:gap-4">
-            <div>
-              <h2 className="text-xl sm:text-2xl font-bold text-[#0053d6]">Available Users</h2>
-              <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-                {paginatedUsers && !searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0
-                  ? `Showing ${((currentPage - 1) * usersPerPage) + 1}-${Math.min(currentPage * usersPerPage, paginatedUsers.totalCount)} of ${paginatedUsers.totalCount} users`
-                  : `Showing ${displayUsers.length} user${displayUsers.length !== 1 ? 's' : ''}`
-                }
-              </p>
-            </div>
-            
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger className="w-full sm:w-48">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="recent">Most Recent</SelectItem>
-                <SelectItem value="skills">Most Skills</SelectItem>
-                <SelectItem value="rating">Highest Rated</SelectItem>
-                <SelectItem value="location">Nearest Location</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="mb-6">
+            <h2 className="text-xl sm:text-2xl font-bold text-[#0053d6]">Available Users</h2>
+            <p className="text-muted-foreground mt-1 text-sm sm:text-base">
+              {paginatedUsers && !searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0
+                ? `Showing ${((currentPage - 1) * usersPerPage) + 1}-${Math.min(currentPage * usersPerPage, paginatedUsers.totalCount)} of ${paginatedUsers.totalCount} users`
+                : `Showing ${displayUsers.length} user${displayUsers.length !== 1 ? 's' : ''}`
+              }
+            </p>
           </div>
 
           {/* Loading State with Skeleton */}
