@@ -26,11 +26,13 @@ Preferred communication style: Simple, everyday language.
 - **API Pattern**: RESTful API endpoints
 - **Validation**: Zod for runtime type checking
 
-**CRITICAL DATABASE CONFIGURATION**:
+**🚨 CRITICAL DATABASE CONFIGURATION 🚨**:
 - **Database URL**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
 - **Configuration**: The database connection is hardcoded in `server/db.ts` to use this external PostgreSQL instance exclusively
 - **Purpose**: This is the ONLY database to be used for this project - no local databases, no environment variables, no alternatives
 - **Status**: Currently operational and contains project data
+- **Documentation**: See `DATABASE_CONFIG.md` for detailed database configuration rules and guidelines
+- **Security**: Connection string is hardcoded for consistency but contains sensitive credentials
 
 ## Key Components
 
@@ -71,8 +73,10 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Database & Infrastructure
-- **EXCLUSIVE DATABASE**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8 (ONLY DATABASE FOR THIS PROJECT)
+- **🚨 EXCLUSIVE DATABASE**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8 (ONLY DATABASE FOR THIS PROJECT)
+- **Configuration Files**: `server/db.ts` (primary), `drizzle.config.ts` (migrations), `DATABASE_CONFIG.md` (documentation)
 - **WebSocket Support**: For real-time database connections
+- **SSL Configuration**: `rejectUnauthorized: false` for external database connectivity
 
 ### UI & Styling
 - **shadcn/ui**: Pre-built accessible UI components
@@ -98,8 +102,9 @@ Preferred communication style: Simple, everyday language.
 - Single deployment artifact with both frontend and backend
 
 ### Environment Configuration
-- Database connection hardcoded to external PostgreSQL instance (postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8)
-- Direct database connection bypasses environment variables for consistency
-- Session storage backed by PostgreSQL for scalability
+- **🚨 Database connection hardcoded to external PostgreSQL instance**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
+- **Direct database connection bypasses environment variables for consistency**
+- **Session storage backed by PostgreSQL for scalability**
+- **Comprehensive documentation**: See `DATABASE_CONFIG.md` for complete database configuration rules
 
 The application follows a monorepo structure with shared TypeScript schemas, ensuring type safety across the full stack while maintaining clear separation between client and server code.
