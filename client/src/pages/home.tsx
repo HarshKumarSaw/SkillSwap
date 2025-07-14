@@ -178,19 +178,7 @@ export default function Home() {
               <div className="hidden lg:block text-sm text-muted-foreground">Browse & Connect</div>
             </div>
             
-            {/* Search Bar */}
-            <div className="flex-1 max-w-sm sm:max-w-md mx-2 sm:mx-4 lg:mx-8">
-              <div className="relative">
-                <Input
-                  type="text"
-                  placeholder="Search skills..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10 text-sm"
-                />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              </div>
-            </div>
+
 
             <div className="flex items-center space-x-2 flex-shrink-0">
               <ThemeToggle />
@@ -204,9 +192,10 @@ export default function Home() {
         </div>
       </header>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Filter Button and Active Filters */}
-        <div className="flex items-center gap-4 mb-4">
-          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+        {/* Filter Button, Active Filters, and Search Bar */}
+        <div className="flex items-center justify-between gap-4 mb-4">
+          <div className="flex items-center gap-4">
+            <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-2">
                 <Filter className="h-4 w-4" />
@@ -355,6 +344,21 @@ export default function Home() {
                 {time.charAt(0).toUpperCase() + time.slice(1)} ×
               </Badge>
             ))}
+          </div>
+          </div>
+
+          {/* Search Bar - Top Right */}
+          <div className="flex-shrink-0 w-full max-w-sm">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Search skills..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 text-sm"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            </div>
           </div>
         </div>
 
