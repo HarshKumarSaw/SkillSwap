@@ -192,24 +192,9 @@ export default function Home() {
         </div>
       </header>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
-        {/* Search Bar - Upper Right Corner */}
-        <div className="flex justify-end mb-4">
-          <div className="w-full max-w-xs">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 text-sm w-full"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            </div>
-          </div>
-        </div>
-
-        {/* Filter Button and Active Filters */}
-        <div className="flex flex-wrap items-center gap-4 mb-4">
+        {/* Filter Button and Search Bar - Same Level */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
+          <div className="flex flex-wrap items-center gap-4 min-w-0 flex-1">
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -359,6 +344,21 @@ export default function Home() {
                 {time.charAt(0).toUpperCase() + time.slice(1)} ×
               </Badge>
             ))}
+          </div>
+          </div>
+
+          {/* Search Bar - Right Side */}
+          <div className="flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
+            <div className="relative">
+              <Input
+                type="text"
+                placeholder="Search skills..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 text-sm w-full"
+              />
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            </div>
           </div>
         </div>
 
