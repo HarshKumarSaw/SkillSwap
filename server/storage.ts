@@ -19,6 +19,10 @@ export interface IStorage {
   getUsersWithSkills(page?: number, limit?: number): Promise<PaginatedResult<UserWithSkills>>;
   searchUsers(searchTerm?: string, skillFilters?: string[], dateFilters?: string[], timeFilters?: string[]): Promise<UserWithSkills[]>;
   
+  // Authentication
+  authenticateUser(email: string, password: string): Promise<User | null>;
+  createUserAccount(name: string, email: string, password: string, location?: string): Promise<User>;
+  
   // Skills
   getAllSkills(): Promise<Skill[]>;
   getSkillsByCategory(): Promise<Record<string, Skill[]>>;
@@ -605,6 +609,51 @@ export class DatabaseStorage implements IStorage {
         [userId]
       );
       return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  async authenticateUser(email: string, password: string): Promise<User | null> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM users WHERE email = $1 AND password = $2',
+        [email, password]
+      );
+      return result.rows[0] || null;
+    } finally {
+      client.release();
+    }
+  }
+
+  async createUserAccount(name: string, email: string, password: string, location?: string): Promise<User> {
+    const client = await pool.connect();
+    try {
+      // Generate a unique user ID
+      const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const result = await client.query(
+        `INSERT INTO users (id, name, email, password, location, profile_photo, availability, is_public, rating, join_date, bio, is_admin, is_banned) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+         RETURNING *`,
+        [
+          userId,
+          name,
+          email,
+          password,
+          location || null,
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+          JSON.stringify({ dates: ["weekends"], times: ["evening"] }),
+          true,
+          "0.0",
+          new Date(),
+          `New user on skill swap platform`,
+          false,
+          false
+        ]
+      );
+      return result.rows[0];
     } finally {
       client.release();
     }

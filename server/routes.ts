@@ -18,32 +18,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { email, password } = req.body;
       
-      // For demonstration, we'll just return a mock user
-      // In a real app, you'd validate credentials against the database
-      const mockUser = {
-        id: "mock-user-" + Date.now(),
-        email,
-        name: "Demo User",
-        location: "Demo Location",
-        isPublic: true,
-        isAdmin: false,
-        rating: "4.5",
-        joinDate: new Date().toISOString(),
-        profilePhoto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
-        bio: "Demo user for skill swap platform",
-        skillsOffered: [],
-        skillsWanted: [],
-        availability: { dates: ["weekends"], times: ["evening"] },
-        isBanned: false
-      };
+      if (!email || !password) {
+        return res.status(400).json({ message: "Email and password are required" });
+      }
+      
+      // Authenticate user against database
+      const user = await storage.authenticateUser(email, password);
+      
+      if (!user) {
+        return res.status(401).json({ message: "Invalid credentials" });
+      }
       
       // Store in session
-      (req as any).session.user = mockUser;
+      (req as any).session.user = user;
       
-      res.json(mockUser);
+      res.json(user);
     } catch (error) {
       console.error("Login error:", error);
-      res.status(401).json({ message: "Invalid credentials" });
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 
@@ -51,32 +43,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const { name, email, password, location } = req.body;
       
-      // For demonstration, we'll just return a mock user
-      // In a real app, you'd create a new user in the database
-      const mockUser = {
-        id: "mock-user-" + Date.now(),
-        email,
-        name,
-        location: location || "Not specified",
-        isPublic: true,
-        isAdmin: false,
-        rating: "0.0",
-        joinDate: new Date().toISOString(),
-        profilePhoto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
-        bio: "New user on skill swap platform",
-        skillsOffered: [],
-        skillsWanted: [],
-        availability: { dates: ["weekends"], times: ["evening"] },
-        isBanned: false
-      };
+      if (!name || !email || !password) {
+        return res.status(400).json({ message: "Name, email, and password are required" });
+      }
+      
+      // Check if user already exists
+      const existingUser = await storage.getUserByEmail(email);
+      if (existingUser) {
+        return res.status(400).json({ message: "User with this email already exists" });
+      }
+      
+      // Create new user account
+      const user = await storage.createUserAccount(name, email, password, location);
       
       // Store in session
-      (req as any).session.user = mockUser;
+      (req as any).session.user = user;
       
-      res.status(201).json(mockUser);
+      res.status(201).json(user);
     } catch (error) {
       console.error("Signup error:", error);
-      res.status(400).json({ message: "Failed to create account" });
+      res.status(500).json({ message: "Failed to create account" });
     }
   });
 
