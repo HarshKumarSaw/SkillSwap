@@ -12,7 +12,7 @@ postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnb
 
 ⚠️ **NEVER USE ANY OTHER DATABASE**
 - This is the ONLY database for this project
-- NO environment variables
+- Environment variable DATABASE_URL contains the exclusive connection string
 - NO local databases
 - NO alternatives
 - NO changes without explicit approval
@@ -21,13 +21,14 @@ postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnb
 
 ### Primary Configuration
 - **File**: `server/db.ts`
-- **Variable**: `EXTERNAL_DATABASE_URL`
+- **Environment Variable**: `DATABASE_URL`
 - **Purpose**: Main database connection for the application
 
 ### Secondary Configuration
 - **File**: `drizzle.config.ts`
-- **Note**: Uses environment variable but should match the same connection string
+- **Environment Variable**: `DATABASE_URL`
 - **Purpose**: Database migrations and schema management
+- **Note**: Uses environment variable which contains the exclusive database connection string
 
 ## DOCUMENTATION LOCATIONS
 
@@ -63,3 +64,4 @@ If you encounter database connection issues:
 
 **Last Updated**: July 14, 2025
 **Status**: Operational and contains project data
+**Configuration Method**: Environment variable (DATABASE_URL)

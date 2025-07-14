@@ -5,25 +5,26 @@ import * as schema from "@shared/schema";
 /**
  * ⚠️ CRITICAL DATABASE CONFIGURATION ⚠️
  * 
- * This is the EXCLUSIVE database connection string for this project.
+ * This uses the EXCLUSIVE database connection string for this project.
  * 
  * Database: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
  * 
  * IMPORTANT RULES:
  * - This is the ONLY database to be used for this project
- * - NO environment variables should be used
+ * - Uses DATABASE_URL environment variable containing the exclusive connection string
  * - NO local databases
  * - NO alternatives
- * - This connection string is hardcoded intentionally for consistency
- * 
- * DO NOT CHANGE THIS CONNECTION STRING WITHOUT EXPLICIT APPROVAL
+ * - DO NOT CHANGE DATABASE CONNECTION WITHOUT EXPLICIT APPROVAL
  */
-const EXTERNAL_DATABASE_URL = "postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8";
 
-console.log('🚨 USING EXCLUSIVE DATABASE:', EXTERNAL_DATABASE_URL);
+if (!process.env.DATABASE_URL) {
+  throw new Error("DATABASE_URL environment variable is required");
+}
+
+console.log('🚨 USING EXCLUSIVE DATABASE:', process.env.DATABASE_URL);
 
 export const pool = new Pool({ 
-  connectionString: EXTERNAL_DATABASE_URL,
+  connectionString: process.env.DATABASE_URL,
   ssl: {
     rejectUnauthorized: false
   }

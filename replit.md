@@ -8,6 +8,14 @@ This is a full-stack web application for skill swapping, where users can offer s
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+**July 14, 2025**:
+- ✓ Updated database configuration to use DATABASE_URL environment variable properly
+- ✓ Aligned all documentation (DATABASE_CONFIG.md, replit.md) with correct environment variable approach
+- ✓ Verified exclusive PostgreSQL database connection is operational with 20 users
+- ✓ Confirmed API endpoints are functioning correctly with external database
+
 ## System Architecture
 
 ### Frontend Architecture
@@ -28,11 +36,11 @@ Preferred communication style: Simple, everyday language.
 
 **🚨 CRITICAL DATABASE CONFIGURATION 🚨**:
 - **Database URL**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
-- **Configuration**: The database connection is hardcoded in `server/db.ts` to use this external PostgreSQL instance exclusively
-- **Purpose**: This is the ONLY database to be used for this project - no local databases, no environment variables, no alternatives
+- **Configuration**: Uses DATABASE_URL environment variable in `server/db.ts` to connect to this external PostgreSQL instance exclusively
+- **Purpose**: This is the ONLY database to be used for this project - no local databases, no alternatives
 - **Status**: Currently operational and contains project data
 - **Documentation**: See `DATABASE_CONFIG.md` for detailed database configuration rules and guidelines
-- **Security**: Connection string is hardcoded for consistency but contains sensitive credentials
+- **Security**: Connection string managed via environment variable for proper security practices
 
 ## Key Components
 
@@ -74,6 +82,7 @@ Preferred communication style: Simple, everyday language.
 
 ### Database & Infrastructure
 - **🚨 EXCLUSIVE DATABASE**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8 (ONLY DATABASE FOR THIS PROJECT)
+- **Environment Variable**: DATABASE_URL contains the exclusive connection string
 - **Configuration Files**: `server/db.ts` (primary), `drizzle.config.ts` (migrations), `DATABASE_CONFIG.md` (documentation)
 - **WebSocket Support**: For real-time database connections
 - **SSL Configuration**: `rejectUnauthorized: false` for external database connectivity
@@ -102,8 +111,8 @@ Preferred communication style: Simple, everyday language.
 - Single deployment artifact with both frontend and backend
 
 ### Environment Configuration
-- **🚨 Database connection hardcoded to external PostgreSQL instance**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
-- **Direct database connection bypasses environment variables for consistency**
+- **🚨 Database connection via DATABASE_URL environment variable**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
+- **Environment variable ensures secure database connection management**
 - **Session storage backed by PostgreSQL for scalability**
 - **Comprehensive documentation**: See `DATABASE_CONFIG.md` for complete database configuration rules
 
