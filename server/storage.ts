@@ -7,7 +7,7 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getUsersWithSkills(page?: number, limit?: number): Promise<UserWithSkills[]>;
-  searchUsers(searchTerm?: string, skillFilters?: string[], availabilityFilters?: string[]): Promise<UserWithSkills[]>;
+  searchUsers(searchTerm?: string, skillFilters?: string[], dateFilters?: string[], timeFilters?: string[]): Promise<UserWithSkills[]>;
   
   // Skills
   getAllSkills(): Promise<Skill[]>;
@@ -365,20 +365,29 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async searchUsers(searchTerm?: string, skillFilters?: string[], availabilityFilters?: string[]): Promise<UserWithSkills[]> {
+  async searchUsers(searchTerm?: string, skillFilters?: string[], dateFilters?: string[], timeFilters?: string[]): Promise<UserWithSkills[]> {
     const client = await pool.connect();
     try {
       let whereClause = 'WHERE u.is_public = true';
       const params: any[] = [];
       let paramIndex = 1;
 
-      // Add availability filter (availability is jsonb, so we need to handle it differently)
-      if (availabilityFilters && availabilityFilters.length > 0) {
-        const availabilityConditions = availabilityFilters.map(filter => {
+      // Add date availability filter
+      if (dateFilters && dateFilters.length > 0) {
+        const dateConditions = dateFilters.map(filter => {
           params.push(`%${filter}%`);
           return `u.availability::text ILIKE $${paramIndex++}`;
         });
-        whereClause += ` AND (${availabilityConditions.join(' OR ')})`;
+        whereClause += ` AND (${dateConditions.join(' OR ')})`;
+      }
+
+      // Add time availability filter
+      if (timeFilters && timeFilters.length > 0) {
+        const timeConditions = timeFilters.map(filter => {
+          params.push(`%${filter}%`);
+          return `u.availability::text ILIKE $${paramIndex++}`;
+        });
+        whereClause += ` AND (${timeConditions.join(' OR ')})`;
       }
 
       // Add skill category filters at the database level for better performance

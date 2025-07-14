@@ -43,15 +43,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Search users with filters
   app.get("/api/users/search", async (req, res) => {
     try {
-      const { q: searchTerm, skills, availability } = req.query;
+      const { q: searchTerm, skills, dates, times } = req.query;
       
       const skillFilters = skills ? (skills as string).split(',').filter(Boolean) : undefined;
-      const availabilityFilters = availability ? (availability as string).split(',').filter(Boolean) : undefined;
+      const dateFilters = dates ? (dates as string).split(',').filter(Boolean) : undefined;
+      const timeFilters = times ? (times as string).split(',').filter(Boolean) : undefined;
 
       const users = await storage.searchUsers(
         searchTerm as string | undefined,
         skillFilters,
-        availabilityFilters
+        dateFilters,
+        timeFilters
       );
       
       res.json(users);

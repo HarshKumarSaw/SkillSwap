@@ -12,32 +12,44 @@ import { useToast } from "@/hooks/use-toast";
 const formatAvailability = (availability: any): string => {
   if (!availability) return "Not specified";
   
-  // If it's already an array, format it nicely
+  // Handle the new structure with dates and times
+  if (typeof availability === 'object' && !Array.isArray(availability)) {
+    const parts: string[] = [];
+    
+    // Add dates if available
+    if (availability.dates && Array.isArray(availability.dates)) {
+      const dateText = availability.dates.map((date: string) => 
+        date.charAt(0).toUpperCase() + date.slice(1)
+      ).join(', ');
+      if (dateText) parts.push(dateText);
+    }
+    
+    // Add times if available
+    if (availability.times && Array.isArray(availability.times)) {
+      const timeText = availability.times.map((time: string) => 
+        time.charAt(0).toUpperCase() + time.slice(1)
+      ).join(', ');
+      if (timeText) parts.push(`(${timeText})`);
+    }
+    
+    return parts.length > 0 ? parts.join(' ') : "Not specified";
+  }
+  
+  // Handle legacy array format
   if (Array.isArray(availability)) {
     return availability.length > 0 ? availability.map(item => 
       item.charAt(0).toUpperCase() + item.slice(1)
     ).join(', ') : "Not specified";
   }
   
-  // If it's a string, try to parse it as JSON first
+  // Handle string format (try to parse as JSON)
   if (typeof availability === 'string') {
     try {
       const parsed = JSON.parse(availability);
-      if (Array.isArray(parsed)) {
-        return parsed.length > 0 ? parsed.map(item => 
-          item.charAt(0).toUpperCase() + item.slice(1)
-        ).join(', ') : "Not specified";
-      }
-      return availability;
+      return formatAvailability(parsed); // Recursive call with parsed object
     } catch {
       return availability;
     }
-  }
-  
-  // If it's an object, try to extract meaningful values
-  if (typeof availability === 'object') {
-    const values = Object.values(availability).filter(val => val && val !== '');
-    return values.length > 0 ? values.join(', ') : "Not specified";
   }
   
   return "Not specified";

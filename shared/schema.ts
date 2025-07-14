@@ -9,7 +9,7 @@ export const users = pgTable("users", {
   email: text("email").notNull().unique(),
   location: text("location"),
   profilePhoto: text("profile_photo"),
-  availability: text("availability"), // e.g., "weekends", "evenings", "weekdays"
+  availability: jsonb("availability"), // e.g., { dates: ["weekends", "weekdays"], times: ["morning", "evening"] }
   isPublic: boolean("is_public").default(true),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
   reviewCount: integer("review_count").default(0),
@@ -116,4 +116,10 @@ export type InsertSwapRequest = z.infer<typeof insertSwapRequestSchema>;
 export type UserWithSkills = User & {
   skillsOffered: Skill[];
   skillsWanted: Skill[];
+};
+
+// Availability structure for better type safety
+export type Availability = {
+  dates?: string[]; // e.g., ["weekends", "weekdays", "everyday"]
+  times?: string[]; // e.g., ["morning", "evening", "night"]
 };

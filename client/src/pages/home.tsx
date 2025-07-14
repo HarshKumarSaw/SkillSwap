@@ -12,7 +12,8 @@ import { UserWithSkills } from "@shared/schema";
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSkillFilters, setSelectedSkillFilters] = useState<string[]>([]);
-  const [selectedAvailabilityFilters, setSelectedAvailabilityFilters] = useState<string[]>([]);
+  const [selectedDateFilters, setSelectedDateFilters] = useState<string[]>([]);
+  const [selectedTimeFilters, setSelectedTimeFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
 
   // Fetch users with pagination (load 6 at a time for faster loading)
@@ -30,12 +31,13 @@ export default function Home() {
 
   // Fetch filtered users when filters change
   const { data: filteredUsers = [], isLoading: searchLoading } = useQuery<UserWithSkills[]>({
-    queryKey: ["/api/users/search", searchTerm, selectedSkillFilters.join(","), selectedAvailabilityFilters.join(",")],
+    queryKey: ["/api/users/search", searchTerm, selectedSkillFilters.join(","), selectedDateFilters.join(","), selectedTimeFilters.join(",")],
     queryFn: async () => {
       const params = new URLSearchParams();
       if (searchTerm) params.append('q', searchTerm);
       if (selectedSkillFilters.length > 0) params.append('skills', selectedSkillFilters.join(','));
-      if (selectedAvailabilityFilters.length > 0) params.append('availability', selectedAvailabilityFilters.join(','));
+      if (selectedDateFilters.length > 0) params.append('dates', selectedDateFilters.join(','));
+      if (selectedTimeFilters.length > 0) params.append('times', selectedTimeFilters.join(','));
       
       const url = `/api/users/search?${params.toString()}`;
       const response = await fetch(url);
@@ -44,7 +46,7 @@ export default function Home() {
       }
       return response.json();
     },
-    enabled: searchTerm.length > 0 || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0,
+    enabled: searchTerm.length > 0 || selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0,
     staleTime: 30 * 1000, // Cache search results for 30 seconds (shorter to see sorting changes faster)
   });
 
@@ -82,7 +84,7 @@ export default function Home() {
     }
   };
 
-  const baseUsers = (searchTerm || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0) ? filteredUsers : users;
+  const baseUsers = (searchTerm || selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) ? filteredUsers : users;
   const displayUsers = sortUsers(baseUsers);
   const isLoading = usersLoading || searchLoading;
 
@@ -94,11 +96,19 @@ export default function Home() {
     );
   };
 
-  const handleAvailabilityFilterToggle = (availability: string) => {
-    setSelectedAvailabilityFilters(prev => 
-      prev.includes(availability) 
-        ? prev.filter(a => a !== availability)
-        : [...prev, availability]
+  const handleDateFilterToggle = (date: string) => {
+    setSelectedDateFilters(prev => 
+      prev.includes(date) 
+        ? prev.filter(d => d !== date)
+        : [...prev, date]
+    );
+  };
+
+  const handleTimeFilterToggle = (time: string) => {
+    setSelectedTimeFilters(prev => 
+      prev.includes(time) 
+        ? prev.filter(t => t !== time)
+        : [...prev, time]
     );
   };
 
@@ -165,19 +175,33 @@ export default function Home() {
 
                 <hr className="my-3 border-slate-200" />
 
-                <h4 className="text-sm font-medium text-slate-800 mb-2">Availability</h4>
-                <div className="space-y-1">
-                  {["weekends", "evenings", "weekdays"].map((availability) => (
-                    <div key={availability} className="flex items-center space-x-2">
-                      <Checkbox
-                        id={availability}
-                        checked={selectedAvailabilityFilters.includes(availability)}
-                        onCheckedChange={() => handleAvailabilityFilterToggle(availability)}
-                      />
-                      <label htmlFor={availability} className="text-xs text-slate-600 capitalize">
-                        {availability}
-                      </label>
-                    </div>
+                <h4 className="text-sm font-medium text-slate-800 mb-2">Available Dates</h4>
+                <div className="flex flex-wrap gap-1 mb-4">
+                  {["weekends", "weekdays", "everyday"].map((date) => (
+                    <Button
+                      key={date}
+                      variant={selectedDateFilters.includes(date) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleDateFilterToggle(date)}
+                      className="text-xs h-7 px-2 sm:px-3"
+                    >
+                      {date.charAt(0).toUpperCase() + date.slice(1)}
+                    </Button>
+                  ))}
+                </div>
+
+                <h4 className="text-sm font-medium text-slate-800 mb-2">Available Times</h4>
+                <div className="flex flex-wrap gap-1">
+                  {["morning", "evening", "night"].map((time) => (
+                    <Button
+                      key={time}
+                      variant={selectedTimeFilters.includes(time) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleTimeFilterToggle(time)}
+                      className="text-xs h-7 px-2 sm:px-3"
+                    >
+                      {time.charAt(0).toUpperCase() + time.slice(1)}
+                    </Button>
                   ))}
                 </div>
               </CardContent>
