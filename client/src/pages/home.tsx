@@ -19,7 +19,7 @@ export default function Home() {
   const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
   const [usersPerPage] = useState(8); // 8 users per page for optimized loading
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
+
 
   // Fetch users with pagination
   const { data: paginatedUsers, isLoading: usersLoading, isFetching } = useQuery<{
@@ -211,7 +211,7 @@ export default function Home() {
           {/* Mobile Layout - Filter and Sort Row */}
           <div className="flex sm:hidden w-full gap-2 mb-4">
             <div className="flex-1">
-              <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="w-full flex items-center justify-center gap-2">
                     <Filter className="h-4 w-4" />
@@ -227,14 +227,6 @@ export default function Home() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold text-foreground">Filters</h3>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setIsFilterOpen(false)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
                     </div>
                     
                     {/* Skills Filter */}
@@ -347,7 +339,7 @@ export default function Home() {
           {/* Desktop Layout - Filter and Sort Row */}
           <div className="hidden sm:flex sm:items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-4 min-w-0 flex-1">
-              <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+              <Popover>
                 <PopoverTrigger asChild>
                   <Button variant="outline" size="sm" className="flex items-center gap-2">
                     <Filter className="h-4 w-4" />
@@ -363,14 +355,6 @@ export default function Home() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-semibold text-foreground">Filters</h3>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => setIsFilterOpen(false)}
-                        className="h-6 w-6 p-0"
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
                     </div>
                     
                     {/* Skills Filter */}
