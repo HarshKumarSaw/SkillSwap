@@ -8,6 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Plus, Loader2 } from "lucide-react";
 import { UserWithSkills } from "@shared/schema";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -137,14 +138,14 @@ export default function Home() {
   const skillCategories = Object.keys(skillsByCategory);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       {/* Header */}
-      <header className="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white dark:bg-slate-800 shadow-sm border-b border-slate-200 dark:border-slate-700 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-slate-800">SkillSwap</h1>
-              <div className="hidden lg:block text-sm text-slate-500">Browse & Connect</div>
+              <h1 className="text-xl sm:text-2xl font-bold text-slate-800 dark:text-slate-200">SkillSwap</h1>
+              <div className="hidden lg:block text-sm text-slate-500 dark:text-slate-400">Browse & Connect</div>
             </div>
             
             {/* Search Bar */}
@@ -157,11 +158,12 @@ export default function Home() {
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10 text-sm"
                 />
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400 dark:text-slate-500 w-4 h-4" />
               </div>
             </div>
 
-            <div className="flex items-center flex-shrink-0">
+            <div className="flex items-center space-x-2 flex-shrink-0">
+              <ThemeToggle />
               <Button className="bg-primary hover:bg-blue-600 text-sm px-3 sm:px-4">
                 <Plus className="w-4 h-4 mr-1 sm:mr-2" />
                 <span className="hidden sm:inline">Add Profile</span>

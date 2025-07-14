@@ -61,8 +61,10 @@
 /* Custom styles for skill swap platform */
 .skill-tag-offered {
   @apply bg-emerald-50 text-emerald-600 border border-emerald-200;
+  @apply dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800;
 }
 
 .skill-tag-wanted {
   @apply bg-indigo-50 text-indigo-600 border border-indigo-200;
+  @apply dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800;
 }
