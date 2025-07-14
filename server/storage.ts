@@ -368,24 +368,21 @@ export class DatabaseStorage implements IStorage {
   async searchUsers(searchTerm?: string, skillFilters?: string[], availabilityFilters?: string[]): Promise<UserWithSkills[]> {
     const client = await pool.connect();
     try {
-      console.log('Search called with:', { searchTerm, skillFilters, availabilityFilters });
-      
       let whereClause = 'WHERE is_public = true';
       const params: any[] = [];
       let paramIndex = 1;
 
-      // Add availability filter
+      // Add availability filter (availability is jsonb, so we need to handle it differently)
       if (availabilityFilters && availabilityFilters.length > 0) {
         const availabilityConditions = availabilityFilters.map(filter => {
           params.push(`%${filter}%`);
-          return `availability ILIKE $${paramIndex++}`;
+          return `availability::text ILIKE $${paramIndex++}`;
         });
         whereClause += ` AND (${availabilityConditions.join(' OR ')})`;
       }
 
       const usersResult = await client.query(`SELECT * FROM users ${whereClause}`, params);
       const users = usersResult.rows;
-      console.log('Found users before skill filtering:', users.length);
       
       const usersWithSkills: UserWithSkills[] = [];
       
@@ -438,7 +435,6 @@ export class DatabaseStorage implements IStorage {
 
       // Apply skill category filters
       if (skillFilters && skillFilters.length > 0) {
-        console.log('Applying skill filters:', skillFilters);
         filteredUsers = filteredUsers.filter(user => {
           const hasOfferedSkill = user.skillsOffered.some(skill => 
             skillFilters.includes(skill.category)
@@ -446,13 +442,10 @@ export class DatabaseStorage implements IStorage {
           const hasWantedSkill = user.skillsWanted.some(skill => 
             skillFilters.includes(skill.category)
           );
-          console.log(`User ${user.name}: offered skills categories: ${user.skillsOffered.map(s => s.category).join(', ')}, wanted skills categories: ${user.skillsWanted.map(s => s.category).join(', ')}`);
           return hasOfferedSkill || hasWantedSkill;
         });
-        console.log('Users after skill filtering:', filteredUsers.length);
       }
 
-      console.log('Final filtered users:', filteredUsers.length);
       return filteredUsers;
     } finally {
       client.release();
