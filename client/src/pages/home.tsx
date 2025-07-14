@@ -119,6 +119,11 @@ export default function Home() {
     setCurrentPage(1);
   }, [searchTerm, selectedSkillFilters, selectedDateFilters, selectedTimeFilters]);
 
+  // Scroll to top when page changes
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [currentPage]);
+
   const handleSkillFilterToggle = (category: string) => {
     setSelectedSkillFilters(prev => 
       prev.includes(category) 
@@ -578,7 +583,9 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                onClick={() => {
+                  setCurrentPage(prev => Math.max(1, prev - 1));
+                }}
                 disabled={!paginatedUsers.hasPreviousPage || isFetching}
                 className="flex items-center gap-1 dark:hover:bg-[#0b3675]/20"
               >
@@ -592,7 +599,9 @@ export default function Home() {
                     key={page}
                     variant={page === currentPage ? "default" : "outline"}
                     size="sm"
-                    onClick={() => setCurrentPage(page)}
+                    onClick={() => {
+                      setCurrentPage(page);
+                    }}
                     disabled={isFetching}
                     className={`w-8 h-8 p-0 ${page === currentPage ? 'bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90' : 'dark:hover:bg-[#0b3675]/20'}`}
                   >
@@ -604,7 +613,9 @@ export default function Home() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(paginatedUsers.totalPages, prev + 1))}
+                onClick={() => {
+                  setCurrentPage(prev => Math.min(paginatedUsers.totalPages, prev + 1));
+                }}
                 disabled={!paginatedUsers.hasNextPage || isFetching}
                 className="flex items-center gap-1 dark:hover:bg-[#0b3675]/20"
               >
