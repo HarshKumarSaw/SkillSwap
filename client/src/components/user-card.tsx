@@ -58,9 +58,10 @@ const formatAvailability = (availability: any): string => {
 
 interface UserCardProps {
   user: UserWithSkills;
+  currentPage?: number;
 }
 
-export function UserCard({ user }: UserCardProps) {
+export function UserCard({ user, currentPage = 1 }: UserCardProps) {
   const [isRequesting, setIsRequesting] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -124,7 +125,7 @@ export function UserCard({ user }: UserCardProps) {
             src={user.profilePhoto || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150"}
             alt={`${user.name} profile photo`}
             className="w-16 h-16 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-primary transition-all duration-200"
-            onClick={() => setLocation(`/profile/${user.id}`)}
+            onClick={() => setLocation(`/profile/${user.id}?page=${currentPage}`)}
           />
           
           <div className="flex-1">

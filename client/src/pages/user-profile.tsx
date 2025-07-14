@@ -60,6 +60,10 @@ const formatAvailability = (availability: any): string => {
 export default function UserProfile() {
   const { id } = useParams();
   const [, setLocation] = useLocation();
+  
+  // Get the page parameter from URL to know where to return
+  const urlParams = new URLSearchParams(window.location.search);
+  const returnPage = urlParams.get('page') || '1';
   const [isRequesting, setIsRequesting] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -155,7 +159,7 @@ export default function UserProfile() {
         <div className="max-w-4xl mx-auto">
           <Button 
             variant="ghost" 
-            onClick={() => setLocation('/')}
+            onClick={() => setLocation(`/?page=${returnPage}`)}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -178,7 +182,7 @@ export default function UserProfile() {
         <div className="max-w-4xl mx-auto">
           <Button 
             variant="ghost" 
-            onClick={() => setLocation('/')}
+            onClick={() => setLocation(`/?page=${returnPage}`)}
             className="mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -203,7 +207,7 @@ export default function UserProfile() {
       <div className="max-w-4xl mx-auto">
         <Button 
           variant="ghost" 
-          onClick={() => setLocation('/')}
+          onClick={() => setLocation(`/?page=${returnPage}`)}
           className="mb-4"
         >
           <ArrowLeft className="w-4 h-4 mr-2" />

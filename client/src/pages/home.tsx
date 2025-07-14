@@ -17,7 +17,11 @@ export default function Home() {
   const [selectedDateFilters, setSelectedDateFilters] = useState<string[]>([]);
   const [selectedTimeFilters, setSelectedTimeFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
-  const [currentPage, setCurrentPage] = useState(1);
+  
+  // Initialize current page from URL parameter if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const initialPage = parseInt(urlParams.get('page') || '1', 10);
+  const [currentPage, setCurrentPage] = useState(initialPage);
   const [usersPerPage] = useState(8); // 8 users per page for optimized loading
 
 
@@ -114,10 +118,22 @@ export default function Home() {
   const displayUsers = sortUsers(baseUsers);
   const isLoading = usersLoading || searchLoading;
   
-  // Reset to first page when filters change
+  // Reset to first page when filters change and clear URL params
   useEffect(() => {
     setCurrentPage(1);
+    // Clear URL parameters when filtering
+    if (searchTerm || selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) {
+      window.history.replaceState({}, '', '/');
+    }
   }, [searchTerm, selectedSkillFilters, selectedDateFilters, selectedTimeFilters]);
+
+  // Update URL when page changes (only for pagination, not filtering)
+  useEffect(() => {
+    if (!searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0) {
+      const newUrl = currentPage === 1 ? '/' : `/?page=${currentPage}`;
+      window.history.replaceState({}, '', newUrl);
+    }
+  }, [currentPage, searchTerm, selectedSkillFilters, selectedDateFilters, selectedTimeFilters]);
 
   // Scroll to top when page changes
   useEffect(() => {
@@ -572,7 +588,7 @@ export default function Home() {
           {!isLoading && displayUsers.length > 0 && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
               {displayUsers.map((user, index) => (
-                <UserCard key={user.id || `user-${index}`} user={user} />
+                <UserCard key={user.id || `user-${index}`} user={user} currentPage={currentPage} />
               ))}
             </div>
           )}
