@@ -9,6 +9,7 @@ interface AuthContextType {
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   signup: (name: string, email: string, password: string, location?: string) => Promise<void>;
+  setUser: (user: User | null) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (response.ok) {
       const userData = await response.json();
       setUser(userData);
+      return userData;
     } else {
       throw new Error("Login failed");
     }
@@ -56,6 +58,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (response.ok) {
       const userData = await response.json();
       setUser(userData);
+      return userData;
     } else {
       throw new Error("Signup failed");
     }
@@ -68,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     login,
     logout,
     signup,
+    setUser,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

@@ -12,6 +12,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { useAuth } from "@/hooks/use-auth";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -37,6 +38,7 @@ interface AuthPopupProps {
 export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProps) {
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const { toast } = useToast();
+  const { setUser } = useAuth();
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -59,16 +61,24 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
   const loginMutation = useMutation({
     mutationFn: async (data: LoginForm) => {
       const response = await apiRequest("POST", "/api/auth/login", data);
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
       return response.json();
     },
     onSuccess: (data) => {
+      // Update auth context immediately
+      setUser(data);
+      
       toast({
         title: "Welcome back!",
         description: "You have successfully logged in.",
       });
-      onAuthSuccess();
+      
+      // Close popup and trigger success handler
       onOpenChange(false);
       loginForm.reset();
+      onAuthSuccess();
     },
     onError: (error) => {
       toast({
@@ -82,16 +92,24 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
   const signupMutation = useMutation({
     mutationFn: async (data: SignupForm) => {
       const response = await apiRequest("POST", "/api/auth/signup", data);
+      if (!response.ok) {
+        throw new Error("Signup failed");
+      }
       return response.json();
     },
     onSuccess: (data) => {
+      // Update auth context immediately
+      setUser(data);
+      
       toast({
         title: "Account created!",
         description: "You have successfully signed up and logged in.",
       });
-      onAuthSuccess();
+      
+      // Close popup and trigger success handler
       onOpenChange(false);
       signupForm.reset();
+      onAuthSuccess();
     },
     onError: (error) => {
       toast({

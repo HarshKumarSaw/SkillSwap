@@ -113,7 +113,8 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
 
   const handleAuthSuccess = () => {
     // After successful auth, automatically trigger the swap request
-    if (isAuthenticated) {
+    // Check if user is authenticated and proceed
+    if (currentUser) {
       setIsRequesting(true);
       createSwapRequestMutation.mutate(user.id);
     }
