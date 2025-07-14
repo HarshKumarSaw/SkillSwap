@@ -45,10 +45,45 @@ export default function Home() {
       return response.json();
     },
     enabled: searchTerm.length > 0 || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0,
-    staleTime: 2 * 60 * 1000, // Cache search results for 2 minutes
+    staleTime: 30 * 1000, // Cache search results for 30 seconds (shorter to see sorting changes faster)
   });
 
-  const displayUsers = (searchTerm || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0) ? filteredUsers : users;
+  // Sort users based on selected criteria
+  const sortUsers = (users: UserWithSkills[]) => {
+    const sorted = [...users];
+    
+    switch (sortBy) {
+      case "recent":
+        // Sort by ID (assuming higher ID = more recent)
+        return sorted.sort((a, b) => b.id.localeCompare(a.id));
+      
+      case "skills":
+        // Sort by total number of skills (offered + wanted)
+        return sorted.sort((a, b) => {
+          const totalSkillsA = a.skillsOffered.length + a.skillsWanted.length;
+          const totalSkillsB = b.skillsOffered.length + b.skillsWanted.length;
+          return totalSkillsB - totalSkillsA;
+        });
+      
+      case "rating":
+        // Sort by rating (highest first)
+        return sorted.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+      
+      case "location":
+        // Sort alphabetically by location
+        return sorted.sort((a, b) => {
+          const locationA = a.location || "ZZZ"; // Put null locations at the end
+          const locationB = b.location || "ZZZ";
+          return locationA.localeCompare(locationB);
+        });
+      
+      default:
+        return sorted;
+    }
+  };
+
+  const baseUsers = (searchTerm || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0) ? filteredUsers : users;
+  const displayUsers = sortUsers(baseUsers);
   const isLoading = usersLoading || searchLoading;
 
   const handleSkillFilterToggle = (category: string) => {
