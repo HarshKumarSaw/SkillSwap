@@ -88,11 +88,22 @@ export class DatabaseStorage implements IStorage {
         WHERE usw.user_id = $1
       `, [id]);
 
-      return {
+      // Transform database field names to match TypeScript interface
+      const transformedUser = {
         ...user,
+        profilePhoto: user.profile_photo,
+        isPublic: user.is_public,
+        reviewCount: user.review_count,
         skillsOffered: offeredResult.rows,
         skillsWanted: wantedResult.rows
       };
+
+      // Remove snake_case fields to avoid confusion
+      delete transformedUser.profile_photo;
+      delete transformedUser.is_public;
+      delete transformedUser.review_count;
+
+      return transformedUser;
     } finally {
       client.release();
     }
