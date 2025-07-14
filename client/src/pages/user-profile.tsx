@@ -65,13 +65,18 @@ export default function UserProfile() {
   const { toast } = useToast();
 
   // Get user data from cache first, then fetch if needed
-  const { data: users } = useQuery<{data: UserWithSkills[]}>({
+  const { data: users, isLoading } = useQuery<{data: UserWithSkills[]}>({
     queryKey: ['/api/users'],
-    enabled: false // Don't refetch, just use cache
+    enabled: true // Enable fetching if not in cache
   });
 
   // Find user in cached data
   const user = users?.data?.find(u => u.id === id);
+
+  // Debug logging
+  console.log('UserProfile - Looking for user ID:', id);
+  console.log('UserProfile - Available users:', users?.data?.map(u => u.id));
+  console.log('UserProfile - Found user:', user);
 
   const createSwapRequestMutation = useMutation({
     mutationFn: async (targetId: string) => {
@@ -124,6 +129,30 @@ export default function UserProfile() {
     return stars;
   };
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background p-4">
+        <div className="max-w-4xl mx-auto">
+          <Button 
+            variant="ghost" 
+            onClick={() => setLocation('/')}
+            className="mb-4"
+          >
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Browse
+          </Button>
+          <Card>
+            <CardContent className="p-6">
+              <p className="text-center text-muted-foreground">Loading user profile...</p>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
+  // Show user not found
   if (!user) {
     return (
       <div className="min-h-screen bg-background p-4">
@@ -138,7 +167,11 @@ export default function UserProfile() {
           </Button>
           <Card>
             <CardContent className="p-6">
-              <p className="text-center text-muted-foreground">User not found</p>
+              <p className="text-center text-muted-foreground">
+                User not found (ID: {id})
+                <br />
+                <small>Available users: {users?.data?.length || 0}</small>
+              </p>
             </CardContent>
           </Card>
         </div>
