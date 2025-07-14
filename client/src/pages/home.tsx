@@ -17,7 +17,7 @@ export default function Home() {
   const [selectedTimeFilters, setSelectedTimeFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(6); // 6 users per page for optimized loading
+  const [usersPerPage] = useState(8); // 8 users per page for optimized loading
 
   // Fetch users with pagination
   const { data: paginatedUsers, isLoading: usersLoading, isFetching } = useQuery<{
@@ -362,7 +362,7 @@ export default function Home() {
             {/* Loading State with Skeleton */}
             {isLoading && (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
+                {[...Array(8)].map((_, i) => (
                   <Card key={i} className="animate-pulse">
                     <CardContent className="p-6">
                       <div className="flex items-center space-x-4 mb-4">
@@ -398,7 +398,7 @@ export default function Home() {
               </div>
             )}
 
-            {/* User Cards Grid - Optimized for 6 users */}
+            {/* User Cards Grid - Optimized for 8 users */}
             {!isLoading && displayUsers.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {displayUsers.map((user, index) => (
