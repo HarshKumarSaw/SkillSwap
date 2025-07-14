@@ -21,12 +21,16 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
 - **Database**: PostgreSQL with Drizzle ORM
-- **Database Provider**: External PostgreSQL (postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8)
+- **Database Provider**: External PostgreSQL (EXCLUSIVE DATABASE)
 - **Session Management**: connect-pg-simple for PostgreSQL-backed sessions
 - **API Pattern**: RESTful API endpoints
 - **Validation**: Zod for runtime type checking
 
-**Note**: The database connection is hardcoded in `server/db.ts` to use the external PostgreSQL instance exclusively, bypassing environment variables for consistency.
+**CRITICAL DATABASE CONFIGURATION**:
+- **Database URL**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
+- **Configuration**: The database connection is hardcoded in `server/db.ts` to use this external PostgreSQL instance exclusively
+- **Purpose**: This is the ONLY database to be used for this project - no local databases, no environment variables, no alternatives
+- **Status**: Currently operational and contains project data
 
 ## Key Components
 
@@ -65,7 +69,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Database & Infrastructure
-- **External PostgreSQL Database**: Dedicated PostgreSQL instance at postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
+- **EXCLUSIVE DATABASE**: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8 (ONLY DATABASE FOR THIS PROJECT)
 - **WebSocket Support**: For real-time database connections
 
 ### UI & Styling
