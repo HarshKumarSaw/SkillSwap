@@ -24,11 +24,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get all users with their skills
+  // Get all users with their skills (with pagination)
   app.get("/api/users", async (req, res) => {
     try {
       console.log("API endpoint /api/users called");
-      const users = await storage.getUsersWithSkills();
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const users = await storage.getUsersWithSkills(page, limit);
       console.log("Successfully fetched users:", users.length);
       res.json(users);
     } catch (error) {

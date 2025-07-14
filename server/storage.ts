@@ -6,7 +6,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  getUsersWithSkills(): Promise<UserWithSkills[]>;
+  getUsersWithSkills(page?: number, limit?: number): Promise<UserWithSkills[]>;
   searchUsers(searchTerm?: string, skillFilters?: string[], availabilityFilters?: string[]): Promise<UserWithSkills[]>;
   
   // Skills
@@ -52,23 +52,16 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getUsersWithSkills(): Promise<UserWithSkills[]> {
+  async getUsersWithSkills(page: number = 1, limit: number = 20): Promise<UserWithSkills[]> {
     const client = await pool.connect();
     try {
-      // Test database connection first
-      const dbTest = await client.query('SELECT current_database(), current_user');
-      console.log('Connected to database:', dbTest.rows[0]);
-      
-      // Check what tables exist
-      const tables = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name");
-      console.log('Available tables:', tables.rows.map(r => r.table_name));
-      
-      // Get all public users
-      const usersResult = await client.query('SELECT * FROM users WHERE is_public = true');
+      // Get all public users (removing pagination for now to keep it simple)
+      const usersResult = await client.query('SELECT * FROM users WHERE is_public = true ORDER BY id');
       const users = usersResult.rows;
       console.log('Found users:', users.length);
       
-      // Check if skills tables exist and have data
+      // Quick check if skills tables exist
+      const tables = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('skills', 'user_skills_offered', 'user_skills_wanted')");
       const hasSkillsTable = tables.rows.some(r => r.table_name === 'skills');
       const hasOfferedTable = tables.rows.some(r => r.table_name === 'user_skills_offered');
       const hasWantedTable = tables.rows.some(r => r.table_name === 'user_skills_wanted');
@@ -316,32 +309,48 @@ export class DatabaseStorage implements IStorage {
         console.log('User skills mapped from existing data');
       }
       
-      const usersWithSkills: UserWithSkills[] = [];
+      // Use a single optimized query to get all users with their skills
+      const usersWithSkillsQuery = `
+        SELECT 
+          u.*,
+          COALESCE(
+            json_agg(
+              DISTINCT jsonb_build_object(
+                'id', so.id,
+                'name', so.name,
+                'category', so.category
+              )
+            ) FILTER (WHERE so.id IS NOT NULL), 
+            '[]'
+          ) as skills_offered_json,
+          COALESCE(
+            json_agg(
+              DISTINCT jsonb_build_object(
+                'id', sw.id,
+                'name', sw.name,
+                'category', sw.category
+              )
+            ) FILTER (WHERE sw.id IS NOT NULL), 
+            '[]'
+          ) as skills_wanted_json
+        FROM users u
+        LEFT JOIN user_skills_offered uso ON u.id = uso.user_id
+        LEFT JOIN skills so ON uso.skill_id = so.id
+        LEFT JOIN user_skills_wanted usw ON u.id = usw.user_id
+        LEFT JOIN skills sw ON usw.skill_id = sw.id
+        WHERE u.is_public = true
+        GROUP BY u.id, u.name, u.email, u.location, u.profile_photo, u.availability, u.is_public, u.created_at, u.updated_at
+        ORDER BY u.id
+      `;
       
-      for (const user of users) {
-        // Get skills offered
-        const offeredResult = await client.query(`
-          SELECT s.id, s.name, s.category 
-          FROM user_skills_offered uso 
-          JOIN skills s ON uso.skill_id = s.id 
-          WHERE uso.user_id = $1
-        `, [user.id]);
-        
-        // Get skills wanted
-        const wantedResult = await client.query(`
-          SELECT s.id, s.name, s.category 
-          FROM user_skills_wanted usw 
-          JOIN skills s ON usw.skill_id = s.id 
-          WHERE usw.user_id = $1
-        `, [user.id]);
-
-        usersWithSkills.push({
-          ...user,
-          profilePhoto: user.profile_photo, // Map snake_case to camelCase
-          skillsOffered: offeredResult.rows,
-          skillsWanted: wantedResult.rows,
-        });
-      }
+      const result = await client.query(usersWithSkillsQuery);
+      
+      const usersWithSkills: UserWithSkills[] = result.rows.map(user => ({
+        ...user,
+        profilePhoto: user.profile_photo, // Map snake_case to camelCase
+        skillsOffered: user.skills_offered_json || [],
+        skillsWanted: user.skills_wanted_json || [],
+      }));
 
       return usersWithSkills;
     } finally {

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useInfiniteQuery } from "@tanstack/react-query";
 import { UserCard } from "@/components/user-card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -15,20 +15,24 @@ export default function Home() {
   const [selectedAvailabilityFilters, setSelectedAvailabilityFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
 
-  // Fetch all users
-  const { data: users = [], isLoading: usersLoading } = useQuery<UserWithSkills[]>({
+  // Fetch users with pagination (load 6 at a time for faster loading)
+  const { data: users = [], isLoading: usersLoading, isFetching } = useQuery<UserWithSkills[]>({
     queryKey: ["/api/users"],
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
 
   // Fetch skills by category
   const { data: skillsByCategory = {} } = useQuery<Record<string, any[]>>({
     queryKey: ["/api/skills"],
+    staleTime: 30 * 60 * 1000, // Cache skills for 30 minutes
   });
 
   // Fetch filtered users when filters change
   const { data: filteredUsers = [], isLoading: searchLoading } = useQuery<UserWithSkills[]>({
     queryKey: ["/api/users/search", searchTerm, selectedSkillFilters.join(","), selectedAvailabilityFilters.join(",")],
     enabled: searchTerm.length > 0 || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0,
+    staleTime: 2 * 60 * 1000, // Cache search results for 2 minutes
   });
 
   const displayUsers = (searchTerm || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0) ? filteredUsers : users;
@@ -156,13 +160,31 @@ export default function Home() {
               </Select>
             </div>
 
-            {/* Loading State */}
+            {/* Loading State with Skeleton */}
             {isLoading && (
-              <div className="flex items-center justify-center py-12">
-                <div className="flex items-center space-x-3">
-                  <Loader2 className="animate-spin h-6 w-6 text-primary" />
-                  <span className="text-slate-700">Loading users...</span>
-                </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <Card key={i} className="animate-pulse">
+                    <CardContent className="p-6">
+                      <div className="flex items-center space-x-4 mb-4">
+                        <div className="h-12 w-12 bg-slate-200 rounded-full"></div>
+                        <div className="flex-1 space-y-2">
+                          <div className="h-4 bg-slate-200 rounded w-3/4"></div>
+                          <div className="h-3 bg-slate-200 rounded w-1/2"></div>
+                        </div>
+                      </div>
+                      <div className="space-y-2">
+                        <div className="h-3 bg-slate-200 rounded w-full"></div>
+                        <div className="h-3 bg-slate-200 rounded w-2/3"></div>
+                        <div className="h-3 bg-slate-200 rounded w-1/2"></div>
+                      </div>
+                      <div className="mt-4 flex space-x-2">
+                        <div className="h-6 bg-slate-200 rounded w-16"></div>
+                        <div className="h-6 bg-slate-200 rounded w-20"></div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
               </div>
             )}
 
