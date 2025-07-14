@@ -97,11 +97,33 @@ export default function Home() {
   };
 
   const handleDateFilterToggle = (date: string) => {
-    setSelectedDateFilters(prev => 
-      prev.includes(date) 
-        ? prev.filter(d => d !== date)
-        : [...prev, date]
-    );
+    setSelectedDateFilters(prev => {
+      const isSelected = prev.includes(date);
+      
+      if (isSelected) {
+        // Remove the selected date
+        return prev.filter(d => d !== date);
+      } else {
+        // Add the selected date with logic constraints
+        let newSelection = [...prev, date];
+        
+        if (date === "everyday") {
+          // If selecting "everyday", remove weekdays and weekends
+          newSelection = ["everyday"];
+        } else if (date === "weekdays" || date === "weekends") {
+          // Remove "everyday" if it exists
+          newSelection = newSelection.filter(d => d !== "everyday");
+          
+          // Check if both weekdays and weekends are now selected
+          if (newSelection.includes("weekdays") && newSelection.includes("weekends")) {
+            // Replace with "everyday"
+            newSelection = ["everyday"];
+          }
+        }
+        
+        return newSelection;
+      }
+    });
   };
 
   const handleTimeFilterToggle = (time: string) => {

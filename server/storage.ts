@@ -372,20 +372,20 @@ export class DatabaseStorage implements IStorage {
       const params: any[] = [];
       let paramIndex = 1;
 
-      // Add date availability filter
+      // Add date availability filter using JSONB contains operator
       if (dateFilters && dateFilters.length > 0) {
         const dateConditions = dateFilters.map(filter => {
-          params.push(`%${filter}%`);
-          return `u.availability::text ILIKE $${paramIndex++}`;
+          params.push(filter);
+          return `u.availability->'dates' ? $${paramIndex++}`;
         });
         whereClause += ` AND (${dateConditions.join(' OR ')})`;
       }
 
-      // Add time availability filter
+      // Add time availability filter using JSONB contains operator
       if (timeFilters && timeFilters.length > 0) {
         const timeConditions = timeFilters.map(filter => {
-          params.push(`%${filter}%`);
-          return `u.availability::text ILIKE $${paramIndex++}`;
+          params.push(filter);
+          return `u.availability->'times' ? $${paramIndex++}`;
         });
         whereClause += ` AND (${timeConditions.join(' OR ')})`;
       }
