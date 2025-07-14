@@ -64,19 +64,38 @@ export default function UserProfile() {
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
-  // Get user data from cache first, then fetch if needed
-  const { data: users, isLoading } = useQuery<{data: UserWithSkills[]}>({
+  // First try to find user in cache from current page
+  const { data: users } = useQuery<{data: UserWithSkills[]}>({
     queryKey: ['/api/users'],
-    enabled: true // Enable fetching if not in cache
+    enabled: false // Don't refetch, just check cache
   });
 
-  // Find user in cached data
-  const user = users?.data?.find(u => u.id === id);
+  // Try to find user in cached data first
+  let user = users?.data?.find(u => u.id === id);
 
-  // Debug logging
-  console.log('UserProfile - Looking for user ID:', id);
-  console.log('UserProfile - Available users:', users?.data?.map(u => u.id));
-  console.log('UserProfile - Found user:', user);
+  // If not found in cache, fetch the specific user by ID
+  const { data: fetchedUser, isLoading: userLoading } = useQuery<UserWithSkills>({
+    queryKey: ['/api/users', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/users/${id}`);
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error('User not found');
+        }
+        throw new Error('Failed to fetch user');
+      }
+      return response.json();
+    },
+    enabled: !user && !!id, // Only fetch if user not found in cache
+    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+  });
+
+  // Use user from cache or from API fetch
+  if (!user && fetchedUser) {
+    user = fetchedUser;
+  }
+
+  const isLoading = userLoading;
 
   const createSwapRequestMutation = useMutation({
     mutationFn: async (targetId: string) => {

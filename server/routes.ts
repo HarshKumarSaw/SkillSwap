@@ -47,7 +47,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Search users with filters
+  // Search users with filters (must come before /api/users/:id)
   app.get("/api/users/search", async (req, res) => {
     try {
       const { q: searchTerm, skills, dates, times } = req.query;
@@ -67,6 +67,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error searching users:", error);
       res.status(500).json({ message: "Failed to search users" });
+    }
+  });
+
+  // Get single user by ID with skills (must come after /api/users/search)
+  app.get("/api/users/:id", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const user = await storage.getUserWithSkills(id);
+      
+      if (!user) {
+        res.status(404).json({ message: "User not found" });
+        return;
+      }
+      
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
     }
   });
 

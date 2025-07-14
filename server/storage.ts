@@ -14,6 +14,7 @@ export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
+  getUserWithSkills(id: string): Promise<UserWithSkills | undefined>;
   createUser(user: InsertUser): Promise<User>;
   getUsersWithSkills(page?: number, limit?: number): Promise<PaginatedResult<UserWithSkills>>;
   searchUsers(searchTerm?: string, skillFilters?: string[], dateFilters?: string[], timeFilters?: string[]): Promise<UserWithSkills[]>;
@@ -43,6 +44,55 @@ export class DatabaseStorage implements IStorage {
     try {
       const result = await client.query('SELECT * FROM users WHERE email = $1', [email]);
       return result.rows[0] || undefined;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserWithSkills(id: string): Promise<UserWithSkills | undefined> {
+    const client = await pool.connect();
+    try {
+      // Get the user
+      const userResult = await client.query('SELECT * FROM users WHERE id = $1 AND is_public = true', [id]);
+      if (userResult.rows.length === 0) {
+        return undefined;
+      }
+      
+      const user = userResult.rows[0];
+
+      // Quick check if skills tables exist
+      const tables = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('skills', 'user_skills_offered', 'user_skills_wanted')");
+      const hasSkillsTable = tables.rows.some(r => r.table_name === 'skills');
+
+      if (!hasSkillsTable) {
+        return {
+          ...user,
+          skillsOffered: [],
+          skillsWanted: []
+        };
+      }
+
+      // Get offered skills
+      const offeredResult = await client.query(`
+        SELECT s.id, s.name, s.category 
+        FROM skills s 
+        JOIN user_skills_offered uso ON s.id = uso.skill_id 
+        WHERE uso.user_id = $1
+      `, [id]);
+
+      // Get wanted skills  
+      const wantedResult = await client.query(`
+        SELECT s.id, s.name, s.category 
+        FROM skills s 
+        JOIN user_skills_wanted usw ON s.id = usw.skill_id 
+        WHERE usw.user_id = $1
+      `, [id]);
+
+      return {
+        ...user,
+        skillsOffered: offeredResult.rows,
+        skillsWanted: wantedResult.rows
+      };
     } finally {
       client.release();
     }

@@ -19,6 +19,8 @@ Preferred communication style: Simple, everyday language.
 - ✓ Added clickable profile photos that open detailed user profile pages
 - ✓ Created dedicated user profile page with comprehensive user information
 - ✓ Implemented scroll-to-top functionality for pagination navigation
+- ✓ Fixed profile page loading for users on any pagination page by creating dedicated API endpoint
+- ✓ Added efficient single-user API endpoint `/api/users/:id` for profile page data fetching
 
 ## System Architecture
 
