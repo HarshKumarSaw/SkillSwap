@@ -210,7 +210,7 @@ export default function Home() {
 
           {/* Filter and Sort Row - Below Search on Mobile */}
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-4 min-w-0 flex-1">
+            <div className="flex flex-wrap items-center justify-between sm:justify-start gap-4 min-w-0 flex-1">
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -361,12 +361,27 @@ export default function Home() {
               </Badge>
             ))}
           </div>
+
+              {/* Sort Button - Same row as filter on mobile */}
+              <div className="sm:hidden">
+                <Select value={sortBy} onValueChange={setSortBy}>
+                  <SelectTrigger className="w-auto min-w-[120px]">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="recent">Most Recent</SelectItem>
+                    <SelectItem value="skills">Most Skills</SelectItem>
+                    <SelectItem value="rating">Highest Rated</SelectItem>
+                    <SelectItem value="location">Nearest Location</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Sort Dropdown - Right Side on Mobile, Far Right on Desktop */}
-            <div className="flex items-center gap-4">
+            {/* Desktop Layout - Search Bar and Sort Button */}
+            <div className="hidden sm:flex items-center gap-4">
               {/* Search Bar - Hidden on Mobile, Visible on Desktop */}
-              <div className="hidden sm:block flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
+              <div className="flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
                 <div className="relative">
                   <Input
                     type="text"
@@ -381,7 +396,7 @@ export default function Home() {
 
               {/* Sort Button */}
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-48">
+                <SelectTrigger className="w-48">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
