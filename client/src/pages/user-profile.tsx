@@ -65,10 +65,7 @@ export default function UserProfile() {
   const urlParams = new URLSearchParams(window.location.search);
   const returnPage = urlParams.get('page') || '1';
   
-  // Debug logging
-  console.log('Current URL:', window.location.href);
-  console.log('Search params:', window.location.search);
-  console.log('Return page:', returnPage);
+
   const [isRequesting, setIsRequesting] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -96,7 +93,9 @@ export default function UserProfile() {
       return response.json();
     },
     enabled: !user && !!id, // Only fetch if user not found in cache
-    staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    staleTime: 10 * 60 * 1000, // Cache for 10 minutes
+    retry: 1, // Only retry once to avoid delays
+    refetchOnWindowFocus: false, // Don't refetch when window focus changes
   });
 
   // Use user from cache or from API fetch

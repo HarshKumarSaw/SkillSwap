@@ -60,33 +60,29 @@ export class DatabaseStorage implements IStorage {
       
       const user = userResult.rows[0];
 
-      // Quick check if skills tables exist
-      const tables = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('skills', 'user_skills_offered', 'user_skills_wanted')");
-      const hasSkillsTable = tables.rows.some(r => r.table_name === 'skills');
+      // Remove table existence check to improve performance 
+      // (we know the tables exist in production)
 
-      if (!hasSkillsTable) {
-        return {
-          ...user,
-          skillsOffered: [],
-          skillsWanted: []
-        };
-      }
-
-      // Get offered skills
-      const offeredResult = await client.query(`
-        SELECT s.id, s.name, s.category 
+      // Get both offered and wanted skills in a single query for better performance
+      const skillsResult = await client.query(`
+        SELECT 
+          s.id, s.name, s.category,
+          CASE 
+            WHEN uso.user_id IS NOT NULL THEN 'offered'
+            WHEN usw.user_id IS NOT NULL THEN 'wanted'
+          END as skill_type
         FROM skills s 
-        JOIN user_skills_offered uso ON s.id = uso.skill_id 
-        WHERE uso.user_id = $1
+        LEFT JOIN user_skills_offered uso ON s.id = uso.skill_id AND uso.user_id = $1
+        LEFT JOIN user_skills_wanted usw ON s.id = usw.skill_id AND usw.user_id = $1
+        WHERE uso.user_id = $1 OR usw.user_id = $1
+        ORDER BY s.name
       `, [id]);
 
-      // Get wanted skills  
-      const wantedResult = await client.query(`
-        SELECT s.id, s.name, s.category 
-        FROM skills s 
-        JOIN user_skills_wanted usw ON s.id = usw.skill_id 
-        WHERE usw.user_id = $1
-      `, [id]);
+      // Separate skills by type
+      const offeredSkills = skillsResult.rows.filter(row => row.skill_type === 'offered')
+        .map(row => ({ id: row.id, name: row.name, category: row.category }));
+      const wantedSkills = skillsResult.rows.filter(row => row.skill_type === 'wanted')
+        .map(row => ({ id: row.id, name: row.name, category: row.category }));
 
       // Transform database field names to match TypeScript interface
       const transformedUser = {
@@ -94,8 +90,8 @@ export class DatabaseStorage implements IStorage {
         profilePhoto: user.profile_photo,
         isPublic: user.is_public,
         reviewCount: user.review_count,
-        skillsOffered: offeredResult.rows,
-        skillsWanted: wantedResult.rows
+        skillsOffered: offeredSkills,
+        skillsWanted: wantedSkills
       };
 
       // Remove snake_case fields to avoid confusion
