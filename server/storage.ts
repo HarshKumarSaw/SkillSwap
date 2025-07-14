@@ -368,6 +368,8 @@ export class DatabaseStorage implements IStorage {
   async searchUsers(searchTerm?: string, skillFilters?: string[], availabilityFilters?: string[]): Promise<UserWithSkills[]> {
     const client = await pool.connect();
     try {
+      console.log('Search called with:', { searchTerm, skillFilters, availabilityFilters });
+      
       let whereClause = 'WHERE is_public = true';
       const params: any[] = [];
       let paramIndex = 1;
@@ -383,6 +385,7 @@ export class DatabaseStorage implements IStorage {
 
       const usersResult = await client.query(`SELECT * FROM users ${whereClause}`, params);
       const users = usersResult.rows;
+      console.log('Found users before skill filtering:', users.length);
       
       const usersWithSkills: UserWithSkills[] = [];
       
@@ -435,15 +438,21 @@ export class DatabaseStorage implements IStorage {
 
       // Apply skill category filters
       if (skillFilters && skillFilters.length > 0) {
+        console.log('Applying skill filters:', skillFilters);
         filteredUsers = filteredUsers.filter(user => {
-          return user.skillsOffered.some(skill => 
-            skillFilters.includes(skill.category)
-          ) || user.skillsWanted.some(skill => 
+          const hasOfferedSkill = user.skillsOffered.some(skill => 
             skillFilters.includes(skill.category)
           );
+          const hasWantedSkill = user.skillsWanted.some(skill => 
+            skillFilters.includes(skill.category)
+          );
+          console.log(`User ${user.name}: offered skills categories: ${user.skillsOffered.map(s => s.category).join(', ')}, wanted skills categories: ${user.skillsWanted.map(s => s.category).join(', ')}`);
+          return hasOfferedSkill || hasWantedSkill;
         });
+        console.log('Users after skill filtering:', filteredUsers.length);
       }
 
+      console.log('Final filtered users:', filteredUsers.length);
       return filteredUsers;
     } finally {
       client.release();
