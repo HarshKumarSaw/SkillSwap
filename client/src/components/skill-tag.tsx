@@ -12,8 +12,8 @@ export function SkillTag({ skill, variant = "offered", className }: SkillTagProp
       className={cn(
         "px-2 py-1 text-xs rounded-full font-medium",
         variant === "offered"
-          ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-          : "bg-indigo-50 text-indigo-600 border border-indigo-200",
+          ? "skill-tag-offered"
+          : "skill-tag-wanted",
         className
       )}
     >
