@@ -8,6 +8,41 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
+// Helper function to format availability
+const formatAvailability = (availability: any): string => {
+  if (!availability) return "Not specified";
+  
+  // If it's already an array, format it nicely
+  if (Array.isArray(availability)) {
+    return availability.length > 0 ? availability.map(item => 
+      item.charAt(0).toUpperCase() + item.slice(1)
+    ).join(', ') : "Not specified";
+  }
+  
+  // If it's a string, try to parse it as JSON first
+  if (typeof availability === 'string') {
+    try {
+      const parsed = JSON.parse(availability);
+      if (Array.isArray(parsed)) {
+        return parsed.length > 0 ? parsed.map(item => 
+          item.charAt(0).toUpperCase() + item.slice(1)
+        ).join(', ') : "Not specified";
+      }
+      return availability;
+    } catch {
+      return availability;
+    }
+  }
+  
+  // If it's an object, try to extract meaningful values
+  if (typeof availability === 'object') {
+    const values = Object.values(availability).filter(val => val && val !== '');
+    return values.length > 0 ? values.join(', ') : "Not specified";
+  }
+  
+  return "Not specified";
+};
+
 interface UserCardProps {
   user: UserWithSkills;
 }
@@ -115,15 +150,15 @@ export function UserCard({ user }: UserCardProps) {
         </div>
 
         <div className="mt-4 pt-3 border-t border-slate-100">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
             <div className="text-xs text-slate-500 flex items-center">
-              <Clock className="w-3 h-3 mr-1" />
-              Available: {user.availability || "Not specified"}
+              <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
+              <span className="break-words">Available: {formatAvailability(user.availability)}</span>
             </div>
             <Button
               onClick={handleSwapRequest}
               disabled={isRequesting || createSwapRequestMutation.isPending}
-              className="px-4 py-2 text-sm"
+              className="px-4 py-2 text-sm w-full sm:w-auto"
             >
               {isRequesting || createSwapRequestMutation.isPending ? "Requesting..." : "Request Swap"}
             </Button>
