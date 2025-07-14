@@ -18,9 +18,9 @@ export function UserCard({ user }: UserCardProps) {
   const { toast } = useToast();
 
   const createSwapRequestMutation = useMutation({
-    mutationFn: async (targetId: number) => {
+    mutationFn: async (targetId: string) => {
       const response = await apiRequest("POST", "/api/swap-requests", {
-        requesterId: 1, // This would come from auth context in a real app
+        requesterId: "user1", // This would come from auth context in a real app
         targetId,
         message: `I'd like to swap skills with you!`,
       });

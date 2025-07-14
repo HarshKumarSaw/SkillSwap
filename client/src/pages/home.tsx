@@ -38,11 +38,11 @@ export default function Home() {
   const displayUsers = (searchTerm || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0) ? filteredUsers : users;
   const isLoading = usersLoading || searchLoading;
 
-  const handleSkillFilterToggle = (category: string) => {
+  const handleSkillFilterToggle = (skillName: string) => {
     setSelectedSkillFilters(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
+      prev.includes(skillName) 
+        ? prev.filter(s => s !== skillName)
+        : [...prev, skillName]
     );
   };
 
@@ -101,19 +101,24 @@ export default function Home() {
                 <h3 className="text-lg font-semibold text-slate-800 mb-4">Filter by Skills</h3>
                 
                 <div className="space-y-3">
-                  <div className="flex flex-wrap gap-2">
-                    {skillCategories.map((category) => (
-                      <Button
-                        key={category}
-                        variant={selectedSkillFilters.includes(category) ? "default" : "outline"}
-                        size="sm"
-                        onClick={() => handleSkillFilterToggle(category)}
-                        className="text-xs"
-                      >
-                        {category}
-                      </Button>
-                    ))}
-                  </div>
+                  {skillCategories.map((category) => (
+                    <div key={category} className="space-y-2">
+                      <h4 className="text-sm font-medium text-slate-700">{category}</h4>
+                      <div className="flex flex-wrap gap-1">
+                        {skillsByCategory[category]?.map((skill) => (
+                          <Button
+                            key={skill.id}
+                            variant={selectedSkillFilters.includes(skill.name) ? "default" : "outline"}
+                            size="sm"
+                            onClick={() => handleSkillFilterToggle(skill.name)}
+                            className="text-xs"
+                          >
+                            {skill.name}
+                          </Button>
+                        ))}
+                      </div>
+                    </div>
+                  ))}
                 </div>
 
                 <hr className="my-6 border-slate-200" />
@@ -202,8 +207,8 @@ export default function Home() {
             {/* User Cards Grid */}
             {!isLoading && displayUsers.length > 0 && (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-                {displayUsers.map((user) => (
-                  <UserCard key={user.id} user={user} />
+                {displayUsers.map((user, index) => (
+                  <UserCard key={user.id || `user-${index}`} user={user} />
                 ))}
               </div>
             )}

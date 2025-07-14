@@ -346,7 +346,7 @@ export class DatabaseStorage implements IStorage {
       const result = await client.query(usersWithSkillsQuery);
       
       const usersWithSkills: UserWithSkills[] = result.rows.map(user => ({
-        id: parseInt(user.id),
+        id: user.id, // Keep as string since the database uses text IDs
         name: user.name,
         email: user.email,
         location: user.location,
@@ -404,8 +404,15 @@ export class DatabaseStorage implements IStorage {
         `, [user.id]);
 
         usersWithSkills.push({
-          ...user,
-          profilePhoto: user.profile_photo, // Map snake_case to camelCase
+          id: user.id, // Keep as string since the database uses text IDs
+          name: user.name,
+          email: user.email,
+          location: user.location,
+          profilePhoto: user.profile_photo,
+          availability: user.availability,
+          isPublic: user.is_public,
+          rating: user.rating,
+          reviewCount: 0, // Default since it's not in the database
           skillsOffered: offeredResult.rows,
           skillsWanted: wantedResult.rows,
         });
@@ -426,11 +433,13 @@ export class DatabaseStorage implements IStorage {
         });
       }
 
-      // Apply skill category filters
+      // Apply individual skill filters (not categories)
       if (skillFilters && skillFilters.length > 0) {
         filteredUsers = filteredUsers.filter(user => {
           return user.skillsOffered.some(skill => 
-            skillFilters.includes(skill.category)
+            skillFilters.includes(skill.name)
+          ) || user.skillsWanted.some(skill => 
+            skillFilters.includes(skill.name)
           );
         });
       }

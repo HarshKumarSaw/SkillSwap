@@ -4,7 +4,7 @@ import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export const users = pgTable("users", {
-  id: serial("id").primaryKey(),
+  id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   location: text("location"),
@@ -23,20 +23,20 @@ export const skills = pgTable("skills", {
 
 export const userSkillsOffered = pgTable("user_skills_offered", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   skillId: integer("skill_id").notNull().references(() => skills.id, { onDelete: "cascade" }),
 });
 
 export const userSkillsWanted = pgTable("user_skills_wanted", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   skillId: integer("skill_id").notNull().references(() => skills.id, { onDelete: "cascade" }),
 });
 
 export const swapRequests = pgTable("swap_requests", {
   id: serial("id").primaryKey(),
-  requesterId: integer("requester_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  targetId: integer("target_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  requesterId: text("requester_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  targetId: text("target_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   status: text("status").notNull().default("pending"), // pending, accepted, rejected, cancelled
   message: text("message"),
 });
