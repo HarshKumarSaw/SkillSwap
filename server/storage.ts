@@ -72,13 +72,13 @@ export class DatabaseStorage implements IStorage {
       const offset = (page - 1) * limit;
       const totalPages = Math.ceil(totalCount / limit);
       
-      // Get paginated users
+      // Get paginated user IDs first
       const usersResult = await client.query(
-        'SELECT * FROM users WHERE is_public = true ORDER BY id LIMIT $1 OFFSET $2',
+        'SELECT id FROM users WHERE is_public = true ORDER BY id LIMIT $1 OFFSET $2',
         [limit, offset]
       );
-      const users = usersResult.rows;
-      console.log('Found users:', users.length);
+      const userIds = usersResult.rows.map(row => row.id);
+      console.log('Found users:', userIds.length);
       
       // Quick check if skills tables exist
       const tables = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' AND table_name IN ('skills', 'user_skills_offered', 'user_skills_wanted')");
@@ -329,7 +329,7 @@ export class DatabaseStorage implements IStorage {
         console.log('User skills mapped from existing data');
       }
       
-      // Use a single optimized query to get all users with their skills
+      // Use a single optimized query to get paginated users with their skills
       const usersWithSkillsQuery = `
         SELECT 
           u.*,
@@ -358,12 +358,12 @@ export class DatabaseStorage implements IStorage {
         LEFT JOIN skills so ON uso.skill_id = so.id
         LEFT JOIN user_skills_wanted usw ON u.id::text = usw.user_id::text
         LEFT JOIN skills sw ON usw.skill_id = sw.id
-        WHERE u.is_public = true
+        WHERE u.is_public = true AND u.id = ANY($1)
         GROUP BY u.id, u.name, u.email, u.location, u.profile_photo, u.availability, u.is_public, u.rating, u.join_date, u.bio, u.is_admin, u.is_banned, u.skills_offered, u.skills_wanted
         ORDER BY u.id
       `;
       
-      const result = await client.query(usersWithSkillsQuery);
+      const result = await client.query(usersWithSkillsQuery, [userIds]);
       
       const usersWithSkills: UserWithSkills[] = result.rows.map(user => ({
         id: user.id, // Keep as string since the database uses text IDs
