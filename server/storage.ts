@@ -337,6 +337,7 @@ export class DatabaseStorage implements IStorage {
 
         usersWithSkills.push({
           ...user,
+          profilePhoto: user.profile_photo, // Map snake_case to camelCase
           skillsOffered: offeredResult.rows,
           skillsWanted: wantedResult.rows,
         });
@@ -388,6 +389,7 @@ export class DatabaseStorage implements IStorage {
 
         usersWithSkills.push({
           ...user,
+          profilePhoto: user.profile_photo, // Map snake_case to camelCase
           skillsOffered: offeredResult.rows,
           skillsWanted: wantedResult.rows,
         });
