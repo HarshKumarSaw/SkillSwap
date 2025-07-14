@@ -57,7 +57,7 @@ Preferred communication style: Simple, everyday language.
 ## Data Flow
 
 1. **User Discovery**: Frontend fetches users and skills from API endpoints with pagination support
-2. **Pagination**: Users are loaded 9 per page with navigation controls (Previous/Next and numbered pages)
+2. **Pagination**: Users are loaded 6 per page with navigation controls (Previous/Next and numbered pages)
 3. **Filtering**: Optimized single-query search with skill and availability filters
 4. **Swap Requests**: Users can send swap requests through POST API calls
 5. **State Management**: TanStack Query handles caching and synchronization
@@ -66,7 +66,7 @@ Preferred communication style: Simple, everyday language.
 ## Performance Optimizations
 
 - **Database Queries**: Single optimized query for user search instead of N+1 queries
-- **Pagination**: Server-side pagination with 9 users per page reduces initial load times
+- **Pagination**: Server-side pagination with 6 users per page reduces initial load times and improves performance
 - **Skill Filtering**: Database-level filtering using EXISTS clauses for better performance
 - **Caching**: TanStack Query caches results with appropriate stale times
 

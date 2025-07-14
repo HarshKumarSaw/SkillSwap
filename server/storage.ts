@@ -61,7 +61,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getUsersWithSkills(page: number = 1, limit: number = 20): Promise<PaginatedResult<UserWithSkills>> {
+  async getUsersWithSkills(page: number = 1, limit: number = 6): Promise<PaginatedResult<UserWithSkills>> {
     const client = await pool.connect();
     try {
       // Get total count first

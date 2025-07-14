@@ -17,7 +17,7 @@ export default function Home() {
   const [selectedTimeFilters, setSelectedTimeFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
   const [currentPage, setCurrentPage] = useState(1);
-  const [usersPerPage] = useState(9); // 9 users per page for better grid layout
+  const [usersPerPage] = useState(6); // 6 users per page for optimized loading
 
   // Fetch users with pagination
   const { data: paginatedUsers, isLoading: usersLoading, isFetching } = useQuery<{
@@ -398,9 +398,9 @@ export default function Home() {
               </div>
             )}
 
-            {/* User Cards Grid */}
+            {/* User Cards Grid - Optimized for 6 users */}
             {!isLoading && displayUsers.length > 0 && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3 gap-4 sm:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 {displayUsers.map((user, index) => (
                   <UserCard key={user.id || `user-${index}`} user={user} />
                 ))}

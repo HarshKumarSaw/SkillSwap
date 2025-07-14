@@ -36,7 +36,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       console.log("API endpoint /api/users called");
       const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 20;
+      const limit = parseInt(req.query.limit as string) || 6;
       
       const result = await storage.getUsersWithSkills(page, limit);
       console.log("Successfully fetched users:", result.data.length);
