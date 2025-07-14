@@ -38,11 +38,11 @@ export default function Home() {
   const displayUsers = (searchTerm || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0) ? filteredUsers : users;
   const isLoading = usersLoading || searchLoading;
 
-  const handleSkillFilterToggle = (skillName: string) => {
+  const handleSkillFilterToggle = (category: string) => {
     setSelectedSkillFilters(prev => 
-      prev.includes(skillName) 
-        ? prev.filter(s => s !== skillName)
-        : [...prev, skillName]
+      prev.includes(category) 
+        ? prev.filter(c => c !== category)
+        : [...prev, category]
     );
   };
 
@@ -97,34 +97,27 @@ export default function Home() {
           {/* Sidebar Filters */}
           <aside className="lg:w-64 flex-shrink-0">
             <Card>
-              <CardContent className="p-6">
-                <h3 className="text-lg font-semibold text-slate-800 mb-4">Filter by Skills</h3>
+              <CardContent className="p-4">
+                <h3 className="text-md font-semibold text-slate-800 mb-3">Filter by Skills</h3>
                 
-                <div className="space-y-3">
+                <div className="flex flex-wrap gap-1 mb-4">
                   {skillCategories.map((category) => (
-                    <div key={category} className="space-y-2">
-                      <h4 className="text-sm font-medium text-slate-700">{category}</h4>
-                      <div className="flex flex-wrap gap-1">
-                        {skillsByCategory[category]?.map((skill) => (
-                          <Button
-                            key={skill.id}
-                            variant={selectedSkillFilters.includes(skill.name) ? "default" : "outline"}
-                            size="sm"
-                            onClick={() => handleSkillFilterToggle(skill.name)}
-                            className="text-xs"
-                          >
-                            {skill.name}
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
+                    <Button
+                      key={category}
+                      variant={selectedSkillFilters.includes(category) ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => handleSkillFilterToggle(category)}
+                      className="text-xs h-7"
+                    >
+                      {category}
+                    </Button>
                   ))}
                 </div>
 
-                <hr className="my-6 border-slate-200" />
+                <hr className="my-3 border-slate-200" />
 
-                <h4 className="text-md font-medium text-slate-800 mb-3">Availability</h4>
-                <div className="space-y-2">
+                <h4 className="text-sm font-medium text-slate-800 mb-2">Availability</h4>
+                <div className="space-y-1">
                   {["weekends", "evenings", "weekdays"].map((availability) => (
                     <div key={availability} className="flex items-center space-x-2">
                       <Checkbox
@@ -132,7 +125,7 @@ export default function Home() {
                         checked={selectedAvailabilityFilters.includes(availability)}
                         onCheckedChange={() => handleAvailabilityFilterToggle(availability)}
                       />
-                      <label htmlFor={availability} className="text-sm text-slate-600 capitalize">
+                      <label htmlFor={availability} className="text-xs text-slate-600 capitalize">
                         {availability}
                       </label>
                     </div>

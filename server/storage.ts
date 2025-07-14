@@ -433,13 +433,13 @@ export class DatabaseStorage implements IStorage {
         });
       }
 
-      // Apply individual skill filters (not categories)
+      // Apply skill category filters
       if (skillFilters && skillFilters.length > 0) {
         filteredUsers = filteredUsers.filter(user => {
           return user.skillsOffered.some(skill => 
-            skillFilters.includes(skill.name)
+            skillFilters.includes(skill.category)
           ) || user.skillsWanted.some(skill => 
-            skillFilters.includes(skill.name)
+            skillFilters.includes(skill.category)
           );
         });
       }
