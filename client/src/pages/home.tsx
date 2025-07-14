@@ -31,6 +31,19 @@ export default function Home() {
   // Fetch filtered users when filters change
   const { data: filteredUsers = [], isLoading: searchLoading } = useQuery<UserWithSkills[]>({
     queryKey: ["/api/users/search", searchTerm, selectedSkillFilters.join(","), selectedAvailabilityFilters.join(",")],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      if (searchTerm) params.append('q', searchTerm);
+      if (selectedSkillFilters.length > 0) params.append('skills', selectedSkillFilters.join(','));
+      if (selectedAvailabilityFilters.length > 0) params.append('availability', selectedAvailabilityFilters.join(','));
+      
+      const url = `/api/users/search?${params.toString()}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch filtered users');
+      }
+      return response.json();
+    },
     enabled: searchTerm.length > 0 || selectedSkillFilters.length > 0 || selectedAvailabilityFilters.length > 0,
     staleTime: 2 * 60 * 1000, // Cache search results for 2 minutes
   });
