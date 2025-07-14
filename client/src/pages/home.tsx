@@ -483,35 +483,32 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Desktop Layout - Search Bar and Sort Button */}
-            <div className="flex items-center gap-4 flex-1">
-              {/* Search Bar - Hidden on Mobile, Visible on Desktop */}
-              <div className="flex-1 min-w-0">
-                <div className="relative">
-                  <Input
-                    type="text"
-                    placeholder="Search skills..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-10 text-sm w-full border-gray-300 dark:border-gray-600 focus:ring-[#0053d6] focus:border-[#0053d6]"
-                  />
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-                </div>
+            {/* Desktop Layout - Search Bar (fills remaining space) */}
+            <div className="flex-1 min-w-0 mx-4">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search skills..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 text-sm w-full border-gray-300 dark:border-gray-600 focus:ring-[#0053d6] focus:border-[#0053d6]"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
               </div>
-
-              {/* Sort Button */}
-              <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48 flex-shrink-0">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="recent">Most Recent</SelectItem>
-                  <SelectItem value="skills">Most Skills</SelectItem>
-                  <SelectItem value="rating">Highest Rated</SelectItem>
-                  <SelectItem value="location">Nearest Location</SelectItem>
-                </SelectContent>
-              </Select>
             </div>
+
+            {/* Sort Button */}
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger className="w-48 flex-shrink-0">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="recent">Most Recent</SelectItem>
+                <SelectItem value="skills">Most Skills</SelectItem>
+                <SelectItem value="rating">Highest Rated</SelectItem>
+                <SelectItem value="location">Nearest Location</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
 
