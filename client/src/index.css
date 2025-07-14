@@ -26,25 +26,25 @@
 }
 
 .dark {
-  --background: hsl(240, 10%, 9%);
-  --foreground: hsl(0, 0%, 95%);
-  --muted: hsl(240, 3.7%, 15.9%);
-  --muted-foreground: hsl(240, 5%, 64.9%);
-  --popover: hsl(240, 10%, 9%);
-  --popover-foreground: hsl(0, 0%, 95%);
-  --card: hsl(240, 10%, 12%);
-  --card-foreground: hsl(0, 0%, 95%);
-  --border: hsl(240, 3.7%, 15.9%);
-  --input: hsl(240, 3.7%, 15.9%);
-  --primary: hsl(221, 83%, 53%);
+  --background: hsl(220, 13%, 9%);
+  --foreground: hsl(210, 40%, 98%);
+  --muted: hsl(220, 13%, 14%);
+  --muted-foreground: hsl(215, 20%, 65%);
+  --popover: hsl(220, 13%, 9%);
+  --popover-foreground: hsl(210, 40%, 98%);
+  --card: hsl(220, 13%, 11%);
+  --card-foreground: hsl(210, 40%, 98%);
+  --border: hsl(217, 19%, 18%);
+  --input: hsl(217, 19%, 18%);
+  --primary: hsl(217, 91%, 60%);
   --primary-foreground: hsl(210, 40%, 98%);
-  --secondary: hsl(240, 3.7%, 15.9%);
-  --secondary-foreground: hsl(0, 0%, 95%);
-  --accent: hsl(240, 3.7%, 15.9%);
-  --accent-foreground: hsl(0, 0%, 95%);
+  --secondary: hsl(217, 19%, 18%);
+  --secondary-foreground: hsl(210, 40%, 98%);
+  --accent: hsl(217, 19%, 18%);
+  --accent-foreground: hsl(210, 40%, 98%);
   --destructive: hsl(0, 62.8%, 30.6%);
-  --destructive-foreground: hsl(0, 0%, 95%);
-  --ring: hsl(240, 4.9%, 83.9%);
+  --destructive-foreground: hsl(210, 40%, 98%);
+  --ring: hsl(217, 91%, 60%);
   --radius: 0.5rem;
 }
 
@@ -61,10 +61,10 @@
 /* Custom styles for skill swap platform */
 .skill-tag-offered {
   @apply bg-emerald-50 text-emerald-600 border border-emerald-200;
-  @apply dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800;
+  @apply dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/20;
 }
 
 .skill-tag-wanted {
   @apply bg-indigo-50 text-indigo-600 border border-indigo-200;
-  @apply dark:bg-indigo-900/20 dark:text-indigo-400 dark:border-indigo-800;
+  @apply dark:bg-indigo-500/10 dark:text-indigo-300 dark:border-indigo-500/20;
 }

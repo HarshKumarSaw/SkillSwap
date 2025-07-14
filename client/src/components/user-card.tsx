@@ -107,7 +107,7 @@ export function UserCard({ user }: UserCardProps) {
       } else if (i === fullStars && hasHalfStar) {
         stars.push(<Star key={i} className="w-3 h-3 fill-yellow-400/50 text-yellow-400" />);
       } else {
-        stars.push(<Star key={i} className="w-3 h-3 text-slate-300" />);
+        stars.push(<Star key={i} className="w-3 h-3 text-muted-foreground" />);
       }
     }
 
@@ -125,9 +125,9 @@ export function UserCard({ user }: UserCardProps) {
           />
           
           <div className="flex-1">
-            <h3 className="text-lg font-semibold text-slate-800">{user.name}</h3>
+            <h3 className="text-lg font-semibold text-foreground">{user.name}</h3>
             {user.location && (
-              <p className="text-slate-500 text-sm flex items-center">
+              <p className="text-muted-foreground text-sm flex items-center">
                 <MapPin className="w-3 h-3 mr-1" />
                 {user.location}
               </p>
@@ -136,7 +136,7 @@ export function UserCard({ user }: UserCardProps) {
               <div className="flex">
                 {renderStars(parseFloat(user.rating || "0"))}
               </div>
-              <span className="text-slate-500 text-sm ml-2">
+              <span className="text-muted-foreground text-sm ml-2">
                 {parseFloat(user.rating || "0").toFixed(1)} ({user.reviewCount})
               </span>
             </div>
@@ -144,7 +144,7 @@ export function UserCard({ user }: UserCardProps) {
         </div>
 
         <div className="mt-4">
-          <h4 className="text-sm font-medium text-slate-700 mb-2">Skills Offered:</h4>
+          <h4 className="text-sm font-medium text-foreground mb-2">Skills Offered:</h4>
           <div className="flex flex-wrap gap-1">
             {user.skillsOffered.map((skill) => (
               <SkillTag key={skill.id} skill={skill.name} variant="offered" />
@@ -153,7 +153,7 @@ export function UserCard({ user }: UserCardProps) {
         </div>
 
         <div className="mt-3">
-          <h4 className="text-sm font-medium text-slate-700 mb-2">Skills Wanted:</h4>
+          <h4 className="text-sm font-medium text-foreground mb-2">Skills Wanted:</h4>
           <div className="flex flex-wrap gap-1">
             {user.skillsWanted.map((skill) => (
               <SkillTag key={skill.id} skill={skill.name} variant="wanted" />
@@ -161,9 +161,9 @@ export function UserCard({ user }: UserCardProps) {
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-100">
+        <div className="mt-4 pt-3 border-t border-border">
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="text-xs text-slate-500 flex items-center">
+            <div className="text-xs text-muted-foreground flex items-center">
               <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
               <span className="break-words">Available: {formatAvailability(user.availability)}</span>
             </div>
