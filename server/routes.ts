@@ -13,6 +13,93 @@ import { pool } from "./db";
  */
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Authentication routes
+  app.post("/api/auth/login", async (req, res) => {
+    try {
+      const { email, password } = req.body;
+      
+      // For demonstration, we'll just return a mock user
+      // In a real app, you'd validate credentials against the database
+      const mockUser = {
+        id: "mock-user-" + Date.now(),
+        email,
+        name: "Demo User",
+        location: "Demo Location",
+        isPublic: true,
+        isAdmin: false,
+        rating: "4.5",
+        joinDate: new Date().toISOString(),
+        profilePhoto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+        bio: "Demo user for skill swap platform",
+        skillsOffered: [],
+        skillsWanted: [],
+        availability: { dates: ["weekends"], times: ["evening"] },
+        isBanned: false
+      };
+      
+      // Store in session
+      (req as any).session.user = mockUser;
+      
+      res.json(mockUser);
+    } catch (error) {
+      console.error("Login error:", error);
+      res.status(401).json({ message: "Invalid credentials" });
+    }
+  });
+
+  app.post("/api/auth/signup", async (req, res) => {
+    try {
+      const { name, email, password, location } = req.body;
+      
+      // For demonstration, we'll just return a mock user
+      // In a real app, you'd create a new user in the database
+      const mockUser = {
+        id: "mock-user-" + Date.now(),
+        email,
+        name,
+        location: location || "Not specified",
+        isPublic: true,
+        isAdmin: false,
+        rating: "0.0",
+        joinDate: new Date().toISOString(),
+        profilePhoto: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+        bio: "New user on skill swap platform",
+        skillsOffered: [],
+        skillsWanted: [],
+        availability: { dates: ["weekends"], times: ["evening"] },
+        isBanned: false
+      };
+      
+      // Store in session
+      (req as any).session.user = mockUser;
+      
+      res.status(201).json(mockUser);
+    } catch (error) {
+      console.error("Signup error:", error);
+      res.status(400).json({ message: "Failed to create account" });
+    }
+  });
+
+  app.get("/api/auth/me", (req, res) => {
+    const user = (req as any).session?.user;
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(401).json({ message: "Not authenticated" });
+    }
+  });
+
+  app.post("/api/auth/logout", (req, res) => {
+    (req as any).session.destroy((err: any) => {
+      if (err) {
+        console.error("Logout error:", err);
+        res.status(500).json({ message: "Failed to logout" });
+      } else {
+        res.json({ message: "Logged out successfully" });
+      }
+    });
+  });
+
   // Database test route
   app.get("/api/test-db", async (req, res) => {
     try {

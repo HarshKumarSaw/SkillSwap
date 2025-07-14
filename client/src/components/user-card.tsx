@@ -8,6 +8,8 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
+import { AuthPopup } from "./auth-popup";
+import { useAuth } from "@/hooks/use-auth";
 
 // Helper function to format availability
 const formatAvailability = (availability: any): string => {
@@ -63,14 +65,19 @@ interface UserCardProps {
 
 export function UserCard({ user, currentPage = 1 }: UserCardProps) {
   const [isRequesting, setIsRequesting] = useState(false);
+  const [showAuthPopup, setShowAuthPopup] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
+  const { user: currentUser, isAuthenticated } = useAuth();
 
   const createSwapRequestMutation = useMutation({
     mutationFn: async (targetId: string) => {
+      if (!currentUser) {
+        throw new Error("User not authenticated");
+      }
       const response = await apiRequest("POST", "/api/swap-requests", {
-        requesterId: "user1", // This would come from auth context in a real app
+        requesterId: currentUser.id,
         targetId,
         message: `I'd like to swap skills with you!`,
       });
@@ -95,8 +102,21 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
   });
 
   const handleSwapRequest = () => {
+    if (!isAuthenticated) {
+      setShowAuthPopup(true);
+      return;
+    }
+    
     setIsRequesting(true);
     createSwapRequestMutation.mutate(user.id);
+  };
+
+  const handleAuthSuccess = () => {
+    // After successful auth, automatically trigger the swap request
+    if (isAuthenticated) {
+      setIsRequesting(true);
+      createSwapRequestMutation.mutate(user.id);
+    }
   };
 
   const renderStars = (rating: number) => {
@@ -118,69 +138,77 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
   };
 
   return (
-    <Card className="hover:shadow-md transition-shadow duration-200">
-      <CardContent className="p-6">
-        <div className="flex items-start space-x-4">
-          <img
-            src={user.profilePhoto || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150"}
-            alt={`${user.name} profile photo`}
-            className="w-16 h-16 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-primary transition-all duration-200"
-            onClick={() => setLocation(`/profile/${user.id}?page=${currentPage}`)}
-          />
-          
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold text-foreground">{user.name}</h3>
-            {user.location && (
-              <p className="text-muted-foreground text-sm flex items-center">
-                <MapPin className="w-3 h-3 mr-1" />
-                {user.location}
-              </p>
-            )}
-            <div className="flex items-center mt-2">
-              <div className="flex">
-                {renderStars(parseFloat(user.rating || "0"))}
+    <>
+      <Card className="hover:shadow-md transition-shadow duration-200">
+        <CardContent className="p-6">
+          <div className="flex items-start space-x-4">
+            <img
+              src={user.profilePhoto || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150"}
+              alt={`${user.name} profile photo`}
+              className="w-16 h-16 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-primary transition-all duration-200"
+              onClick={() => setLocation(`/profile/${user.id}?page=${currentPage}`)}
+            />
+            
+            <div className="flex-1">
+              <h3 className="text-lg font-semibold text-foreground">{user.name}</h3>
+              {user.location && (
+                <p className="text-muted-foreground text-sm flex items-center">
+                  <MapPin className="w-3 h-3 mr-1" />
+                  {user.location}
+                </p>
+              )}
+              <div className="flex items-center mt-2">
+                <div className="flex">
+                  {renderStars(parseFloat(user.rating || "0"))}
+                </div>
+                <span className="text-muted-foreground text-sm ml-2">
+                  {parseFloat(user.rating || "0").toFixed(1)} ({user.reviewCount})
+                </span>
               </div>
-              <span className="text-muted-foreground text-sm ml-2">
-                {parseFloat(user.rating || "0").toFixed(1)} ({user.reviewCount})
-              </span>
             </div>
           </div>
-        </div>
 
-        <div className="mt-4">
-          <h4 className="text-sm font-medium text-foreground mb-2">Skills Offered:</h4>
-          <div className="flex flex-wrap gap-1">
-            {user.skillsOffered.map((skill) => (
-              <SkillTag key={skill.id} skill={skill.name} variant="offered" />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-3">
-          <h4 className="text-sm font-medium text-foreground mb-2">Skills Wanted:</h4>
-          <div className="flex flex-wrap gap-1">
-            {user.skillsWanted.map((skill) => (
-              <SkillTag key={skill.id} skill={skill.name} variant="wanted" />
-            ))}
-          </div>
-        </div>
-
-        <div className="mt-4 pt-3 border-t border-border">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-            <div className="text-xs text-muted-foreground flex items-center">
-              <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
-              <span className="break-words">Available: {formatAvailability(user.availability)}</span>
+          <div className="mt-4">
+            <h4 className="text-sm font-medium text-foreground mb-2">Skills Offered:</h4>
+            <div className="flex flex-wrap gap-1">
+              {user.skillsOffered.map((skill) => (
+                <SkillTag key={skill.id} skill={skill.name} variant="offered" />
+              ))}
             </div>
-            <Button
-              onClick={handleSwapRequest}
-              disabled={isRequesting || createSwapRequestMutation.isPending}
-              className="px-4 py-2 text-sm w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90"
-            >
-              {isRequesting || createSwapRequestMutation.isPending ? "Requesting..." : "Request Swap"}
-            </Button>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+
+          <div className="mt-3">
+            <h4 className="text-sm font-medium text-foreground mb-2">Skills Wanted:</h4>
+            <div className="flex flex-wrap gap-1">
+              {user.skillsWanted.map((skill) => (
+                <SkillTag key={skill.id} skill={skill.name} variant="wanted" />
+              ))}
+            </div>
+          </div>
+
+          <div className="mt-4 pt-3 border-t border-border">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+              <div className="text-xs text-muted-foreground flex items-center">
+                <Clock className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="break-words">Available: {formatAvailability(user.availability)}</span>
+              </div>
+              <Button
+                onClick={handleSwapRequest}
+                disabled={isRequesting || createSwapRequestMutation.isPending}
+                className="px-4 py-2 text-sm w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90"
+              >
+                {isRequesting || createSwapRequestMutation.isPending ? "Requesting..." : "Request Swap"}
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+      
+      <AuthPopup
+        isOpen={showAuthPopup}
+        onOpenChange={setShowAuthPopup}
+        onAuthSuccess={handleAuthSuccess}
+      />
+    </>
   );
 }
