@@ -167,10 +167,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Update user profile
   app.put("/api/users/:id", async (req, res) => {
     try {
-      console.log("Session userId:", req.session.userId);
-      console.log("Request params id:", req.params.id);
-      console.log("Session user:", req.session.user);
-      
       if (!req.session.userId) {
         return res.status(401).json({ message: "Not authenticated" });
       }

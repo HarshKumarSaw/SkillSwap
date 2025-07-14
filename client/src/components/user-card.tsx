@@ -2,7 +2,7 @@ import { UserWithSkills } from "@shared/schema";
 import { SkillTag } from "./skill-tag";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { MapPin, Clock, Star } from "lucide-react";
+import { MapPin, Clock, Star, MessageSquare, Loader2, User } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -107,6 +107,16 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
       return;
     }
     
+    // Prevent users from requesting swap with themselves
+    if (currentUser?.id === user.id) {
+      toast({
+        title: "Cannot request swap",
+        description: "You cannot request a skill swap with yourself.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsRequesting(true);
     createSwapRequestMutation.mutate(user.id);
   };
@@ -195,10 +205,25 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
               </div>
               <Button
                 onClick={handleSwapRequest}
-                disabled={isRequesting || createSwapRequestMutation.isPending}
-                className="px-4 py-2 text-sm w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90"
+                disabled={isRequesting || createSwapRequestMutation.isPending || currentUser?.id === user.id}
+                className="px-4 py-2 text-sm w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90 disabled:opacity-50"
               >
-                {isRequesting || createSwapRequestMutation.isPending ? "Requesting..." : "Request Swap"}
+                {isRequesting || createSwapRequestMutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Requesting...
+                  </>
+                ) : currentUser?.id === user.id ? (
+                  <>
+                    <User className="mr-2 h-4 w-4" />
+                    Your Profile
+                  </>
+                ) : (
+                  <>
+                    <MessageSquare className="mr-2 h-4 w-4" />
+                    Request Swap
+                  </>
+                )}
               </Button>
             </div>
           </div>

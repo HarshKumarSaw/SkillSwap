@@ -684,9 +684,12 @@ export class DatabaseStorage implements IStorage {
   async createSwapRequest(request: InsertSwapRequest): Promise<SwapRequest> {
     const client = await pool.connect();
     try {
+      // Generate a unique ID for the swap request
+      const requestId = `swap_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
       const result = await client.query(
-        'INSERT INTO swap_requests (sender_id, receiver_id, status, message) VALUES ($1, $2, $3, $4) RETURNING *',
-        [request.requesterId, request.targetId, request.status || 'pending', request.message]
+        'INSERT INTO swap_requests (id, sender_id, receiver_id, status, message) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [requestId, request.requesterId, request.targetId, request.status || 'pending', request.message]
       );
       return result.rows[0];
     } finally {
