@@ -218,9 +218,12 @@ export default function UserProfile() {
           <CardHeader>
             <div className="flex flex-col sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-6">
               <img
-                src={user.profilePhoto || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200"}
+                src={user.profilePhoto}
                 alt={`${user.name} profile photo`}
                 className="w-32 h-32 rounded-full object-cover mx-auto sm:mx-0"
+                onError={(e) => {
+                  e.currentTarget.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=200&h=200";
+                }}
               />
               
               <div className="flex-1 text-center sm:text-left">
