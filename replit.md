@@ -32,6 +32,11 @@ Preferred communication style: Simple, everyday language.
 - ✓ Replaced "Add Profile" button with login/logout functionality using UserMenu component
 - ✓ Created UserMenu component with profile avatar dropdown for authenticated users
 - ✓ Fixed authentication state synchronization for swap request functionality
+- ✓ Created comprehensive edit profile page with forms for personal details, skills, and availability
+- ✓ Added backend API endpoints for updating user profiles and skills (PUT /api/users/:id)
+- ✓ Implemented skill management system allowing users to add/remove offered and wanted skills
+- ✓ Added availability settings for dates (weekends/weekdays/everyday) and times (morning/evening/night)
+- ✓ Created secure profile editing with authentication checks and user authorization
 
 ## System Architecture
 

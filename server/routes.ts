@@ -161,6 +161,35 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update user profile
+  app.put("/api/users/:id", async (req, res) => {
+    try {
+      if (!req.session.userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      // Only allow users to update their own profile
+      if (req.session.userId !== req.params.id) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+
+      const { skillsOffered, skillsWanted, ...userData } = req.body;
+      
+      // Update user data
+      const updatedUser = await storage.updateUser(req.params.id, userData);
+      
+      // Update skills if provided
+      if (skillsOffered || skillsWanted) {
+        await storage.updateUserSkills(req.params.id, skillsOffered || [], skillsWanted || []);
+      }
+
+      res.json(updatedUser);
+    } catch (error) {
+      console.error("Error updating user profile:", error);
+      res.status(500).json({ message: "Failed to update profile" });
+    }
+  });
+
   // Get all skills grouped by category
   app.get("/api/skills", async (req, res) => {
     try {

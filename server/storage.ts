@@ -16,6 +16,8 @@ export interface IStorage {
   getUserByEmail(email: string): Promise<User | undefined>;
   getUserWithSkills(id: string): Promise<UserWithSkills | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUser(id: string, userData: Partial<User>): Promise<User>;
+  updateUserSkills(userId: string, skillsOffered: string[], skillsWanted: string[]): Promise<void>;
   getUsersWithSkills(page?: number, limit?: number): Promise<PaginatedResult<UserWithSkills>>;
   searchUsers(searchTerm?: string, skillFilters?: string[], dateFilters?: string[], timeFilters?: string[]): Promise<UserWithSkills[]>;
   
@@ -117,6 +119,97 @@ export class DatabaseStorage implements IStorage {
         [insertUser.name, insertUser.email, insertUser.location, insertUser.profilePhoto, insertUser.availability, insertUser.isPublic]
       );
       return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User> {
+    const client = await pool.connect();
+    try {
+      const fields = [];
+      const values = [];
+      let paramIndex = 1;
+
+      // Build dynamic query based on provided fields
+      if (userData.name !== undefined) {
+        fields.push(`name = $${paramIndex++}`);
+        values.push(userData.name);
+      }
+      if (userData.email !== undefined) {
+        fields.push(`email = $${paramIndex++}`);
+        values.push(userData.email);
+      }
+      if (userData.location !== undefined) {
+        fields.push(`location = $${paramIndex++}`);
+        values.push(userData.location);
+      }
+      if (userData.bio !== undefined) {
+        fields.push(`bio = $${paramIndex++}`);
+        values.push(userData.bio);
+      }
+      if (userData.profilePhoto !== undefined) {
+        fields.push(`profile_photo = $${paramIndex++}`);
+        values.push(userData.profilePhoto);
+      }
+      if (userData.availability !== undefined) {
+        fields.push(`availability = $${paramIndex++}`);
+        values.push(JSON.stringify(userData.availability));
+      }
+
+      if (fields.length === 0) {
+        throw new Error("No fields to update");
+      }
+
+      values.push(id);
+      const query = `UPDATE users SET ${fields.join(', ')} WHERE id = $${paramIndex} RETURNING *`;
+      
+      const result = await client.query(query, values);
+      if (result.rows.length === 0) {
+        throw new Error("User not found");
+      }
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateUserSkills(userId: string, skillsOffered: string[], skillsWanted: string[]): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+
+      // Clear existing skills
+      await client.query('DELETE FROM user_skills_offered WHERE user_id = $1', [userId]);
+      await client.query('DELETE FROM user_skills_wanted WHERE user_id = $1', [userId]);
+
+      // Add offered skills
+      for (const skillName of skillsOffered) {
+        const skillResult = await client.query('SELECT id FROM skills WHERE name = $1', [skillName]);
+        if (skillResult.rows.length > 0) {
+          await client.query(
+            'INSERT INTO user_skills_offered (user_id, skill_id) VALUES ($1, $2)',
+            [userId, skillResult.rows[0].id]
+          );
+        }
+      }
+
+      // Add wanted skills
+      for (const skillName of skillsWanted) {
+        const skillResult = await client.query('SELECT id FROM skills WHERE name = $1', [skillName]);
+        if (skillResult.rows.length > 0) {
+          await client.query(
+            'INSERT INTO user_skills_wanted (user_id, skill_id) VALUES ($1, $2)',
+            [userId, skillResult.rows[0].id]
+          );
+        }
+      }
+
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
     } finally {
       client.release();
     }

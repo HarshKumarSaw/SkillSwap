@@ -7,6 +7,7 @@ import { ThemeProvider } from "@/components/theme-provider";
 import { AuthProvider } from "@/hooks/use-auth";
 import Home from "@/pages/home";
 import UserProfile from "@/pages/user-profile";
+import EditProfile from "@/pages/edit-profile";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -14,6 +15,7 @@ function Router() {
     <Switch>
       <Route path="/" component={Home} />
       <Route path="/profile/:id" component={UserProfile} />
+      <Route path="/edit-profile" component={EditProfile} />
       <Route component={NotFound} />
     </Switch>
   );
