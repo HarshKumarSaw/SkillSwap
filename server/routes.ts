@@ -31,9 +31,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const page = parseInt(req.query.page as string) || 1;
       const limit = parseInt(req.query.limit as string) || 20;
       
-      const users = await storage.getUsersWithSkills(page, limit);
-      console.log("Successfully fetched users:", users.length);
-      res.json(users);
+      const result = await storage.getUsersWithSkills(page, limit);
+      console.log("Successfully fetched users:", result.data.length);
+      res.json(result);
     } catch (error) {
       console.error("Error fetching users:", error);
       res.status(500).json({ message: "Failed to fetch users", error: error instanceof Error ? error.message : String(error) });

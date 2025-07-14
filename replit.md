@@ -47,22 +47,24 @@ Preferred communication style: Simple, everyday language.
 - **Toast Notifications**: User feedback for actions like sending swap requests
 
 ### API Endpoints
-- `GET /api/users` - Fetch all public users with their skills
+- `GET /api/users` - Fetch all public users with their skills (with pagination support)
 - `GET /api/users/search` - Search users with filters for skills and availability
 - `GET /api/skills` - Get all skills grouped by category
 - `POST /api/swap-requests` - Create new skill swap requests
 
 ## Data Flow
 
-1. **User Discovery**: Frontend fetches users and skills from API endpoints
-2. **Filtering**: Optimized single-query search with skill and availability filters
-3. **Swap Requests**: Users can send swap requests through POST API calls
-4. **State Management**: TanStack Query handles caching and synchronization
-5. **User Feedback**: Toast notifications provide immediate action feedback
+1. **User Discovery**: Frontend fetches users and skills from API endpoints with pagination support
+2. **Pagination**: Users are loaded 9 per page with navigation controls (Previous/Next and numbered pages)
+3. **Filtering**: Optimized single-query search with skill and availability filters
+4. **Swap Requests**: Users can send swap requests through POST API calls
+5. **State Management**: TanStack Query handles caching and synchronization
+6. **User Feedback**: Toast notifications provide immediate action feedback
 
 ## Performance Optimizations
 
 - **Database Queries**: Single optimized query for user search instead of N+1 queries
+- **Pagination**: Server-side pagination with 9 users per page reduces initial load times
 - **Skill Filtering**: Database-level filtering using EXISTS clauses for better performance
 - **Caching**: TanStack Query caches results with appropriate stale times
 

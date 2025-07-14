@@ -1,12 +1,21 @@
 import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest } from "@shared/schema";
 import { pool } from "./db";
 
+export interface PaginatedResult<T> {
+  data: T[];
+  totalCount: number;
+  totalPages: number;
+  currentPage: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
 export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
-  getUsersWithSkills(page?: number, limit?: number): Promise<UserWithSkills[]>;
+  getUsersWithSkills(page?: number, limit?: number): Promise<PaginatedResult<UserWithSkills>>;
   searchUsers(searchTerm?: string, skillFilters?: string[], dateFilters?: string[], timeFilters?: string[]): Promise<UserWithSkills[]>;
   
   // Skills
@@ -52,11 +61,22 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getUsersWithSkills(page: number = 1, limit: number = 20): Promise<UserWithSkills[]> {
+  async getUsersWithSkills(page: number = 1, limit: number = 20): Promise<PaginatedResult<UserWithSkills>> {
     const client = await pool.connect();
     try {
-      // Get all public users (removing pagination for now to keep it simple)
-      const usersResult = await client.query('SELECT * FROM users WHERE is_public = true ORDER BY id');
+      // Get total count first
+      const countResult = await client.query('SELECT COUNT(*) FROM users WHERE is_public = true');
+      const totalCount = parseInt(countResult.rows[0].count);
+      
+      // Calculate pagination
+      const offset = (page - 1) * limit;
+      const totalPages = Math.ceil(totalCount / limit);
+      
+      // Get paginated users
+      const usersResult = await client.query(
+        'SELECT * FROM users WHERE is_public = true ORDER BY id LIMIT $1 OFFSET $2',
+        [limit, offset]
+      );
       const users = usersResult.rows;
       console.log('Found users:', users.length);
       
@@ -359,7 +379,15 @@ export class DatabaseStorage implements IStorage {
         skillsWanted: user.skills_wanted_json || [],
       }));
 
-      return usersWithSkills;
+      // Return paginated result
+      return {
+        data: usersWithSkills,
+        totalCount,
+        totalPages,
+        currentPage: page,
+        hasNextPage: page < totalPages,
+        hasPreviousPage: page > 1,
+      };
     } finally {
       client.release();
     }

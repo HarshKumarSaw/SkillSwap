@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Plus, Loader2 } from "lucide-react";
+import { Search, Plus, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
 import { UserWithSkills } from "@shared/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -16,13 +16,36 @@ export default function Home() {
   const [selectedDateFilters, setSelectedDateFilters] = useState<string[]>([]);
   const [selectedTimeFilters, setSelectedTimeFilters] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState("recent");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [usersPerPage] = useState(9); // 9 users per page for better grid layout
 
-  // Fetch users with pagination (load 6 at a time for faster loading)
-  const { data: users = [], isLoading: usersLoading, isFetching } = useQuery<UserWithSkills[]>({
-    queryKey: ["/api/users"],
+  // Fetch users with pagination
+  const { data: paginatedUsers, isLoading: usersLoading, isFetching } = useQuery<{
+    data: UserWithSkills[];
+    totalCount: number;
+    totalPages: number;
+    currentPage: number;
+    hasNextPage: boolean;
+    hasPreviousPage: boolean;
+  }>({
+    queryKey: ["/api/users", currentPage, usersPerPage],
+    queryFn: async () => {
+      const params = new URLSearchParams();
+      params.append('page', currentPage.toString());
+      params.append('limit', usersPerPage.toString());
+      
+      const url = `/api/users?${params.toString()}`;
+      const response = await fetch(url);
+      if (!response.ok) {
+        throw new Error('Failed to fetch users');
+      }
+      return response.json();
+    },
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
     gcTime: 10 * 60 * 1000, // Keep in cache for 10 minutes
   });
+
+  const users = paginatedUsers?.data || [];
 
   // Fetch skills by category
   const { data: skillsByCategory = {} } = useQuery<Record<string, any[]>>({
@@ -88,6 +111,11 @@ export default function Home() {
   const baseUsers = (searchTerm || selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) ? filteredUsers : users;
   const displayUsers = sortUsers(baseUsers);
   const isLoading = usersLoading || searchLoading;
+  
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedSkillFilters, selectedDateFilters, selectedTimeFilters]);
 
   const handleSkillFilterToggle = (category: string) => {
     setSelectedSkillFilters(prev => 
@@ -311,7 +339,10 @@ export default function Home() {
               <div>
                 <h2 className="text-xl sm:text-2xl font-bold text-[#0053d6]">Available Users</h2>
                 <p className="text-muted-foreground mt-1 text-sm sm:text-base">
-                  Showing {displayUsers.length} user{displayUsers.length !== 1 ? 's' : ''}
+                  {paginatedUsers && !searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0
+                    ? `Showing ${((currentPage - 1) * usersPerPage) + 1}-${Math.min(currentPage * usersPerPage, paginatedUsers.totalCount)} of ${paginatedUsers.totalCount} users`
+                    : `Showing ${displayUsers.length} user${displayUsers.length !== 1 ? 's' : ''}`
+                  }
                 </p>
               </div>
               
@@ -373,6 +404,48 @@ export default function Home() {
                 {displayUsers.map((user, index) => (
                   <UserCard key={user.id || `user-${index}`} user={user} />
                 ))}
+              </div>
+            )}
+
+            {/* Pagination Controls - only show when not filtering */}
+            {!isLoading && paginatedUsers && !searchTerm && selectedSkillFilters.length === 0 && selectedDateFilters.length === 0 && selectedTimeFilters.length === 0 && paginatedUsers.totalPages > 1 && (
+              <div className="flex items-center justify-center space-x-2 mt-8">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={!paginatedUsers.hasPreviousPage || isFetching}
+                  className="flex items-center gap-1 dark:hover:bg-[#0b3675]/20"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                  Previous
+                </Button>
+                
+                <div className="flex items-center space-x-1">
+                  {Array.from({ length: paginatedUsers.totalPages }, (_, i) => i + 1).map(page => (
+                    <Button
+                      key={page}
+                      variant={page === currentPage ? "default" : "outline"}
+                      size="sm"
+                      onClick={() => setCurrentPage(page)}
+                      disabled={isFetching}
+                      className={`w-8 h-8 p-0 ${page === currentPage ? 'bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90' : 'dark:hover:bg-[#0b3675]/20'}`}
+                    >
+                      {page}
+                    </Button>
+                  ))}
+                </div>
+                
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(paginatedUsers.totalPages, prev + 1))}
+                  disabled={!paginatedUsers.hasNextPage || isFetching}
+                  className="flex items-center gap-1 dark:hover:bg-[#0b3675]/20"
+                >
+                  Next
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
               </div>
             )}
           </main>
