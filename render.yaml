@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: skill-swap-platform
+    env: node
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        fromService:
+          type: pserv
+          name: skill-swap-db
+          property: connectionString
+    healthCheckPath: /
