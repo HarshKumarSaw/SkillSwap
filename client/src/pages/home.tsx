@@ -500,9 +500,9 @@ export default function Home() {
             </div>
 
             {/* Desktop Layout - Search Bar and Sort Button */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 flex-1">
               {/* Search Bar - Hidden on Mobile, Visible on Desktop */}
-              <div className="flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
+              <div className="flex-1 min-w-0">
                 <div className="relative">
                   <Input
                     type="text"
@@ -517,7 +517,7 @@ export default function Home() {
 
               {/* Sort Button */}
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-48">
+                <SelectTrigger className="w-48 flex-shrink-0">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
