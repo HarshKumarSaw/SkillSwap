@@ -55,16 +55,292 @@ export class DatabaseStorage implements IStorage {
   async getUsersWithSkills(): Promise<UserWithSkills[]> {
     const client = await pool.connect();
     try {
+      // Test database connection first
+      const dbTest = await client.query('SELECT current_database(), current_user');
+      console.log('Connected to database:', dbTest.rows[0]);
+      
+      // Check what tables exist
+      const tables = await client.query("SELECT table_name FROM information_schema.tables WHERE table_schema = 'public' ORDER BY table_name");
+      console.log('Available tables:', tables.rows.map(r => r.table_name));
+      
       // Get all public users
       const usersResult = await client.query('SELECT * FROM users WHERE is_public = true');
       const users = usersResult.rows;
+      console.log('Found users:', users.length);
       
-      // For now, return users with empty skills arrays since skills tables are missing
-      const usersWithSkills: UserWithSkills[] = users.map(user => ({
-        ...user,
-        skillsOffered: [],
-        skillsWanted: [],
-      }));
+      // Check if skills tables exist and have data
+      const hasSkillsTable = tables.rows.some(r => r.table_name === 'skills');
+      const hasOfferedTable = tables.rows.some(r => r.table_name === 'user_skills_offered');
+      const hasWantedTable = tables.rows.some(r => r.table_name === 'user_skills_wanted');
+      
+      // Check if skills table has data
+      let skillsCount = 0;
+      if (hasSkillsTable) {
+        const skillsCountResult = await client.query('SELECT COUNT(*) FROM skills');
+        skillsCount = parseInt(skillsCountResult.rows[0].count);
+      }
+      
+      if (!hasSkillsTable || !hasOfferedTable || !hasWantedTable || skillsCount === 0) {
+        console.log('Skills tables missing, creating them...');
+        
+        // Drop existing tables if they have issues
+        await client.query('DROP TABLE IF EXISTS user_skills_offered CASCADE');
+        await client.query('DROP TABLE IF EXISTS user_skills_wanted CASCADE');
+        await client.query('DROP TABLE IF EXISTS skills CASCADE');
+        
+        // Create tables in correct order
+        await client.query(`
+          CREATE TABLE skills (
+            id SERIAL PRIMARY KEY,
+            name TEXT NOT NULL UNIQUE,
+            category TEXT NOT NULL
+          )
+        `);
+        
+        await client.query(`
+          CREATE TABLE user_skills_offered (
+            id SERIAL PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            skill_id INTEGER NOT NULL
+          )
+        `);
+        
+        await client.query(`
+          CREATE TABLE user_skills_wanted (
+            id SERIAL PRIMARY KEY,
+            user_id TEXT NOT NULL,
+            skill_id INTEGER NOT NULL
+          )
+        `);
+        
+        console.log('Skills tables created without foreign keys');
+        
+        // Populate skills table with comprehensive skills
+        await client.query(`
+          INSERT INTO skills (name, category) VALUES
+          -- Design & Creative
+          ('Graphic Design', 'Design'),
+          ('UI/UX Design', 'Design'),
+          ('Logo Design', 'Design'),
+          ('Web Design', 'Design'),
+          ('Brand Identity', 'Design'),
+          ('Adobe Photoshop', 'Design'),
+          ('Adobe Illustrator', 'Design'),
+          ('Figma', 'Design'),
+          ('Color Theory', 'Design'),
+          ('Typography', 'Design'),
+          ('Space Planning', 'Design'),
+          ('Interior Design', 'Design'),
+          
+          -- Programming & Development
+          ('Web Development', 'Programming'),
+          ('JavaScript', 'Programming'),
+          ('React', 'Programming'),
+          ('Node.js', 'Programming'),
+          ('Python', 'Programming'),
+          ('Java', 'Programming'),
+          ('PHP', 'Programming'),
+          ('Mobile Development', 'Programming'),
+          ('Swift', 'Programming'),
+          ('Android Development', 'Programming'),
+          ('Database Design', 'Programming'),
+          ('API Development', 'Programming'),
+          ('CSS Design', 'Programming'),
+          
+          -- Marketing & Business
+          ('Digital Marketing', 'Marketing'),
+          ('SEO', 'Marketing'),
+          ('Social Media Marketing', 'Marketing'),
+          ('Content Marketing', 'Marketing'),
+          ('Email Marketing', 'Marketing'),
+          ('PPC Advertising', 'Marketing'),
+          ('Brand Strategy', 'Marketing'),
+          ('Market Research', 'Marketing'),
+          ('Sales Strategy', 'Marketing'),
+          ('Business Development', 'Marketing'),
+          
+          -- Languages
+          ('Spanish', 'Languages'),
+          ('French', 'Languages'),
+          ('German', 'Languages'),
+          ('Mandarin', 'Languages'),
+          ('Japanese', 'Languages'),
+          ('Italian', 'Languages'),
+          ('Portuguese', 'Languages'),
+          ('Russian', 'Languages'),
+          ('Korean', 'Languages'),
+          ('Arabic', 'Languages'),
+          
+          -- Culinary Arts
+          ('Culinary Arts', 'Culinary'),
+          ('Baking', 'Culinary'),
+          ('Pastry Making', 'Culinary'),
+          ('Wine Pairing', 'Culinary'),
+          ('Nutrition Coaching', 'Culinary'),
+          ('Meal Planning', 'Culinary'),
+          ('Food Photography', 'Culinary'),
+          ('Food Styling', 'Culinary'),
+          ('Restaurant Management', 'Culinary'),
+          
+          -- Fitness & Sports
+          ('Personal Training', 'Fitness'),
+          ('Yoga Instruction', 'Fitness'),
+          ('Rock Climbing', 'Fitness'),
+          ('Swimming', 'Fitness'),
+          ('Marathon Running', 'Fitness'),
+          ('CrossFit', 'Fitness'),
+          ('Pilates', 'Fitness'),
+          ('Martial Arts', 'Fitness'),
+          ('Dance', 'Fitness'),
+          ('Sports Coaching', 'Fitness'),
+          ('Outdoor Safety', 'Fitness'),
+          
+          -- Music & Arts
+          ('Guitar', 'Music'),
+          ('Piano', 'Music'),
+          ('Violin', 'Music'),
+          ('Drums', 'Music'),
+          ('Singing', 'Music'),
+          ('Music Production', 'Music'),
+          ('Sound Engineering', 'Music'),
+          ('Songwriting', 'Music'),
+          ('Music Theory', 'Music'),
+          ('DJ Skills', 'Music'),
+          
+          -- Technology
+          ('Data Science', 'Technology'),
+          ('Machine Learning', 'Technology'),
+          ('Cybersecurity', 'Technology'),
+          ('Cloud Computing', 'Technology'),
+          ('DevOps', 'Technology'),
+          ('3D Modeling', 'Technology'),
+          ('3D Printing', 'Technology'),
+          ('Electronics', 'Technology'),
+          ('Drone Photography', 'Technology'),
+          ('Video Editing', 'Technology'),
+          
+          -- Crafts & Making
+          ('Woodworking', 'Crafts'),
+          ('Furniture Making', 'Crafts'),
+          ('Pottery', 'Crafts'),
+          ('Jewelry Making', 'Crafts'),
+          ('Leather Working', 'Crafts'),
+          ('Knitting', 'Crafts'),
+          ('Sewing', 'Crafts'),
+          ('Painting', 'Crafts'),
+          ('Sculpture', 'Crafts'),
+          ('Metalworking', 'Crafts'),
+          
+          -- Professional Skills
+          ('Project Management', 'Professional'),
+          ('Public Speaking', 'Professional'),
+          ('Technical Writing', 'Professional'),
+          ('Grant Writing', 'Professional'),
+          ('Policy Research', 'Professional'),
+          ('Data Analysis', 'Professional'),
+          ('Financial Planning', 'Professional'),
+          ('Teaching', 'Professional'),
+          ('Coaching', 'Professional'),
+          ('Consulting', 'Professional'),
+          ('Debate Coaching', 'Professional'),
+          ('Data Visualization', 'Professional'),
+          ('Survey Design', 'Professional'),
+          ('Interview Techniques', 'Professional'),
+          
+          -- Automotive & Mechanical
+          ('Automotive Engineering', 'Automotive'),
+          ('Car Restoration', 'Automotive'),
+          ('Mechanical Repair', 'Automotive'),
+          ('Welding', 'Automotive'),
+          ('Motorcycle Maintenance', 'Automotive'),
+          ('Engine Diagnostics', 'Automotive'),
+          
+          -- Outdoors & Adventure
+          ('Hiking', 'Outdoors'),
+          ('Camping', 'Outdoors'),
+          ('Survival Skills', 'Outdoors'),
+          ('Photography', 'Outdoors'),
+          ('Travel Planning', 'Outdoors'),
+          ('Surfing', 'Outdoors'),
+          ('Sailing', 'Outdoors'),
+          
+          -- Home & Garden
+          ('Plant Care', 'Home'),
+          ('Sustainable Living', 'Home'),
+          ('Home Renovation', 'Home'),
+          ('Gardening', 'Home'),
+          ('Landscaping', 'Home')
+          ON CONFLICT (name) DO NOTHING
+        `);
+        
+        console.log('Skills populated');
+        
+        // Now assign skills to users based on their existing data
+        const allUsers = await client.query('SELECT * FROM users');
+        for (const user of allUsers.rows) {
+          // Extract skills from JSON arrays if they exist
+          const skillsOffered = user.skills_offered || [];
+          const skillsWanted = user.skills_wanted || [];
+          
+          // Add skills offered
+          for (const skillName of skillsOffered) {
+            try {
+              const skill = await client.query('SELECT id FROM skills WHERE name = $1', [skillName]);
+              if (skill.rows.length > 0) {
+                await client.query(
+                  'INSERT INTO user_skills_offered (user_id, skill_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                  [user.id, skill.rows[0].id]
+                );
+              }
+            } catch (e) {
+              // Skip if skill doesn't exist
+            }
+          }
+          
+          // Add skills wanted
+          for (const skillName of skillsWanted) {
+            try {
+              const skill = await client.query('SELECT id FROM skills WHERE name = $1', [skillName]);
+              if (skill.rows.length > 0) {
+                await client.query(
+                  'INSERT INTO user_skills_wanted (user_id, skill_id) VALUES ($1, $2) ON CONFLICT DO NOTHING',
+                  [user.id, skill.rows[0].id]
+                );
+              }
+            } catch (e) {
+              // Skip if skill doesn't exist
+            }
+          }
+        }
+        
+        console.log('User skills mapped from existing data');
+      }
+      
+      const usersWithSkills: UserWithSkills[] = [];
+      
+      for (const user of users) {
+        // Get skills offered
+        const offeredResult = await client.query(`
+          SELECT s.id, s.name, s.category 
+          FROM user_skills_offered uso 
+          JOIN skills s ON uso.skill_id = s.id 
+          WHERE uso.user_id = $1
+        `, [user.id]);
+        
+        // Get skills wanted
+        const wantedResult = await client.query(`
+          SELECT s.id, s.name, s.category 
+          FROM user_skills_wanted usw 
+          JOIN skills s ON usw.skill_id = s.id 
+          WHERE usw.user_id = $1
+        `, [user.id]);
+
+        usersWithSkills.push({
+          ...user,
+          skillsOffered: offeredResult.rows,
+          skillsWanted: wantedResult.rows,
+        });
+      }
 
       return usersWithSkills;
     } finally {
@@ -91,20 +367,52 @@ export class DatabaseStorage implements IStorage {
       const usersResult = await client.query(`SELECT * FROM users ${whereClause}`, params);
       const users = usersResult.rows;
       
-      // For now, return users with empty skills arrays since skills tables are missing
-      let filteredUsers: UserWithSkills[] = users.map(user => ({
-        ...user,
-        skillsOffered: [],
-        skillsWanted: [],
-      }));
+      const usersWithSkills: UserWithSkills[] = [];
+      
+      for (const user of users) {
+        // Get skills offered
+        const offeredResult = await client.query(`
+          SELECT s.id, s.name, s.category 
+          FROM user_skills_offered uso 
+          JOIN skills s ON uso.skill_id = s.id 
+          WHERE uso.user_id = $1
+        `, [user.id]);
+        
+        // Get skills wanted
+        const wantedResult = await client.query(`
+          SELECT s.id, s.name, s.category 
+          FROM user_skills_wanted usw 
+          JOIN skills s ON usw.skill_id = s.id 
+          WHERE usw.user_id = $1
+        `, [user.id]);
 
-      // Apply search term filter (only on name and location for now)
+        usersWithSkills.push({
+          ...user,
+          skillsOffered: offeredResult.rows,
+          skillsWanted: wantedResult.rows,
+        });
+      }
+
+      let filteredUsers = usersWithSkills;
+
+      // Apply search term filter
       if (searchTerm) {
         filteredUsers = filteredUsers.filter(user => {
           const searchLower = searchTerm.toLowerCase();
           return (
             user.name.toLowerCase().includes(searchLower) ||
-            user.location?.toLowerCase().includes(searchLower)
+            user.location?.toLowerCase().includes(searchLower) ||
+            user.skillsOffered.some(skill => skill.name.toLowerCase().includes(searchLower)) ||
+            user.skillsWanted.some(skill => skill.name.toLowerCase().includes(searchLower))
+          );
+        });
+      }
+
+      // Apply skill category filters
+      if (skillFilters && skillFilters.length > 0) {
+        filteredUsers = filteredUsers.filter(user => {
+          return user.skillsOffered.some(skill => 
+            skillFilters.includes(skill.category)
           );
         });
       }
@@ -116,13 +424,24 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getAllSkills(): Promise<Skill[]> {
-    // Return empty array for now since skills table is missing
-    return [];
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM skills ORDER BY category, name');
+      return result.rows;
+    } finally {
+      client.release();
+    }
   }
 
   async getSkillsByCategory(): Promise<Record<string, Skill[]>> {
-    // Return empty object for now since skills table is missing
-    return {};
+    const allSkills = await this.getAllSkills();
+    return allSkills.reduce((acc, skill) => {
+      if (!acc[skill.category]) {
+        acc[skill.category] = [];
+      }
+      acc[skill.category].push(skill);
+      return acc;
+    }, {} as Record<string, Skill[]>);
   }
 
   async createSwapRequest(request: InsertSwapRequest): Promise<SwapRequest> {
