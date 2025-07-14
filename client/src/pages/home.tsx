@@ -173,7 +173,6 @@ export default function Home() {
           </div>
         </div>
       </header>
-
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
           
@@ -310,7 +309,7 @@ export default function Home() {
           <main className="flex-1">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
               <div>
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-800">Available Users</h2>
+                <h2 className="text-xl sm:text-2xl font-bold text-[#0053d6]">Available Users</h2>
                 <p className="text-slate-600 mt-1 text-sm sm:text-base">
                   Showing {displayUsers.length} user{displayUsers.length !== 1 ? 's' : ''}
                 </p>
