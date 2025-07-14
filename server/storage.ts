@@ -334,20 +334,27 @@ export class DatabaseStorage implements IStorage {
             '[]'
           ) as skills_wanted_json
         FROM users u
-        LEFT JOIN user_skills_offered uso ON u.id = uso.user_id
+        LEFT JOIN user_skills_offered uso ON u.id::text = uso.user_id::text
         LEFT JOIN skills so ON uso.skill_id = so.id
-        LEFT JOIN user_skills_wanted usw ON u.id = usw.user_id
+        LEFT JOIN user_skills_wanted usw ON u.id::text = usw.user_id::text
         LEFT JOIN skills sw ON usw.skill_id = sw.id
         WHERE u.is_public = true
-        GROUP BY u.id, u.name, u.email, u.location, u.profile_photo, u.availability, u.is_public, u.created_at, u.updated_at
+        GROUP BY u.id, u.name, u.email, u.location, u.profile_photo, u.availability, u.is_public, u.rating, u.join_date, u.bio, u.is_admin, u.is_banned, u.skills_offered, u.skills_wanted
         ORDER BY u.id
       `;
       
       const result = await client.query(usersWithSkillsQuery);
       
       const usersWithSkills: UserWithSkills[] = result.rows.map(user => ({
-        ...user,
-        profilePhoto: user.profile_photo, // Map snake_case to camelCase
+        id: parseInt(user.id),
+        name: user.name,
+        email: user.email,
+        location: user.location,
+        profilePhoto: user.profile_photo,
+        availability: user.availability,
+        isPublic: user.is_public,
+        rating: user.rating,
+        reviewCount: 0, // Default since it's not in the database
         skillsOffered: user.skills_offered_json || [],
         skillsWanted: user.skills_wanted_json || [],
       }));

@@ -26,6 +26,8 @@ Preferred communication style: Simple, everyday language.
 - **API Pattern**: RESTful API endpoints
 - **Validation**: Zod for runtime type checking
 
+**Note**: The database connection is hardcoded in `server/db.ts` to use the external PostgreSQL instance exclusively, bypassing environment variables for consistency.
+
 ## Key Components
 
 ### Database Schema
