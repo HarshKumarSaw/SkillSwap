@@ -64,6 +64,11 @@ export default function UserProfile() {
   // Get the page parameter from URL to know where to return
   const urlParams = new URLSearchParams(window.location.search);
   const returnPage = urlParams.get('page') || '1';
+  
+  // Debug logging
+  console.log('Current URL:', window.location.href);
+  console.log('Search params:', window.location.search);
+  console.log('Return page:', returnPage);
   const [isRequesting, setIsRequesting] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
