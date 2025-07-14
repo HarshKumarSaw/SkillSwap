@@ -193,8 +193,9 @@ export default function Home() {
       </header>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
         {/* Filter Button and Search Bar - Same Level */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-          <div className="flex flex-wrap items-center gap-4 min-w-0 flex-1">
+        <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 mb-6 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-4 min-w-0 flex-1">
           <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
             <PopoverTrigger asChild>
               <Button variant="outline" size="sm" className="flex items-center gap-2">
@@ -347,24 +348,25 @@ export default function Home() {
           </div>
           </div>
 
-          {/* Search Bar - Right Side */}
-          <div className="flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
-            <div className="relative">
-              <Input
-                type="text"
-                placeholder="Search skills..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 text-sm w-full"
-              />
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            {/* Search Bar - Right Side */}
+            <div className="flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
+              <div className="relative">
+                <Input
+                  type="text"
+                  placeholder="Search skills..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 text-sm w-full border-gray-300 dark:border-gray-600 focus:ring-[#0053d6] focus:border-[#0053d6]"
+                />
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              </div>
             </div>
           </div>
         </div>
 
         {/* Main Content */}
         <main className="w-full">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 sm:mb-6 gap-3 sm:gap-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-3 sm:gap-4">
             <div>
               <h2 className="text-xl sm:text-2xl font-bold text-[#0053d6]">Available Users</h2>
               <p className="text-muted-foreground mt-1 text-sm sm:text-base">
