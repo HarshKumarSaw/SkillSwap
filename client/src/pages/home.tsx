@@ -208,178 +208,299 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Filter and Sort Row - Below Search on Mobile */}
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center justify-between sm:justify-start gap-4 min-w-0 flex-1">
-          <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
-            <PopoverTrigger asChild>
-              <Button variant="outline" size="sm" className="flex items-center gap-2">
-                <Filter className="h-4 w-4" />
-                Filters
-                {(selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) && (
-                  <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
-                    {selectedSkillFilters.length + selectedDateFilters.length + selectedTimeFilters.length}
-                  </span>
-                )}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-4" align="start">
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-semibold text-foreground">Filters</h3>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => setIsFilterOpen(false)}
-                    className="h-6 w-6 p-0"
-                  >
-                    <X className="h-4 w-4" />
+          {/* Mobile Layout - Filter and Sort Row */}
+          <div className="flex sm:hidden w-full gap-2 mb-4">
+            <div className="flex-1">
+              <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="w-full flex items-center justify-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    Filters
+                    {(selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) && (
+                      <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
+                        {selectedSkillFilters.length + selectedDateFilters.length + selectedTimeFilters.length}
+                      </span>
+                    )}
                   </Button>
-                </div>
-                
-                {/* Skills Filter */}
-                <div>
-                  <label className="text-xs font-medium text-foreground mb-1 block">Skills</label>
-                  <Select 
-                    value={selectedSkillFilters.length > 0 ? selectedSkillFilters[0] : ""} 
-                    onValueChange={(value) => {
-                      if (value && !selectedSkillFilters.includes(value)) {
-                        setSelectedSkillFilters(prev => [...prev, value]);
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="w-full h-8 text-xs">
-                      <SelectValue placeholder="Select skill" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {skillCategories.map((category) => (
-                        <SelectItem key={category} value={category} className="text-xs">
-                          {category}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4" align="start">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-foreground">Filters</h3>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setIsFilterOpen(false)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    {/* Skills Filter */}
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Skills</label>
+                      <Select 
+                        value={selectedSkillFilters.length > 0 ? selectedSkillFilters[0] : ""} 
+                        onValueChange={(value) => {
+                          if (value && !selectedSkillFilters.includes(value)) {
+                            setSelectedSkillFilters(prev => [...prev, value]);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-8 text-xs">
+                          <SelectValue placeholder="Select skill" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {skillCategories.map((category) => (
+                            <SelectItem key={category} value={category} className="text-xs">
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {/* Dates Filter */}
-                <div>
-                  <label className="text-xs font-medium text-foreground mb-1 block">Dates</label>
-                  <Select 
-                    value={selectedDateFilters.length > 0 ? selectedDateFilters[0] : ""} 
-                    onValueChange={(value) => {
-                      if (value) {
-                        handleDateFilterToggle(value);
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="w-full h-8 text-xs">
-                      <SelectValue placeholder="Select dates" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["weekends", "weekdays", "everyday"].map((date) => (
-                        <SelectItem key={date} value={date} className="text-xs">
-                          {date.charAt(0).toUpperCase() + date.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    {/* Dates Filter */}
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Dates</label>
+                      <Select 
+                        value={selectedDateFilters.length > 0 ? selectedDateFilters[0] : ""} 
+                        onValueChange={(value) => {
+                          if (value) {
+                            handleDateFilterToggle(value);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-8 text-xs">
+                          <SelectValue placeholder="Select dates" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["weekends", "weekdays", "everyday"].map((date) => (
+                            <SelectItem key={date} value={date} className="text-xs">
+                              {date.charAt(0).toUpperCase() + date.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {/* Times Filter */}
-                <div>
-                  <label className="text-xs font-medium text-foreground mb-1 block">Times</label>
-                  <Select 
-                    value={selectedTimeFilters.length > 0 ? selectedTimeFilters[0] : ""} 
-                    onValueChange={(value) => {
-                      if (value && !selectedTimeFilters.includes(value)) {
-                        setSelectedTimeFilters(prev => [...prev, value]);
-                      }
-                    }}
-                  >
-                    <SelectTrigger className="w-full h-8 text-xs">
-                      <SelectValue placeholder="Select times" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {["morning", "evening", "night"].map((time) => (
-                        <SelectItem key={time} value={time} className="text-xs">
-                          {time.charAt(0).toUpperCase() + time.slice(1)}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+                    {/* Times Filter */}
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Times</label>
+                      <Select 
+                        value={selectedTimeFilters.length > 0 ? selectedTimeFilters[0] : ""} 
+                        onValueChange={(value) => {
+                          if (value && !selectedTimeFilters.includes(value)) {
+                            setSelectedTimeFilters(prev => [...prev, value]);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-8 text-xs">
+                          <SelectValue placeholder="Select times" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["morning", "evening", "night"].map((time) => (
+                            <SelectItem key={time} value={time} className="text-xs">
+                              {time.charAt(0).toUpperCase() + time.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                {/* Clear All Filters */}
-                {(selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) && (
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => {
-                      setSelectedSkillFilters([]);
-                      setSelectedDateFilters([]);
-                      setSelectedTimeFilters([]);
-                    }}
-                    className="w-full"
-                  >
-                    Clear All Filters
-                  </Button>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
-
-          {/* Active Filter Tags */}
-          <div className="flex flex-wrap gap-1">
-            {selectedSkillFilters.map((skill) => (
-              <Badge 
-                key={skill} 
-                variant="secondary" 
-                className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
-                onClick={() => handleSkillFilterToggle(skill)}
-              >
-                {skill} ×
-              </Badge>
-            ))}
-            {selectedDateFilters.map((date) => (
-              <Badge 
-                key={date} 
-                variant="outline" 
-                className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
-                onClick={() => handleDateFilterToggle(date)}
-              >
-                {date.charAt(0).toUpperCase() + date.slice(1)} ×
-              </Badge>
-            ))}
-            {selectedTimeFilters.map((time) => (
-              <Badge 
-                key={time} 
-                variant="outline" 
-                className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
-                onClick={() => handleTimeFilterToggle(time)}
-              >
-                {time.charAt(0).toUpperCase() + time.slice(1)} ×
-              </Badge>
-            ))}
+                    {/* Clear All Filters */}
+                    {(selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          setSelectedSkillFilters([]);
+                          setSelectedDateFilters([]);
+                          setSelectedTimeFilters([]);
+                        }}
+                        className="w-full"
+                      >
+                        Clear All Filters
+                      </Button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+            </div>
+            
+            <div className="flex-1">
+              <Select value={sortBy} onValueChange={setSortBy}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="recent">Most Recent</SelectItem>
+                  <SelectItem value="skills">Most Skills</SelectItem>
+                  <SelectItem value="rating">Highest Rated</SelectItem>
+                  <SelectItem value="location">Nearest Location</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-              {/* Sort Button - Same row as filter on mobile */}
-              <div className="sm:hidden">
-                <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="w-auto min-w-[120px]">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="recent">Most Recent</SelectItem>
-                    <SelectItem value="skills">Most Skills</SelectItem>
-                    <SelectItem value="rating">Highest Rated</SelectItem>
-                    <SelectItem value="location">Nearest Location</SelectItem>
-                  </SelectContent>
-                </Select>
+          {/* Desktop Layout - Filter and Sort Row */}
+          <div className="hidden sm:flex sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-4 min-w-0 flex-1">
+              <Popover open={isFilterOpen} onOpenChange={setIsFilterOpen}>
+                <PopoverTrigger asChild>
+                  <Button variant="outline" size="sm" className="flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    Filters
+                    {(selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) && (
+                      <span className="bg-primary text-primary-foreground rounded-full px-2 py-0.5 text-xs">
+                        {selectedSkillFilters.length + selectedDateFilters.length + selectedTimeFilters.length}
+                      </span>
+                    )}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-80 p-4" align="start">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold text-foreground">Filters</h3>
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={() => setIsFilterOpen(false)}
+                        className="h-6 w-6 p-0"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    {/* Skills Filter */}
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Skills</label>
+                      <Select 
+                        value={selectedSkillFilters.length > 0 ? selectedSkillFilters[0] : ""} 
+                        onValueChange={(value) => {
+                          if (value && !selectedSkillFilters.includes(value)) {
+                            setSelectedSkillFilters(prev => [...prev, value]);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-8 text-xs">
+                          <SelectValue placeholder="Select skill" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {skillCategories.map((category) => (
+                            <SelectItem key={category} value={category} className="text-xs">
+                              {category}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Dates Filter */}
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Dates</label>
+                      <Select 
+                        value={selectedDateFilters.length > 0 ? selectedDateFilters[0] : ""} 
+                        onValueChange={(value) => {
+                          if (value) {
+                            handleDateFilterToggle(value);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-8 text-xs">
+                          <SelectValue placeholder="Select dates" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["weekends", "weekdays", "everyday"].map((date) => (
+                            <SelectItem key={date} value={date} className="text-xs">
+                              {date.charAt(0).toUpperCase() + date.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Times Filter */}
+                    <div>
+                      <label className="text-xs font-medium text-foreground mb-1 block">Times</label>
+                      <Select 
+                        value={selectedTimeFilters.length > 0 ? selectedTimeFilters[0] : ""} 
+                        onValueChange={(value) => {
+                          if (value && !selectedTimeFilters.includes(value)) {
+                            setSelectedTimeFilters(prev => [...prev, value]);
+                          }
+                        }}
+                      >
+                        <SelectTrigger className="w-full h-8 text-xs">
+                          <SelectValue placeholder="Select times" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {["morning", "evening", "night"].map((time) => (
+                            <SelectItem key={time} value={time} className="text-xs">
+                              {time.charAt(0).toUpperCase() + time.slice(1)}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {/* Clear All Filters */}
+                    {(selectedSkillFilters.length > 0 || selectedDateFilters.length > 0 || selectedTimeFilters.length > 0) && (
+                      <Button 
+                        variant="outline" 
+                        size="sm" 
+                        onClick={() => {
+                          setSelectedSkillFilters([]);
+                          setSelectedDateFilters([]);
+                          setSelectedTimeFilters([]);
+                        }}
+                        className="w-full"
+                      >
+                        Clear All Filters
+                      </Button>
+                    )}
+                  </div>
+                </PopoverContent>
+              </Popover>
+
+              {/* Active Filter Tags */}
+              <div className="flex flex-wrap gap-1">
+                {selectedSkillFilters.map((skill) => (
+                  <Badge 
+                    key={skill} 
+                    variant="secondary" 
+                    className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                    onClick={() => handleSkillFilterToggle(skill)}
+                  >
+                    {skill} ×
+                  </Badge>
+                ))}
+                {selectedDateFilters.map((date) => (
+                  <Badge 
+                    key={date} 
+                    variant="outline" 
+                    className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                    onClick={() => handleDateFilterToggle(date)}
+                  >
+                    {date.charAt(0).toUpperCase() + date.slice(1)} ×
+                  </Badge>
+                ))}
+                {selectedTimeFilters.map((time) => (
+                  <Badge 
+                    key={time} 
+                    variant="outline" 
+                    className="text-xs px-2 py-1 cursor-pointer hover:bg-red-100"
+                    onClick={() => handleTimeFilterToggle(time)}
+                  >
+                    {time.charAt(0).toUpperCase() + time.slice(1)} ×
+                  </Badge>
+                ))}
               </div>
             </div>
 
             {/* Desktop Layout - Search Bar and Sort Button */}
-            <div className="hidden sm:flex items-center gap-4">
+            <div className="flex items-center gap-4">
               {/* Search Bar - Hidden on Mobile, Visible on Desktop */}
               <div className="flex-shrink-0 w-full sm:w-auto sm:max-w-xs">
                 <div className="relative">
