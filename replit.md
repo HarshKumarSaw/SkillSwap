@@ -21,7 +21,7 @@ Preferred communication style: Simple, everyday language.
 ### Backend Architecture
 - **Framework**: Express.js with TypeScript
 - **Database**: PostgreSQL with Drizzle ORM
-- **Database Provider**: Neon serverless PostgreSQL
+- **Database Provider**: External PostgreSQL (postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8)
 - **Session Management**: connect-pg-simple for PostgreSQL-backed sessions
 - **API Pattern**: RESTful API endpoints
 - **Validation**: Zod for runtime type checking
@@ -57,7 +57,7 @@ Preferred communication style: Simple, everyday language.
 ## External Dependencies
 
 ### Database & Infrastructure
-- **Neon Database**: Serverless PostgreSQL hosting
+- **External PostgreSQL Database**: Dedicated PostgreSQL instance at postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
 - **WebSocket Support**: For real-time database connections
 
 ### UI & Styling
@@ -84,8 +84,8 @@ Preferred communication style: Simple, everyday language.
 - Single deployment artifact with both frontend and backend
 
 ### Environment Configuration
-- Database connection via `DATABASE_URL` environment variable
-- Automatic database provisioning check with helpful error messages
+- Database connection hardcoded to external PostgreSQL instance (postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8)
+- Direct database connection bypasses environment variables for consistency
 - Session storage backed by PostgreSQL for scalability
 
 The application follows a monorepo structure with shared TypeScript schemas, ensuring type safety across the full stack while maintaining clear separation between client and server code.
