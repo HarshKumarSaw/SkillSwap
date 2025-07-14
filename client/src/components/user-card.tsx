@@ -7,6 +7,7 @@ import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useLocation } from "wouter";
 
 // Helper function to format availability
 const formatAvailability = (availability: any): string => {
@@ -63,6 +64,7 @@ export function UserCard({ user }: UserCardProps) {
   const [isRequesting, setIsRequesting] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
 
   const createSwapRequestMutation = useMutation({
     mutationFn: async (targetId: string) => {
@@ -121,7 +123,8 @@ export function UserCard({ user }: UserCardProps) {
           <img
             src={user.profilePhoto || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150"}
             alt={`${user.name} profile photo`}
-            className="w-16 h-16 rounded-full object-cover"
+            className="w-16 h-16 rounded-full object-cover cursor-pointer hover:ring-2 hover:ring-primary transition-all duration-200"
+            onClick={() => setLocation(`/profile/${user.id}`)}
           />
           
           <div className="flex-1">
