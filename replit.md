@@ -51,10 +51,16 @@ Preferred communication style: Simple, everyday language.
 ## Data Flow
 
 1. **User Discovery**: Frontend fetches users and skills from API endpoints
-2. **Filtering**: Real-time search queries with skill and availability filters
+2. **Filtering**: Optimized single-query search with skill and availability filters
 3. **Swap Requests**: Users can send swap requests through POST API calls
 4. **State Management**: TanStack Query handles caching and synchronization
 5. **User Feedback**: Toast notifications provide immediate action feedback
+
+## Performance Optimizations
+
+- **Database Queries**: Single optimized query for user search instead of N+1 queries
+- **Skill Filtering**: Database-level filtering using EXISTS clauses for better performance
+- **Caching**: TanStack Query caches results with appropriate stale times
 
 ## External Dependencies
 

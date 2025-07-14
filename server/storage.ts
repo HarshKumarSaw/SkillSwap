@@ -368,7 +368,7 @@ export class DatabaseStorage implements IStorage {
   async searchUsers(searchTerm?: string, skillFilters?: string[], availabilityFilters?: string[]): Promise<UserWithSkills[]> {
     const client = await pool.connect();
     try {
-      let whereClause = 'WHERE is_public = true';
+      let whereClause = 'WHERE u.is_public = true';
       const params: any[] = [];
       let paramIndex = 1;
 
@@ -376,54 +376,84 @@ export class DatabaseStorage implements IStorage {
       if (availabilityFilters && availabilityFilters.length > 0) {
         const availabilityConditions = availabilityFilters.map(filter => {
           params.push(`%${filter}%`);
-          return `availability::text ILIKE $${paramIndex++}`;
+          return `u.availability::text ILIKE $${paramIndex++}`;
         });
         whereClause += ` AND (${availabilityConditions.join(' OR ')})`;
       }
 
-      const usersResult = await client.query(`SELECT * FROM users ${whereClause}`, params);
-      const users = usersResult.rows;
-      
-      const usersWithSkills: UserWithSkills[] = [];
-      
-      for (const user of users) {
-        // Get skills offered
-        const offeredResult = await client.query(`
-          SELECT s.id, s.name, s.category 
-          FROM user_skills_offered uso 
-          JOIN skills s ON uso.skill_id = s.id 
-          WHERE uso.user_id = $1
-        `, [user.id]);
-        
-        // Get skills wanted
-        const wantedResult = await client.query(`
-          SELECT s.id, s.name, s.category 
-          FROM user_skills_wanted usw 
-          JOIN skills s ON usw.skill_id = s.id 
-          WHERE usw.user_id = $1
-        `, [user.id]);
-
-        usersWithSkills.push({
-          id: user.id, // Keep as string since the database uses text IDs
-          name: user.name,
-          email: user.email,
-          location: user.location,
-          profilePhoto: user.profile_photo,
-          availability: user.availability,
-          isPublic: user.is_public,
-          rating: user.rating,
-          reviewCount: 0, // Default since it's not in the database
-          skillsOffered: offeredResult.rows,
-          skillsWanted: wantedResult.rows,
+      // Add skill category filters at the database level for better performance
+      if (skillFilters && skillFilters.length > 0) {
+        const skillConditions = skillFilters.map(category => {
+          params.push(category);
+          return `$${paramIndex++}`;
         });
+        whereClause += ` AND (
+          EXISTS (
+            SELECT 1 FROM user_skills_offered uso 
+            JOIN skills s ON uso.skill_id = s.id 
+            WHERE uso.user_id = u.id AND s.category IN (${skillConditions.join(',')})
+          ) OR EXISTS (
+            SELECT 1 FROM user_skills_wanted usw 
+            JOIN skills s ON usw.skill_id = s.id 
+            WHERE usw.user_id = u.id AND s.category IN (${skillConditions.join(',')})
+          )
+        )`;
       }
 
-      let filteredUsers = usersWithSkills;
+      // Single optimized query to get all users with their skills
+      const usersWithSkillsQuery = `
+        SELECT 
+          u.id, u.name, u.email, u.location, u.profile_photo, u.availability, u.is_public, u.rating,
+          COALESCE(
+            json_agg(
+              DISTINCT jsonb_build_object(
+                'id', so.id,
+                'name', so.name,
+                'category', so.category
+              )
+            ) FILTER (WHERE so.id IS NOT NULL), 
+            '[]'
+          ) as skills_offered_json,
+          COALESCE(
+            json_agg(
+              DISTINCT jsonb_build_object(
+                'id', sw.id,
+                'name', sw.name,
+                'category', sw.category
+              )
+            ) FILTER (WHERE sw.id IS NOT NULL), 
+            '[]'
+          ) as skills_wanted_json
+        FROM users u
+        LEFT JOIN user_skills_offered uso ON u.id = uso.user_id
+        LEFT JOIN skills so ON uso.skill_id = so.id
+        LEFT JOIN user_skills_wanted usw ON u.id = usw.user_id
+        LEFT JOIN skills sw ON usw.skill_id = sw.id
+        ${whereClause}
+        GROUP BY u.id, u.name, u.email, u.location, u.profile_photo, u.availability, u.is_public, u.rating
+        ORDER BY u.id
+      `;
+      
+      const result = await client.query(usersWithSkillsQuery, params);
+      
+      let usersWithSkills: UserWithSkills[] = result.rows.map(user => ({
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        location: user.location,
+        profilePhoto: user.profile_photo,
+        availability: user.availability,
+        isPublic: user.is_public,
+        rating: user.rating,
+        reviewCount: 0, // Default since it's not in the database
+        skillsOffered: user.skills_offered_json || [],
+        skillsWanted: user.skills_wanted_json || [],
+      }));
 
-      // Apply search term filter
+      // Apply search term filter if provided
       if (searchTerm) {
-        filteredUsers = filteredUsers.filter(user => {
-          const searchLower = searchTerm.toLowerCase();
+        const searchLower = searchTerm.toLowerCase();
+        usersWithSkills = usersWithSkills.filter(user => {
           return (
             user.name.toLowerCase().includes(searchLower) ||
             user.location?.toLowerCase().includes(searchLower) ||
@@ -433,20 +463,7 @@ export class DatabaseStorage implements IStorage {
         });
       }
 
-      // Apply skill category filters
-      if (skillFilters && skillFilters.length > 0) {
-        filteredUsers = filteredUsers.filter(user => {
-          const hasOfferedSkill = user.skillsOffered.some(skill => 
-            skillFilters.includes(skill.category)
-          );
-          const hasWantedSkill = user.skillsWanted.some(skill => 
-            skillFilters.includes(skill.category)
-          );
-          return hasOfferedSkill || hasWantedSkill;
-        });
-      }
-
-      return filteredUsers;
+      return usersWithSkills;
     } finally {
       client.release();
     }
