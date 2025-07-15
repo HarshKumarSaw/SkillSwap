@@ -74,14 +74,20 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
   const { user: currentUser, isAuthenticated } = useAuth();
 
   const createSwapRequestMutation = useMutation({
-    mutationFn: async (targetId: string) => {
+    mutationFn: async (data: {
+      senderSkill: string;
+      receiverSkill: string;
+      message: string;
+    }) => {
       if (!currentUser) {
         throw new Error("User not authenticated");
       }
       const response = await apiRequest("POST", "/api/swap-requests", {
         requesterId: currentUser.id,
-        targetId,
-        message: `I'd like to swap skills with you!`,
+        targetId: user.id,
+        senderSkill: data.senderSkill,
+        receiverSkill: data.receiverSkill,
+        message: data.message,
       });
       return response.json();
     },
@@ -91,6 +97,7 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
         description: `Your swap request has been sent to ${user.name}.`,
       });
       setIsRequesting(false);
+      setShowSwapPopup(false);
     },
     onError: (error) => {
       console.error("Error creating swap request:", error);
@@ -119,17 +126,22 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
       return;
     }
     
-    setIsRequesting(true);
-    createSwapRequestMutation.mutate(user.id);
+    // Show the swap request popup instead of directly sending the request
+    setShowSwapPopup(true);
   };
 
   const handleAuthSuccess = () => {
-    // After successful auth, automatically trigger the swap request
-    // Check if user is authenticated and proceed
-    if (currentUser) {
-      setIsRequesting(true);
-      createSwapRequestMutation.mutate(user.id);
-    }
+    // After successful auth, show the swap request popup
+    setShowSwapPopup(true);
+  };
+
+  const handleSwapRequestSubmit = (data: {
+    senderSkill: string;
+    receiverSkill: string;
+    message: string;
+  }) => {
+    setIsRequesting(true);
+    createSwapRequestMutation.mutate(data);
   };
 
   const renderStars = (rating: number) => {
@@ -237,6 +249,17 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
         onOpenChange={setShowAuthPopup}
         onAuthSuccess={handleAuthSuccess}
       />
+      
+      {currentUser && (
+        <SwapRequestPopup
+          isOpen={showSwapPopup}
+          onOpenChange={setShowSwapPopup}
+          targetUser={user}
+          currentUser={currentUser}
+          onSubmit={handleSwapRequestSubmit}
+          isLoading={isRequesting || createSwapRequestMutation.isPending}
+        />
+      )}
     </>
   );
 }
