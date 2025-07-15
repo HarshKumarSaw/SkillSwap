@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
+import { UserPlus, LogIn, Mail, Lock, User, MapPin, Loader2 } from "lucide-react";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -130,129 +131,211 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle>Join Skill Swap</DialogTitle>
-        </DialogHeader>
+      <DialogContent className="sm:max-w-[450px] w-[95vw] max-h-[95vh] overflow-y-auto p-0">
+        <div className="p-6 pb-4">
+          <DialogHeader className="text-center space-y-3">
+            <div className="mx-auto w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center">
+              <UserPlus className="w-6 h-6 text-primary" />
+            </div>
+            <DialogTitle className="text-xl font-semibold">Join Skill Swap</DialogTitle>
+            <p className="text-sm text-muted-foreground">Connect with others and learn new skills</p>
+          </DialogHeader>
+        </div>
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "signup")} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="login">Login</TabsTrigger>
-            <TabsTrigger value="signup">Sign Up</TabsTrigger>
-          </TabsList>
+          <div className="px-6">
+            <TabsList className="grid w-full grid-cols-2 h-11">
+              <TabsTrigger value="login" className="flex items-center gap-2">
+                <LogIn className="w-4 h-4" />
+                <span className="hidden sm:inline">Login</span>
+                <span className="sm:hidden">Login</span>
+              </TabsTrigger>
+              <TabsTrigger value="signup" className="flex items-center gap-2">
+                <UserPlus className="w-4 h-4" />
+                <span className="hidden sm:inline">Sign Up</span>
+                <span className="sm:hidden">Sign Up</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
           
-          <TabsContent value="login" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Welcome back</CardTitle>
-                <CardDescription>Sign in to your account to continue</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Form {...loginForm}>
-                  <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
-                    <FormField
-                      control={loginForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={loginForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Enter your password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full" disabled={loginMutation.isPending}>
-                      {loginMutation.isPending ? "Signing in..." : "Sign In"}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
+          <TabsContent value="login" className="p-6 pt-4 space-y-6">
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold">Welcome back</h3>
+              <p className="text-sm text-muted-foreground">Sign in to your account to continue</p>
+            </div>
+            
+            <Form {...loginForm}>
+              <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-5">
+                <FormField
+                  control={loginForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="Enter your email" 
+                            className="pl-10 h-11"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={loginForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            type="password" 
+                            placeholder="Enter your password" 
+                            className="pl-10 h-11"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 bg-primary hover:bg-primary/90 transition-colors" 
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing in...
+                    </>
+                  ) : (
+                    <>
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Sign In
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
           </TabsContent>
           
-          <TabsContent value="signup" className="space-y-4">
-            <Card>
-              <CardHeader>
-                <CardTitle>Create account</CardTitle>
-                <CardDescription>Sign up to start swapping skills</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <Form {...signupForm}>
-                  <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
-                    <FormField
-                      control={signupForm.control}
-                      name="name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Name</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your full name" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={signupForm.control}
-                      name="email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your email" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={signupForm.control}
-                      name="password"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Password</FormLabel>
-                          <FormControl>
-                            <Input type="password" placeholder="Create a password" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={signupForm.control}
-                      name="location"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Location (optional)</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter your location" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <Button type="submit" className="w-full" disabled={signupMutation.isPending}>
-                      {signupMutation.isPending ? "Creating account..." : "Create Account"}
-                    </Button>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
+          <TabsContent value="signup" className="p-6 pt-4 space-y-6">
+            <div className="text-center space-y-2">
+              <h3 className="text-lg font-semibold">Create account</h3>
+              <p className="text-sm text-muted-foreground">Sign up to start swapping skills</p>
+            </div>
+            
+            <Form {...signupForm}>
+              <form onSubmit={signupForm.handleSubmit(handleSignup)} className="space-y-4">
+                <FormField
+                  control={signupForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Full Name</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="Enter your full name" 
+                            className="pl-10 h-11"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signupForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Email</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="Enter your email" 
+                            className="pl-10 h-11"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signupForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Password</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            type="password" 
+                            placeholder="Create a password" 
+                            className="pl-10 h-11"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={signupForm.control}
+                  name="location"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel className="text-sm font-medium">Location (optional)</FormLabel>
+                      <FormControl>
+                        <div className="relative">
+                          <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                          <Input 
+                            placeholder="Enter your location" 
+                            className="pl-10 h-11"
+                            {...field} 
+                          />
+                        </div>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <Button 
+                  type="submit" 
+                  className="w-full h-11 bg-primary hover:bg-primary/90 transition-colors mt-6" 
+                  disabled={signupMutation.isPending}
+                >
+                  {signupMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Creating account...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="mr-2 h-4 w-4" />
+                      Create Account
+                    </>
+                  )}
+                </Button>
+              </form>
+            </Form>
           </TabsContent>
         </Tabs>
       </DialogContent>
