@@ -13,6 +13,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthPopup } from "@/components/auth-popup";
+import { SwapRequestPopup } from "@/components/swap-request-popup";
 
 // Helper function to format availability
 const formatAvailability = (availability: any): string => {
@@ -73,6 +74,7 @@ export default function UserProfile() {
 
   const [isRequesting, setIsRequesting] = useState(false);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
+  const [showSwapPopup, setShowSwapPopup] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -116,15 +118,28 @@ export default function UserProfile() {
     enabled: !!id,
   });
 
+  // Fetch current user with skills when needed for swap popup
+  const { data: currentUserWithSkills, isLoading: isLoadingCurrentUser } = useQuery({
+    queryKey: ['/api/users', currentUser?.id],
+    enabled: isAuthenticated && !!currentUser?.id && showSwapPopup,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
+
   const createSwapRequestMutation = useMutation({
-    mutationFn: async (targetId: string) => {
-      if (!currentUser) {
-        throw new Error("Not authenticated");
+    mutationFn: async (data: {
+      senderSkill: string;
+      receiverSkill: string;
+      message: string;
+    }) => {
+      if (!currentUser || !user) {
+        throw new Error("User not authenticated");
       }
       const response = await apiRequest("POST", "/api/swap-requests", {
         requesterId: currentUser.id,
-        targetId,
-        message: `I'd like to swap skills with you!`,
+        targetId: user.id,
+        senderSkill: data.senderSkill,
+        receiverSkill: data.receiverSkill,
+        message: data.message,
       });
       return response.json();
     },
@@ -134,6 +149,7 @@ export default function UserProfile() {
         description: `Your swap request has been sent to ${user?.name}.`,
       });
       setIsRequesting(false);
+      setShowSwapPopup(false);
     },
     onError: (error) => {
       console.error("Error creating swap request:", error);
@@ -164,8 +180,26 @@ export default function UserProfile() {
       return;
     }
     
+    // Show the swap request popup instead of directly sending the request
+    setShowSwapPopup(true);
+  };
+
+  const handleAuthSuccess = () => {
+    // After successful auth, show the swap request popup
+    setShowSwapPopup(true);
+  };
+
+  const handleSwapRequestSubmit = (data: {
+    senderSkills: string[];
+    receiverSkills: string[];
+    message: string;
+  }) => {
     setIsRequesting(true);
-    createSwapRequestMutation.mutate(user.id);
+    createSwapRequestMutation.mutate({
+      senderSkill: data.senderSkills.join(', '),
+      receiverSkill: data.receiverSkills.join(', '),
+      message: data.message
+    });
   };
 
   const renderStars = (rating: number) => {
@@ -403,12 +437,19 @@ export default function UserProfile() {
       <AuthPopup
         isOpen={showAuthPopup}
         onOpenChange={setShowAuthPopup}
-        onAuthSuccess={() => {
-          setShowAuthPopup(false);
-          // Refresh the page after successful authentication
-          window.location.reload();
-        }}
+        onAuthSuccess={handleAuthSuccess}
       />
+      
+      {currentUser && currentUserWithSkills && user && (
+        <SwapRequestPopup
+          isOpen={showSwapPopup}
+          onOpenChange={setShowSwapPopup}
+          targetUser={user}
+          currentUser={currentUserWithSkills}
+          onSubmit={handleSwapRequestSubmit}
+          isLoading={isRequesting || createSwapRequestMutation.isPending || isLoadingCurrentUser}
+        />
+      )}
     </div>
   );
 }
