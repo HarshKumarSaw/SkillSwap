@@ -8,6 +8,7 @@ export const users = pgTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password"), // For authentication
+  bio: text("bio"), // User biography
   location: text("location"),
   profilePhoto: text("profile_photo"),
   availability: jsonb("availability"), // e.g., { dates: ["weekends", "weekdays"], times: ["morning", "evening"] }

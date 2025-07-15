@@ -276,6 +276,18 @@ export default function UserProfile() {
               </div>
             </div>
           </CardHeader>
+          
+          {user.bio && (
+            <CardContent className="pt-0">
+              <div className="bg-muted/50 rounded-lg p-4">
+                <h3 className="font-semibold mb-2 flex items-center">
+                  <User className="w-4 h-4 mr-2" />
+                  About
+                </h3>
+                <p className="text-muted-foreground leading-relaxed">{user.bio}</p>
+              </div>
+            </CardContent>
+          )}
 
           <CardContent className="space-y-6">
             <div>
