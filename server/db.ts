@@ -7,8 +7,6 @@ import * as schema from "@shared/schema";
  * 
  * This uses the EXCLUSIVE database connection string for this project.
  * 
- * Database: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
- * 
  * IMPORTANT RULES:
  * - This is the ONLY database to be used for this project
  * - Uses DATABASE_URL environment variable containing the exclusive connection string

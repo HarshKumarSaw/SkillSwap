@@ -8,7 +8,6 @@ import { pool } from "./db";
 /**
  * 🚨 DATABASE REFERENCE 🚨
  * This file uses the exclusive database connection from server/db.ts
- * Database: postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
  * See DATABASE_CONFIG.md for complete configuration rules
  */
 

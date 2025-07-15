@@ -32,7 +32,7 @@ Add these in the Environment section:
 | Key | Value |
 |-----|-------|
 | `NODE_ENV` | `production` |
-| `DATABASE_URL` | `postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8` |
+| `DATABASE_URL` | `[Your PostgreSQL connection string]` |
 
 ### 4. Deploy
 - Click "Create Web Service"

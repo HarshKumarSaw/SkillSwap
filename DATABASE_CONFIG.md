@@ -2,11 +2,7 @@
 
 ## EXCLUSIVE DATABASE CONNECTION
 
-This project uses **ONE AND ONLY ONE** database connection string:
-
-```
-postgresql://database_92s8_user:bbZSAeLRZ0FxTDM0V64Izx1pX1gQmBQ6@dpg-d1pqc23ipnbc738anci0-a.oregon-postgres.render.com/database_92s8
-```
+This project uses **ONE AND ONLY ONE** external PostgreSQL database via environment variable.
 
 ## IMPORTANT RULES
 

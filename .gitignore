@@ -4,3 +4,27 @@ dist
 server/public
 vite.config.ts.*
 *.tar.gz
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+*.pem
+*.key
+
+# Database and deployment configs
+DATABASE_CONFIG.md
+DEPLOYMENT.md
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# Runtime data
+pids
+*.pid
+*.seed
+*.pid.lock
