@@ -14,6 +14,11 @@ export const users = pgTable("users", {
   isPublic: boolean("is_public").default(true),
   rating: decimal("rating", { precision: 3, scale: 2 }).default("0.00"),
   reviewCount: integer("review_count").default(0),
+  role: text("role").default("user"), // user, admin
+  isBanned: boolean("is_banned").default(false),
+  banReason: text("ban_reason"),
+  bannedAt: text("banned_at"),
+  createdAt: text("created_at").default("NOW()"),
 });
 
 export const skills = pgTable("skills", {
@@ -56,6 +61,41 @@ export const swapRatings = pgTable("swap_ratings", {
   createdAt: text("created_at").default("NOW()"),
 });
 
+export const adminActions = pgTable("admin_actions", {
+  id: text("id").primaryKey(),
+  adminId: text("admin_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  action: text("action").notNull(), // ban_user, unban_user, reject_skill, approve_skill, send_message
+  targetId: text("target_id"), // user id or skill id
+  targetType: text("target_type"), // user, skill, system
+  reason: text("reason"),
+  metadata: jsonb("metadata"), // additional action data
+  createdAt: text("created_at").default("NOW()"),
+});
+
+export const systemMessages = pgTable("system_messages", {
+  id: text("id").primaryKey(),
+  adminId: text("admin_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  message: text("message").notNull(),
+  type: text("type").notNull(), // announcement, maintenance, update
+  isActive: boolean("is_active").default(true),
+  createdAt: text("created_at").default("NOW()"),
+  expiresAt: text("expires_at"),
+});
+
+export const reportedContent = pgTable("reported_content", {
+  id: text("id").primaryKey(),
+  reporterId: text("reporter_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  contentType: text("content_type").notNull(), // user, skill, swap_request
+  contentId: text("content_id").notNull(),
+  reason: text("reason").notNull(),
+  description: text("description"),
+  status: text("status").default("pending"), // pending, reviewed, resolved, dismissed
+  reviewedBy: text("reviewed_by").references(() => users.id),
+  reviewedAt: text("reviewed_at"),
+  createdAt: text("created_at").default("NOW()"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   skillsOffered: many(userSkillsOffered),
@@ -64,6 +104,10 @@ export const usersRelations = relations(users, ({ many }) => ({
   receivedRequests: many(swapRequests, { relationName: "target" }),
   ratingsGiven: many(swapRatings, { relationName: "rater" }),
   ratingsReceived: many(swapRatings, { relationName: "rated" }),
+  adminActions: many(adminActions),
+  systemMessages: many(systemMessages),
+  reportsSubmitted: many(reportedContent, { relationName: "reporter" }),
+  reportsReviewed: many(reportedContent, { relationName: "reviewer" }),
 }));
 
 export const skillsRelations = relations(skills, ({ many }) => ({
@@ -124,6 +168,33 @@ export const swapRatingsRelations = relations(swapRatings, ({ one }) => ({
   }),
 }));
 
+export const adminActionsRelations = relations(adminActions, ({ one }) => ({
+  admin: one(users, {
+    fields: [adminActions.adminId],
+    references: [users.id],
+  }),
+}));
+
+export const systemMessagesRelations = relations(systemMessages, ({ one }) => ({
+  admin: one(users, {
+    fields: [systemMessages.adminId],
+    references: [users.id],
+  }),
+}));
+
+export const reportedContentRelations = relations(reportedContent, ({ one }) => ({
+  reporter: one(users, {
+    fields: [reportedContent.reporterId],
+    references: [users.id],
+    relationName: "reporter",
+  }),
+  reviewer: one(users, {
+    fields: [reportedContent.reviewedBy],
+    references: [users.id],
+    relationName: "reviewer",
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -146,6 +217,21 @@ export const insertSwapRatingSchema = createInsertSchema(swapRatings).omit({
   createdAt: true,
 });
 
+export const insertAdminActionSchema = createInsertSchema(adminActions).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSystemMessageSchema = createInsertSchema(systemMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertReportedContentSchema = createInsertSchema(reportedContent).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -155,6 +241,12 @@ export type SwapRequest = typeof swapRequests.$inferSelect;
 export type InsertSwapRequest = z.infer<typeof insertSwapRequestSchema>;
 export type SwapRating = typeof swapRatings.$inferSelect;
 export type InsertSwapRating = z.infer<typeof insertSwapRatingSchema>;
+export type AdminAction = typeof adminActions.$inferSelect;
+export type InsertAdminAction = z.infer<typeof insertAdminActionSchema>;
+export type SystemMessage = typeof systemMessages.$inferSelect;
+export type InsertSystemMessage = z.infer<typeof insertSystemMessageSchema>;
+export type ReportedContent = typeof reportedContent.$inferSelect;
+export type InsertReportedContent = z.infer<typeof insertReportedContentSchema>;
 
 // Extended types for frontend use
 export type UserWithSkills = User & {

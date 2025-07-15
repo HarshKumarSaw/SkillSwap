@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertSwapRequestSchema, insertSwapRatingSchema } from "@shared/schema";
+import { insertSwapRequestSchema, insertSwapRatingSchema, insertAdminActionSchema, insertSystemMessageSchema, insertReportedContentSchema } from "@shared/schema";
 import { z } from "zod";
 import { pool } from "./db";
 
@@ -309,6 +309,195 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.error("Error creating rating:", error);
         res.status(500).json({ message: "Failed to create rating" });
       }
+    }
+  });
+
+  // Admin middleware to check if user is admin
+  const requireAdmin = (req: any, res: any, next: any) => {
+    const user = req.session?.user;
+    if (!user || user.role !== 'admin') {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    next();
+  };
+
+  // Admin Routes
+  app.get("/api/admin/users", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const result = await storage.getAllUsers(page, limit);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching users:", error);
+      res.status(500).json({ message: "Failed to fetch users" });
+    }
+  });
+
+  app.post("/api/admin/users/:id/ban", requireAdmin, async (req, res) => {
+    try {
+      const { reason } = req.body;
+      const adminUser = req.session.user;
+      
+      if (!reason) {
+        return res.status(400).json({ message: "Ban reason is required" });
+      }
+      
+      await storage.banUser(req.params.id, reason, adminUser.id);
+      res.json({ message: "User banned successfully" });
+    } catch (error) {
+      console.error("Error banning user:", error);
+      res.status(500).json({ message: "Failed to ban user" });
+    }
+  });
+
+  app.post("/api/admin/users/:id/unban", requireAdmin, async (req, res) => {
+    try {
+      const adminUser = req.session.user;
+      
+      await storage.unbanUser(req.params.id, adminUser.id);
+      res.json({ message: "User unbanned successfully" });
+    } catch (error) {
+      console.error("Error unbanning user:", error);
+      res.status(500).json({ message: "Failed to unban user" });
+    }
+  });
+
+  app.get("/api/admin/swap-requests", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const result = await storage.getAllSwapRequests(page, limit);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching swap requests:", error);
+      res.status(500).json({ message: "Failed to fetch swap requests" });
+    }
+  });
+
+  app.get("/api/admin/actions", requireAdmin, async (req, res) => {
+    try {
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const result = await storage.getAdminActions(page, limit);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching admin actions:", error);
+      res.status(500).json({ message: "Failed to fetch admin actions" });
+    }
+  });
+
+  // System Messages
+  app.get("/api/system-messages", async (req, res) => {
+    try {
+      const activeOnly = req.query.active === 'true';
+      const messages = await storage.getSystemMessages(activeOnly);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching system messages:", error);
+      res.status(500).json({ message: "Failed to fetch system messages" });
+    }
+  });
+
+  app.post("/api/admin/system-messages", requireAdmin, async (req, res) => {
+    try {
+      const adminUser = req.session.user;
+      const validatedData = insertSystemMessageSchema.parse({
+        ...req.body,
+        adminId: adminUser.id
+      });
+
+      const message = await storage.createSystemMessage(validatedData);
+      res.status(201).json(message);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid message data", errors: error.errors });
+      } else {
+        console.error("Error creating system message:", error);
+        res.status(500).json({ message: "Failed to create system message" });
+      }
+    }
+  });
+
+  app.patch("/api/admin/system-messages/:id", requireAdmin, async (req, res) => {
+    try {
+      const message = await storage.updateSystemMessage(req.params.id, req.body);
+      res.json(message);
+    } catch (error) {
+      console.error("Error updating system message:", error);
+      res.status(500).json({ message: "Failed to update system message" });
+    }
+  });
+
+  app.delete("/api/admin/system-messages/:id", requireAdmin, async (req, res) => {
+    try {
+      const deleted = await storage.deleteSystemMessage(req.params.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "System message not found" });
+      }
+      res.json({ message: "System message deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting system message:", error);
+      res.status(500).json({ message: "Failed to delete system message" });
+    }
+  });
+
+  // Reports
+  app.post("/api/reports", async (req, res) => {
+    try {
+      const user = req.session?.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const validatedData = insertReportedContentSchema.parse({
+        ...req.body,
+        reporterId: user.id
+      });
+
+      const report = await storage.createReport(validatedData);
+      res.status(201).json(report);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid report data", errors: error.errors });
+      } else {
+        console.error("Error creating report:", error);
+        res.status(500).json({ message: "Failed to create report" });
+      }
+    }
+  });
+
+  app.get("/api/admin/reports", requireAdmin, async (req, res) => {
+    try {
+      const status = req.query.status as string;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 20;
+      
+      const result = await storage.getReports(status, page, limit);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching reports:", error);
+      res.status(500).json({ message: "Failed to fetch reports" });
+    }
+  });
+
+  app.patch("/api/admin/reports/:id", requireAdmin, async (req, res) => {
+    try {
+      const { status } = req.body;
+      const adminUser = req.session.user;
+      
+      if (!status) {
+        return res.status(400).json({ message: "Status is required" });
+      }
+      
+      const report = await storage.updateReport(req.params.id, status, adminUser.id);
+      res.json(report);
+    } catch (error) {
+      console.error("Error updating report:", error);
+      res.status(500).json({ message: "Failed to update report" });
     }
   });
 

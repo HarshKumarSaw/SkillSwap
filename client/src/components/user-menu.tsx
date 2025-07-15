@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogIn, LogOut, User, Settings, Edit, ArrowRightLeft } from "lucide-react";
+import { LogIn, LogOut, User, Settings, Edit, ArrowRightLeft, Shield } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthPopup } from "./auth-popup";
 import { useLocation } from "wouter";
@@ -79,6 +79,12 @@ export function UserMenu() {
           <ArrowRightLeft className="mr-2 h-4 w-4" />
           <span>Swap Requests</span>
         </DropdownMenuItem>
+        {user?.role === 'admin' && (
+          <DropdownMenuItem onClick={() => setLocation(`/admin`)}>
+            <Shield className="mr-2 h-4 w-4" />
+            <span>Admin Dashboard</span>
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>

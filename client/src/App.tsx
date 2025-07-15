@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import UserProfile from "@/pages/user-profile";
 import EditProfile from "@/pages/edit-profile";
 import SwapRequests from "@/pages/swap-requests";
+import AdminDashboard from "@/pages/admin-dashboard";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -18,6 +19,7 @@ function Router() {
       <Route path="/profile/:id" component={UserProfile} />
       <Route path="/edit-profile" component={EditProfile} />
       <Route path="/swap-requests" component={SwapRequests} />
+      <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
   );

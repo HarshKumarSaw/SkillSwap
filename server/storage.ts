@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating } from "@shared/schema";
+import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating, type AdminAction, type InsertAdminAction, type SystemMessage, type InsertSystemMessage, type ReportedContent, type InsertReportedContent } from "@shared/schema";
 import { pool } from "./db";
 
 export interface PaginatedResult<T> {
@@ -39,6 +39,25 @@ export interface IStorage {
   createSwapRating(rating: InsertSwapRating): Promise<SwapRating>;
   getSwapRating(swapRequestId: string, raterId: string): Promise<SwapRating | undefined>;
   updateUserRating(userId: string): Promise<void>;
+  
+  // Admin Functions
+  getAllUsers(page?: number, limit?: number): Promise<PaginatedResult<User>>;
+  banUser(userId: string, reason: string, adminId: string): Promise<void>;
+  unbanUser(userId: string, adminId: string): Promise<void>;
+  getAllSwapRequests(page?: number, limit?: number): Promise<PaginatedResult<SwapRequestWithUsers>>;
+  createAdminAction(action: InsertAdminAction): Promise<AdminAction>;
+  getAdminActions(page?: number, limit?: number): Promise<PaginatedResult<AdminAction & { admin: User }>>;
+  
+  // System Messages
+  createSystemMessage(message: InsertSystemMessage): Promise<SystemMessage>;
+  getSystemMessages(activeOnly?: boolean): Promise<SystemMessage[]>;
+  updateSystemMessage(messageId: string, data: Partial<SystemMessage>): Promise<SystemMessage>;
+  deleteSystemMessage(messageId: string): Promise<boolean>;
+  
+  // Reports
+  createReport(report: InsertReportedContent): Promise<ReportedContent>;
+  getReports(status?: string, page?: number, limit?: number): Promise<PaginatedResult<ReportedContent & { reporter: User; reviewer?: User }>>;
+  updateReport(reportId: string, status: string, reviewerId: string): Promise<ReportedContent>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -876,6 +895,374 @@ export class DatabaseStorage implements IStorage {
           false
         ]
       );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  // Admin Functions
+  async getAllUsers(page: number = 1, limit: number = 20): Promise<PaginatedResult<User>> {
+    const client = await pool.connect();
+    try {
+      const offset = (page - 1) * limit;
+      
+      // Get total count
+      const countResult = await client.query('SELECT COUNT(*) FROM users');
+      const totalCount = parseInt(countResult.rows[0].count);
+      
+      // Get users
+      const result = await client.query(`
+        SELECT * FROM users 
+        ORDER BY created_at DESC 
+        LIMIT $1 OFFSET $2
+      `, [limit, offset]);
+      
+      return {
+        data: result.rows,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPreviousPage: page > 1
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  async banUser(userId: string, reason: string, adminId: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      
+      // Ban the user
+      await client.query(
+        'UPDATE users SET is_banned = true, ban_reason = $1, banned_at = NOW() WHERE id = $2',
+        [reason, userId]
+      );
+      
+      // Log admin action
+      const actionId = `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      await client.query(
+        'INSERT INTO admin_actions (id, admin_id, action, target_id, target_type, reason, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
+        [actionId, adminId, 'ban_user', userId, 'user', reason]
+      );
+      
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async unbanUser(userId: string, adminId: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
+      
+      // Unban the user
+      await client.query(
+        'UPDATE users SET is_banned = false, ban_reason = NULL, banned_at = NULL WHERE id = $1',
+        [userId]
+      );
+      
+      // Log admin action
+      const actionId = `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      await client.query(
+        'INSERT INTO admin_actions (id, admin_id, action, target_id, target_type, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
+        [actionId, adminId, 'unban_user', userId, 'user']
+      );
+      
+      await client.query('COMMIT');
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getAllSwapRequests(page: number = 1, limit: number = 20): Promise<PaginatedResult<SwapRequestWithUsers>> {
+    const client = await pool.connect();
+    try {
+      const offset = (page - 1) * limit;
+      
+      // Get total count
+      const countResult = await client.query('SELECT COUNT(*) FROM swap_requests');
+      const totalCount = parseInt(countResult.rows[0].count);
+      
+      // Get swap requests with user details
+      const result = await client.query(`
+        SELECT 
+          sr.*,
+          requester.id as requester_id, requester.name as requester_name, requester.email as requester_email, requester.profile_photo as requester_photo,
+          target.id as target_id, target.name as target_name, target.email as target_email, target.profile_photo as target_photo
+        FROM swap_requests sr
+        JOIN users requester ON sr.sender_id = requester.id
+        JOIN users target ON sr.receiver_id = target.id
+        ORDER BY sr.created_at DESC
+        LIMIT $1 OFFSET $2
+      `, [limit, offset]);
+      
+      const swapRequests = result.rows.map(row => ({
+        id: row.id,
+        requesterId: row.sender_id,
+        targetId: row.receiver_id,
+        senderSkill: row.sender_skill,
+        receiverSkill: row.receiver_skill,
+        status: row.status,
+        message: row.message,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        requester: {
+          id: row.requester_id,
+          name: row.requester_name,
+          email: row.requester_email,
+          profilePhoto: row.requester_photo,
+        },
+        target: {
+          id: row.target_id,
+          name: row.target_name,
+          email: row.target_email,
+          profilePhoto: row.target_photo,
+        }
+      }));
+      
+      return {
+        data: swapRequests,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPreviousPage: page > 1
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  async createAdminAction(action: InsertAdminAction): Promise<AdminAction> {
+    const client = await pool.connect();
+    try {
+      const actionId = `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const result = await client.query(
+        'INSERT INTO admin_actions (id, admin_id, action, target_id, target_type, reason, metadata, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *',
+        [actionId, action.adminId, action.action, action.targetId, action.targetType, action.reason, action.metadata]
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getAdminActions(page: number = 1, limit: number = 20): Promise<PaginatedResult<AdminAction & { admin: User }>> {
+    const client = await pool.connect();
+    try {
+      const offset = (page - 1) * limit;
+      
+      // Get total count
+      const countResult = await client.query('SELECT COUNT(*) FROM admin_actions');
+      const totalCount = parseInt(countResult.rows[0].count);
+      
+      // Get admin actions with admin details
+      const result = await client.query(`
+        SELECT 
+          aa.*,
+          u.id as admin_user_id, u.name as admin_name, u.email as admin_email
+        FROM admin_actions aa
+        JOIN users u ON aa.admin_id = u.id
+        ORDER BY aa.created_at DESC
+        LIMIT $1 OFFSET $2
+      `, [limit, offset]);
+      
+      const actions = result.rows.map(row => ({
+        id: row.id,
+        adminId: row.admin_id,
+        action: row.action,
+        targetId: row.target_id,
+        targetType: row.target_type,
+        reason: row.reason,
+        metadata: row.metadata,
+        createdAt: row.created_at,
+        admin: {
+          id: row.admin_user_id,
+          name: row.admin_name,
+          email: row.admin_email,
+        }
+      }));
+      
+      return {
+        data: actions,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPreviousPage: page > 1
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  async createSystemMessage(message: InsertSystemMessage): Promise<SystemMessage> {
+    const client = await pool.connect();
+    try {
+      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const result = await client.query(
+        'INSERT INTO system_messages (id, admin_id, title, message, type, is_active, expires_at, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *',
+        [messageId, message.adminId, message.title, message.message, message.type, message.isActive, message.expiresAt]
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getSystemMessages(activeOnly: boolean = false): Promise<SystemMessage[]> {
+    const client = await pool.connect();
+    try {
+      let query = 'SELECT * FROM system_messages';
+      const params: any[] = [];
+      
+      if (activeOnly) {
+        query += ' WHERE is_active = true AND (expires_at IS NULL OR expires_at > NOW())';
+      }
+      
+      query += ' ORDER BY created_at DESC';
+      
+      const result = await client.query(query, params);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateSystemMessage(messageId: string, data: Partial<SystemMessage>): Promise<SystemMessage> {
+    const client = await pool.connect();
+    try {
+      const fields = Object.keys(data).map((key, index) => `${key} = $${index + 2}`).join(', ');
+      const values = Object.values(data);
+      
+      const result = await client.query(
+        `UPDATE system_messages SET ${fields} WHERE id = $1 RETURNING *`,
+        [messageId, ...values]
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async deleteSystemMessage(messageId: string): Promise<boolean> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query('DELETE FROM system_messages WHERE id = $1 RETURNING id', [messageId]);
+      return result.rows.length > 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  async createReport(report: InsertReportedContent): Promise<ReportedContent> {
+    const client = await pool.connect();
+    try {
+      const reportId = `report_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const result = await client.query(
+        'INSERT INTO reported_content (id, reporter_id, content_type, content_id, reason, description, status, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *',
+        [reportId, report.reporterId, report.contentType, report.contentId, report.reason, report.description, report.status || 'pending']
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getReports(status?: string, page: number = 1, limit: number = 20): Promise<PaginatedResult<ReportedContent & { reporter: User; reviewer?: User }>> {
+    const client = await pool.connect();
+    try {
+      const offset = (page - 1) * limit;
+      
+      // Build query conditions
+      let whereClause = '';
+      const params = [limit, offset];
+      if (status) {
+        whereClause = 'WHERE rc.status = $3';
+        params.push(status);
+      }
+      
+      // Get total count
+      const countQuery = `SELECT COUNT(*) FROM reported_content rc ${whereClause}`;
+      const countResult = await client.query(countQuery, status ? [status] : []);
+      const totalCount = parseInt(countResult.rows[0].count);
+      
+      // Get reports with user details
+      const result = await client.query(`
+        SELECT 
+          rc.*,
+          reporter.id as reporter_id, reporter.name as reporter_name, reporter.email as reporter_email,
+          reviewer.id as reviewer_id, reviewer.name as reviewer_name, reviewer.email as reviewer_email
+        FROM reported_content rc
+        JOIN users reporter ON rc.reporter_id = reporter.id
+        LEFT JOIN users reviewer ON rc.reviewed_by = reviewer.id
+        ${whereClause}
+        ORDER BY rc.created_at DESC
+        LIMIT $1 OFFSET $2
+      `, params);
+      
+      const reports = result.rows.map(row => ({
+        id: row.id,
+        reporterId: row.reporter_id,
+        contentType: row.content_type,
+        contentId: row.content_id,
+        reason: row.reason,
+        description: row.description,
+        status: row.status,
+        reviewedBy: row.reviewed_by,
+        reviewedAt: row.reviewed_at,
+        createdAt: row.created_at,
+        reporter: {
+          id: row.reporter_id,
+          name: row.reporter_name,
+          email: row.reporter_email,
+        },
+        reviewer: row.reviewer_id ? {
+          id: row.reviewer_id,
+          name: row.reviewer_name,
+          email: row.reviewer_email,
+        } : undefined
+      }));
+      
+      return {
+        data: reports,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPreviousPage: page > 1
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateReport(reportId: string, status: string, reviewerId: string): Promise<ReportedContent> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'UPDATE reported_content SET status = $1, reviewed_by = $2, reviewed_at = NOW() WHERE id = $3 RETURNING *',
+        [status, reviewerId, reportId]
+      );
+      
       return result.rows[0];
     } finally {
       client.release();
