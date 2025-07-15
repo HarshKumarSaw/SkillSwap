@@ -33,6 +33,8 @@ export function SwapRequestPopup({
   const [senderSkills, setSenderSkills] = useState<string[]>([]);
   const [receiverSkills, setReceiverSkills] = useState<string[]>([]);
   const [message, setMessage] = useState(`Hi ${targetUser.name}! I'd like to swap skills with you.`);
+  const [senderDropdownOpen, setSenderDropdownOpen] = useState(false);
+  const [receiverDropdownOpen, setReceiverDropdownOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -90,7 +92,7 @@ export function SwapRequestPopup({
           <div className="space-y-2">
             <Label>What skills do you offer?</Label>
             
-            <Popover>
+            <Popover open={senderDropdownOpen} onOpenChange={setSenderDropdownOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -104,21 +106,30 @@ export function SwapRequestPopup({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
-                <div className="max-h-48 overflow-y-auto p-2">
+                <div className="max-h-48 overflow-y-auto">
                   {(currentUser.skillsOffered || []).map((skill) => (
-                    <div key={skill.id} className="flex items-center space-x-2 p-2 hover:bg-accent rounded cursor-pointer" onClick={() => toggleSenderSkill(skill.name)}>
+                    <div 
+                      key={skill.id} 
+                      className={`flex items-center space-x-2 p-3 hover:bg-accent cursor-pointer transition-colors ${
+                        senderSkills.includes(skill.name) ? 'bg-accent/50' : ''
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleSenderSkill(skill.name);
+                      }}
+                    >
                       <Checkbox
-                        id={`sender-${skill.id}`}
                         checked={senderSkills.includes(skill.name)}
-                        onCheckedChange={() => toggleSenderSkill(skill.name)}
+                        readOnly
+                        className="pointer-events-none"
                       />
-                      <Label htmlFor={`sender-${skill.id}`} className="text-sm font-normal cursor-pointer">
+                      <span className="text-sm flex-1">
                         {skill.name}
-                      </Label>
+                      </span>
                     </div>
                   ))}
                   {(!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) && (
-                    <p className="text-sm text-muted-foreground p-2">
+                    <p className="text-sm text-muted-foreground p-3">
                       You need to add skills to your profile first.
                     </p>
                   )}
@@ -145,7 +156,7 @@ export function SwapRequestPopup({
           <div className="space-y-2">
             <Label>What skills do you want from {targetUser.name}?</Label>
             
-            <Popover>
+            <Popover open={receiverDropdownOpen} onOpenChange={setReceiverDropdownOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -159,21 +170,30 @@ export function SwapRequestPopup({
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-full p-0">
-                <div className="max-h-48 overflow-y-auto p-2">
+                <div className="max-h-48 overflow-y-auto">
                   {(targetUser.skillsOffered || []).map((skill) => (
-                    <div key={skill.id} className="flex items-center space-x-2 p-2 hover:bg-accent rounded cursor-pointer" onClick={() => toggleReceiverSkill(skill.name)}>
+                    <div 
+                      key={skill.id} 
+                      className={`flex items-center space-x-2 p-3 hover:bg-accent cursor-pointer transition-colors ${
+                        receiverSkills.includes(skill.name) ? 'bg-accent/50' : ''
+                      }`}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        toggleReceiverSkill(skill.name);
+                      }}
+                    >
                       <Checkbox
-                        id={`receiver-${skill.id}`}
                         checked={receiverSkills.includes(skill.name)}
-                        onCheckedChange={() => toggleReceiverSkill(skill.name)}
+                        readOnly
+                        className="pointer-events-none"
                       />
-                      <Label htmlFor={`receiver-${skill.id}`} className="text-sm font-normal cursor-pointer">
+                      <span className="text-sm flex-1">
                         {skill.name}
-                      </Label>
+                      </span>
                     </div>
                   ))}
                   {(!targetUser.skillsOffered || targetUser.skillsOffered.length === 0) && (
-                    <p className="text-sm text-muted-foreground p-2">
+                    <p className="text-sm text-muted-foreground p-3">
                       {targetUser.name} hasn't added any skills yet.
                     </p>
                   )}
