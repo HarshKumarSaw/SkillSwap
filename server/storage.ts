@@ -37,7 +37,7 @@ export interface IStorage {
   
   // Ratings
   createSwapRating(rating: InsertSwapRating): Promise<SwapRating>;
-  getSwapRating(swapRequestId: string, raterId: string): Promise<SwapRating | undefined>;
+  getSwapRating(swapRequestId: string, raterId: string, ratingType?: string): Promise<SwapRating | undefined>;
   updateUserRating(userId: string): Promise<void>;
   
   // Admin Functions
@@ -837,8 +837,8 @@ export class DatabaseStorage implements IStorage {
       const ratingId = `rating_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       const result = await client.query(
-        'INSERT INTO swap_ratings (id, swap_request_id, rater_id, rated_id, rating, feedback, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *',
-        [ratingId, rating.swapRequestId, rating.raterId, rating.ratedId, rating.rating, rating.feedback]
+        'INSERT INTO swap_ratings (id, swap_request_id, rater_id, rated_id, rating, feedback, rating_type, created_at) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW()) RETURNING *',
+        [ratingId, rating.swapRequestId, rating.raterId, rating.ratedId, rating.rating, rating.feedback, rating.ratingType || 'post_request']
       );
       
       // Update the rated user's overall rating
@@ -850,13 +850,18 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getSwapRating(swapRequestId: string, raterId: string): Promise<SwapRating | undefined> {
+  async getSwapRating(swapRequestId: string, raterId: string, ratingType?: string): Promise<SwapRating | undefined> {
     const client = await pool.connect();
     try {
-      const result = await client.query(
-        'SELECT * FROM swap_ratings WHERE swap_request_id = $1 AND rater_id = $2',
-        [swapRequestId, raterId]
-      );
+      let query = 'SELECT * FROM swap_ratings WHERE swap_request_id = $1 AND rater_id = $2';
+      let params = [swapRequestId, raterId];
+      
+      if (ratingType) {
+        query += ' AND rating_type = $3';
+        params.push(ratingType);
+      }
+      
+      const result = await client.query(query, params);
       return result.rows[0] || undefined;
     } finally {
       client.release();

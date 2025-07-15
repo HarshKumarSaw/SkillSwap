@@ -59,6 +59,7 @@ export const swapRatings = pgTable("swap_ratings", {
   ratedId: text("rated_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   rating: integer("rating").notNull(), // 1-5 stars
   feedback: text("feedback"),
+  ratingType: text("rating_type").default("post_request"), // post_request, post_completion
   createdAt: text("created_at").default("NOW()"),
 });
 

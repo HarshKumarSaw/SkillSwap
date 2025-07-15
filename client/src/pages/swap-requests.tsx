@@ -177,10 +177,18 @@ export default function SwapRequests() {
                   <Trash2 className="h-4 w-4" />
                 </Button>
               )}
-              {request.status === "completed" && (
+              {/* Allow feedback on any sent request */}
+              {isOwner && (
+                <Button size="sm" onClick={() => handleRate(request)} variant="outline">
+                  <MessageSquare className="h-4 w-4 mr-1" />
+                  Give Feedback
+                </Button>
+              )}
+              {/* Traditional rating for completed requests */}
+              {request.status === "completed" && !isOwner && (
                 <Button size="sm" onClick={() => handleRate(request)} variant="outline">
                   <Star className="h-4 w-4 mr-1" />
-                  Rate
+                  Rate Experience
                 </Button>
               )}
             </div>

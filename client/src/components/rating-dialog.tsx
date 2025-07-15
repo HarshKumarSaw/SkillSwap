@@ -38,6 +38,12 @@ export function RatingDialog({
   const [feedback, setFeedback] = useState("");
 
   const otherUser = swapRequest.requesterId === user?.id ? swapRequest.target : swapRequest.requester;
+  const isRequester = swapRequest.requesterId === user?.id;
+  const isCompleted = swapRequest.status === "completed";
+
+  // Determine rating type based on request status and user role
+  const ratingType = isCompleted ? "post_completion" : "post_request";
+  const isInitialFeedback = !isCompleted && isRequester;
 
   const submitRatingMutation = useMutation({
     mutationFn: async () => {
@@ -47,12 +53,16 @@ export function RatingDialog({
           ratedId: otherUser.id,
           rating,
           feedback: feedback.trim() || undefined,
+          ratingType,
         }),
         headers: { "Content-Type": "application/json" },
       });
     },
     onSuccess: () => {
-      toast({ title: "Rating submitted successfully!" });
+      const successMessage = isInitialFeedback 
+        ? "Feedback submitted successfully!" 
+        : "Rating submitted successfully!";
+      toast({ title: successMessage });
       queryClient.invalidateQueries({ queryKey: ["/api/swap-requests"] });
       onRatingSubmitted();
       // Reset form
@@ -85,9 +95,14 @@ export function RatingDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Rate Your Swap Experience</DialogTitle>
+          <DialogTitle>
+            {isInitialFeedback ? "Give Initial Feedback" : "Rate Your Swap Experience"}
+          </DialogTitle>
           <DialogDescription>
-            How was your skill swap with {otherUser.name}?
+            {isInitialFeedback 
+              ? `Share your initial thoughts about connecting with ${otherUser.name}`
+              : `How was your skill swap with ${otherUser.name}?`
+            }
           </DialogDescription>
         </DialogHeader>
 
@@ -128,10 +143,16 @@ export function RatingDialog({
 
           {/* Feedback */}
           <div className="space-y-2">
-            <Label htmlFor="feedback">Feedback (Optional)</Label>
+            <Label htmlFor="feedback">
+              {isInitialFeedback ? "Initial Feedback (Optional)" : "Feedback (Optional)"}
+            </Label>
             <Textarea
               id="feedback"
-              placeholder="Share your experience with this skill swap..."
+              placeholder={
+                isInitialFeedback 
+                  ? "Share your initial thoughts about this user..."
+                  : "Share your experience with this skill swap..."
+              }
               value={feedback}
               onChange={(e) => setFeedback(e.target.value)}
               rows={3}
@@ -151,7 +172,12 @@ export function RatingDialog({
             onClick={handleSubmit}
             disabled={rating === 0 || submitRatingMutation.isPending}
           >
-            {submitRatingMutation.isPending ? "Submitting..." : "Submit Rating"}
+            {submitRatingMutation.isPending 
+              ? "Submitting..." 
+              : isInitialFeedback 
+                ? "Submit Feedback" 
+                : "Submit Rating"
+            }
           </Button>
         </DialogFooter>
       </DialogContent>

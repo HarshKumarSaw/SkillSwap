@@ -297,10 +297,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         raterId: user.id
       });
 
-      // Check if rating already exists
-      const existingRating = await storage.getSwapRating(req.params.id, user.id);
+      // Check if rating already exists for this type
+      const ratingType = req.body.ratingType || 'post_request';
+      const existingRating = await storage.getSwapRating(req.params.id, user.id, ratingType);
       if (existingRating) {
-        return res.status(400).json({ message: "You have already rated this swap" });
+        const typeText = ratingType === 'post_request' ? 'given feedback for' : 'rated';
+        return res.status(400).json({ message: `You have already ${typeText} this swap` });
       }
 
       const rating = await storage.createSwapRating(validatedData);
