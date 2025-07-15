@@ -321,6 +321,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
     next();
   };
 
+  // Auth middleware to check if user is authenticated
+  const requireAuth = (req: any, res: any, next: any) => {
+    const user = req.session?.user;
+    if (!user) {
+      return res.status(401).json({ message: "Authentication required" });
+    }
+    next();
+  };
+
   // Admin Routes
   app.get("/api/admin/users", requireAdmin, async (req, res) => {
     try {
