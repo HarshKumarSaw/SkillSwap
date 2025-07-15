@@ -9,6 +9,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { AuthPopup } from "./auth-popup";
+import { SwapRequestPopup } from "./swap-request-popup";
 import { useAuth } from "@/hooks/use-auth";
 
 // Helper function to format availability
@@ -66,6 +67,7 @@ interface UserCardProps {
 export function UserCard({ user, currentPage = 1 }: UserCardProps) {
   const [isRequesting, setIsRequesting] = useState(false);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
+  const [showSwapPopup, setShowSwapPopup] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
   const [, setLocation] = useLocation();

@@ -35,9 +35,11 @@ export const userSkillsWanted = pgTable("user_skills_wanted", {
 });
 
 export const swapRequests = pgTable("swap_requests", {
-  id: serial("id").primaryKey(),
-  requesterId: text("requester_id").notNull().references(() => users.id, { onDelete: "cascade" }),
-  targetId: text("target_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey(),
+  requesterId: text("sender_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  targetId: text("receiver_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  senderSkill: text("sender_skill"),
+  receiverSkill: text("receiver_skill"),
   status: text("status").notNull().default("pending"), // pending, accepted, rejected, cancelled
   message: text("message"),
 });
