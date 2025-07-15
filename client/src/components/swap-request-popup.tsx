@@ -2,10 +2,10 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { Checkbox } from "@/components/ui/checkbox";
 import { UserWithSkills } from "@shared/schema";
-import { MessageSquare, Loader2 } from "lucide-react";
+import { MessageSquare, Loader2, X } from "lucide-react";
 
 interface SwapRequestPopupProps {
   isOpen: boolean;
@@ -13,8 +13,8 @@ interface SwapRequestPopupProps {
   targetUser: UserWithSkills;
   currentUser: UserWithSkills;
   onSubmit: (data: {
-    senderSkill: string;
-    receiverSkill: string;
+    senderSkills: string[];
+    receiverSkills: string[];
     message: string;
   }) => void;
   isLoading: boolean;
@@ -28,26 +28,50 @@ export function SwapRequestPopup({
   onSubmit, 
   isLoading 
 }: SwapRequestPopupProps) {
-  const [senderSkill, setSenderSkill] = useState("");
-  const [receiverSkill, setReceiverSkill] = useState("");
+  const [senderSkills, setSenderSkills] = useState<string[]>([]);
+  const [receiverSkills, setReceiverSkills] = useState<string[]>([]);
   const [message, setMessage] = useState(`Hi ${targetUser.name}! I'd like to swap skills with you.`);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!senderSkill || !receiverSkill) return;
+    if (senderSkills.length === 0 || receiverSkills.length === 0) return;
     
     onSubmit({
-      senderSkill,
-      receiverSkill,
+      senderSkills,
+      receiverSkills,
       message
     });
   };
 
   const handleClose = () => {
-    setSenderSkill("");
-    setReceiverSkill("");
+    setSenderSkills([]);
+    setReceiverSkills([]);
     setMessage(`Hi ${targetUser.name}! I'd like to swap skills with you.`);
     onOpenChange(false);
+  };
+
+  const toggleSenderSkill = (skillName: string) => {
+    setSenderSkills(prev => 
+      prev.includes(skillName) 
+        ? prev.filter(s => s !== skillName)
+        : [...prev, skillName]
+    );
+  };
+
+  const toggleReceiverSkill = (skillName: string) => {
+    setReceiverSkills(prev => 
+      prev.includes(skillName) 
+        ? prev.filter(s => s !== skillName)
+        : [...prev, skillName]
+    );
+  };
+
+  const removeSenderSkill = (skillName: string) => {
+    setSenderSkills(prev => prev.filter(s => s !== skillName));
+  };
+
+  const removeReceiverSkill = (skillName: string) => {
+    setReceiverSkills(prev => prev.filter(s => s !== skillName));
   };
 
   return (
@@ -61,20 +85,40 @@ export function SwapRequestPopup({
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="sender-skill">What skill do you offer?</Label>
-            <Select value={senderSkill} onValueChange={setSenderSkill}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a skill you offer" />
-              </SelectTrigger>
-              <SelectContent>
-                {(currentUser.skillsOffered || []).map((skill) => (
-                  <SelectItem key={skill.id} value={skill.name}>
-                    {skill.name}
-                  </SelectItem>
+          <div className="space-y-3">
+            <Label>What skills do you offer? (Select at least one)</Label>
+            
+            {/* Selected skills display */}
+            {senderSkills.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {senderSkills.map((skill) => (
+                  <span key={skill} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                    {skill}
+                    <X 
+                      className="w-3 h-3 cursor-pointer hover:text-primary/60" 
+                      onClick={() => removeSenderSkill(skill)}
+                    />
+                  </span>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            )}
+
+            {/* Skills checklist */}
+            <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
+              {(currentUser.skillsOffered || []).map((skill) => (
+                <div key={skill.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`sender-${skill.id}`}
+                    checked={senderSkills.includes(skill.name)}
+                    onCheckedChange={() => toggleSenderSkill(skill.name)}
+                  />
+                  <Label htmlFor={`sender-${skill.id}`} className="text-sm font-normal cursor-pointer">
+                    {skill.name}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            
             {(!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) && (
               <p className="text-sm text-muted-foreground">
                 You need to add skills to your profile first.
@@ -82,20 +126,40 @@ export function SwapRequestPopup({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="receiver-skill">What skill do you want from {targetUser.name}?</Label>
-            <Select value={receiverSkill} onValueChange={setReceiverSkill}>
-              <SelectTrigger>
-                <SelectValue placeholder="Choose a skill you want to learn" />
-              </SelectTrigger>
-              <SelectContent>
-                {(targetUser.skillsOffered || []).map((skill) => (
-                  <SelectItem key={skill.id} value={skill.name}>
-                    {skill.name}
-                  </SelectItem>
+          <div className="space-y-3">
+            <Label>What skills do you want from {targetUser.name}? (Select at least one)</Label>
+            
+            {/* Selected skills display */}
+            {receiverSkills.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {receiverSkills.map((skill) => (
+                  <span key={skill} className="bg-secondary/10 text-secondary-foreground px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                    {skill}
+                    <X 
+                      className="w-3 h-3 cursor-pointer hover:text-muted-foreground" 
+                      onClick={() => removeReceiverSkill(skill)}
+                    />
+                  </span>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            )}
+
+            {/* Skills checklist */}
+            <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
+              {(targetUser.skillsOffered || []).map((skill) => (
+                <div key={skill.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`receiver-${skill.id}`}
+                    checked={receiverSkills.includes(skill.name)}
+                    onCheckedChange={() => toggleReceiverSkill(skill.name)}
+                  />
+                  <Label htmlFor={`receiver-${skill.id}`} className="text-sm font-normal cursor-pointer">
+                    {skill.name}
+                  </Label>
+                </div>
+              ))}
+            </div>
+            
             {(!targetUser.skillsOffered || targetUser.skillsOffered.length === 0) && (
               <p className="text-sm text-muted-foreground">
                 {targetUser.name} hasn't added any skills yet.
@@ -120,7 +184,7 @@ export function SwapRequestPopup({
             </Button>
             <Button 
               type="submit" 
-              disabled={!senderSkill || !receiverSkill || isLoading || (!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) || (!targetUser.skillsOffered || targetUser.skillsOffered.length === 0)}
+              disabled={senderSkills.length === 0 || receiverSkills.length === 0 || isLoading || (!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) || (!targetUser.skillsOffered || targetUser.skillsOffered.length === 0)}
             >
               {isLoading ? (
                 <>

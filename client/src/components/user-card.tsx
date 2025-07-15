@@ -143,12 +143,16 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
   };
 
   const handleSwapRequestSubmit = (data: {
-    senderSkill: string;
-    receiverSkill: string;
+    senderSkills: string[];
+    receiverSkills: string[];
     message: string;
   }) => {
     setIsRequesting(true);
-    createSwapRequestMutation.mutate(data);
+    createSwapRequestMutation.mutate({
+      senderSkill: data.senderSkills.join(', '),
+      receiverSkill: data.receiverSkills.join(', '),
+      message: data.message
+    });
   };
 
   const renderStars = (rating: number) => {
