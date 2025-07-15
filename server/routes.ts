@@ -513,6 +513,177 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Admin Report Downloads
+  app.get("/api/admin/download/user-activity", requireAdmin, async (req, res) => {
+    try {
+      const client = await pool.connect();
+      try {
+        const result = await client.query(`
+          SELECT 
+            u.id,
+            u.name,
+            u.email,
+            u.location,
+            u.rating,
+            u.review_count,
+            u.is_public,
+            u.is_banned,
+            u.created_at,
+            COUNT(DISTINCT sr_sent.id) as swap_requests_sent,
+            COUNT(DISTINCT sr_received.id) as swap_requests_received,
+            COUNT(DISTINCT ratings_given.id) as ratings_given,
+            COUNT(DISTINCT ratings_received.id) as ratings_received
+          FROM users u
+          LEFT JOIN swap_requests sr_sent ON u.id = sr_sent.requester_id
+          LEFT JOIN swap_requests sr_received ON u.id = sr_received.target_id
+          LEFT JOIN swap_ratings ratings_given ON u.id = ratings_given.rater_id
+          LEFT JOIN swap_ratings ratings_received ON u.id = ratings_received.rated_id
+          GROUP BY u.id, u.name, u.email, u.location, u.rating, u.review_count, u.is_public, u.is_banned, u.created_at
+          ORDER BY u.created_at DESC
+        `);
+
+        const csvContent = [
+          'ID,Name,Email,Location,Rating,Review Count,Is Public,Is Banned,Created At,Swap Requests Sent,Swap Requests Received,Ratings Given,Ratings Received',
+          ...result.rows.map(row => 
+            `"${row.id}","${row.name}","${row.email}","${row.location || ''}",${row.rating},${row.review_count},${row.is_public},${row.is_banned},"${row.created_at}",${row.swap_requests_sent},${row.swap_requests_received},${row.ratings_given},${row.ratings_received}`
+          )
+        ].join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="user-activity-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(csvContent);
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error("Error generating user activity report:", error);
+      res.status(500).json({ message: "Failed to generate user activity report" });
+    }
+  });
+
+  app.get("/api/admin/download/feedback-logs", requireAdmin, async (req, res) => {
+    try {
+      const client = await pool.connect();
+      try {
+        const result = await client.query(`
+          SELECT 
+            sr.id as swap_request_id,
+            sr.requester_skill,
+            sr.target_skill,
+            sr.status,
+            sr.created_at as swap_created_at,
+            rater.name as rater_name,
+            rater.email as rater_email,
+            rated.name as rated_name,
+            rated.email as rated_email,
+            rating.rating,
+            rating.feedback,
+            rating.created_at as rating_created_at
+          FROM swap_ratings rating
+          JOIN swap_requests sr ON rating.swap_request_id = sr.id
+          JOIN users rater ON rating.rater_id = rater.id
+          JOIN users rated ON rating.rated_id = rated.id
+          ORDER BY rating.created_at DESC
+        `);
+
+        const csvContent = [
+          'Swap Request ID,Requester Skill,Target Skill,Swap Status,Swap Created At,Rater Name,Rater Email,Rated Name,Rated Email,Rating,Feedback,Rating Created At',
+          ...result.rows.map(row => 
+            `"${row.swap_request_id}","${row.requester_skill}","${row.target_skill}","${row.status}","${row.swap_created_at}","${row.rater_name}","${row.rater_email}","${row.rated_name}","${row.rated_email}",${row.rating},"${(row.feedback || '').replace(/"/g, '""')}","${row.rating_created_at}"`
+          )
+        ].join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="feedback-logs-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(csvContent);
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error("Error generating feedback logs report:", error);
+      res.status(500).json({ message: "Failed to generate feedback logs report" });
+    }
+  });
+
+  app.get("/api/admin/download/swap-stats", requireAdmin, async (req, res) => {
+    try {
+      const client = await pool.connect();
+      try {
+        const statsResult = await client.query(`
+          SELECT 
+            COUNT(*) as total_swap_requests,
+            COUNT(CASE WHEN status = 'pending' THEN 1 END) as pending_requests,
+            COUNT(CASE WHEN status = 'accepted' THEN 1 END) as accepted_requests,
+            COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected_requests,
+            COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_requests,
+            AVG(CASE WHEN status = 'completed' THEN 
+              EXTRACT(epoch FROM (completed_at::timestamp - created_at::timestamp))/86400 
+            END) as avg_completion_days
+          FROM swap_requests
+        `);
+
+        const skillsResult = await client.query(`
+          SELECT 
+            requester_skill as skill,
+            COUNT(*) as requests_count
+          FROM swap_requests
+          GROUP BY requester_skill
+          UNION
+          SELECT 
+            target_skill as skill,
+            COUNT(*) as requests_count
+          FROM swap_requests
+          GROUP BY target_skill
+          ORDER BY requests_count DESC
+          LIMIT 20
+        `);
+
+        const monthlyResult = await client.query(`
+          SELECT 
+            DATE_TRUNC('month', created_at::timestamp) as month,
+            COUNT(*) as requests_count,
+            COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_count
+          FROM swap_requests
+          WHERE created_at::timestamp >= NOW() - INTERVAL '12 months'
+          GROUP BY DATE_TRUNC('month', created_at::timestamp)
+          ORDER BY month DESC
+        `);
+
+        const stats = statsResult.rows[0];
+        
+        let csvContent = 'Skill Swap Platform Statistics Report\n';
+        csvContent += `Generated on: ${new Date().toISOString()}\n\n`;
+        csvContent += 'OVERALL STATISTICS\n';
+        csvContent += `Total Swap Requests,${stats.total_swap_requests}\n`;
+        csvContent += `Pending Requests,${stats.pending_requests}\n`;
+        csvContent += `Accepted Requests,${stats.accepted_requests}\n`;
+        csvContent += `Rejected Requests,${stats.rejected_requests}\n`;
+        csvContent += `Completed Requests,${stats.completed_requests}\n`;
+        csvContent += `Average Completion Time (Days),${stats.avg_completion_days || 0}\n\n`;
+        
+        csvContent += 'TOP SKILLS BY REQUEST COUNT\n';
+        csvContent += 'Skill,Request Count\n';
+        csvContent += skillsResult.rows.map(row => `"${row.skill}",${row.requests_count}`).join('\n');
+        csvContent += '\n\n';
+        
+        csvContent += 'MONTHLY ACTIVITY (Last 12 Months)\n';
+        csvContent += 'Month,Total Requests,Completed Requests\n';
+        csvContent += monthlyResult.rows.map(row => 
+          `"${row.month}",${row.requests_count},${row.completed_count}`
+        ).join('\n');
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', `attachment; filename="swap-stats-${new Date().toISOString().split('T')[0]}.csv"`);
+        res.send(csvContent);
+      } finally {
+        client.release();
+      }
+    } catch (error) {
+      console.error("Error generating swap stats report:", error);
+      res.status(500).json({ message: "Failed to generate swap stats report" });
+    }
+  });
+
   // Messaging API Routes
   app.get("/api/conversations", requireAuth, async (req, res) => {
     try {

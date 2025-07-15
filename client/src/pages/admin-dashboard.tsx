@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Users, MessageSquare, Shield, TrendingUp, Ban, UserCheck, Plus } from "lucide-react";
+import { Users, MessageSquare, Shield, TrendingUp, Ban, UserCheck, Plus, Download } from "lucide-react";
 import { apiRequest } from "@/lib/queryClient";
 
 interface User {
@@ -73,6 +73,35 @@ export default function AdminDashboard() {
   const [selectedUser, setSelectedUser] = useState<User | null>(null);
   const [banReason, setBanReason] = useState("");
   const [newMessage, setNewMessage] = useState({ title: "", message: "", type: "announcement" });
+
+  // Download functions
+  const downloadReport = async (reportType: string, filename: string) => {
+    try {
+      const response = await fetch(`/api/admin/download/${reportType}`, {
+        method: 'GET',
+        credentials: 'include',
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to download report');
+      }
+      
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+      
+      toast({ title: "Report downloaded successfully" });
+    } catch (error) {
+      toast({ title: "Failed to download report", variant: "destructive" });
+    }
+  };
 
   // Check if user is admin
   if (!user || user.role !== 'admin') {
@@ -245,6 +274,7 @@ export default function AdminDashboard() {
           <TabsTrigger value="users">Users</TabsTrigger>
           <TabsTrigger value="swap-requests">Swap Requests</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
+          <TabsTrigger value="downloads">Downloads</TabsTrigger>
           <TabsTrigger value="messages">System Messages</TabsTrigger>
           <TabsTrigger value="actions">Admin Actions</TabsTrigger>
         </TabsList>
@@ -435,6 +465,83 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="downloads">
+          <Card>
+            <CardHeader>
+              <CardTitle>Download Reports</CardTitle>
+              <CardDescription>Download comprehensive reports of platform activity and analytics</CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">User Activity Report</CardTitle>
+                    <CardDescription>
+                      Complete user statistics including signup dates, swap activity, ratings, and account status.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={() => downloadReport('user-activity', `user-activity-${new Date().toISOString().split('T')[0]}.csv`)}
+                      className="w-full"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download CSV
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Feedback Logs</CardTitle>
+                    <CardDescription>
+                      All user ratings and feedback from completed skill swaps with detailed information.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={() => downloadReport('feedback-logs', `feedback-logs-${new Date().toISOString().split('T')[0]}.csv`)}
+                      className="w-full"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download CSV
+                    </Button>
+                  </CardContent>
+                </Card>
+
+                <Card>
+                  <CardHeader>
+                    <CardTitle className="text-lg">Swap Statistics</CardTitle>
+                    <CardDescription>
+                      Platform-wide analytics including popular skills, completion rates, and monthly trends.
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <Button 
+                      onClick={() => downloadReport('swap-stats', `swap-stats-${new Date().toISOString().split('T')[0]}.csv`)}
+                      className="w-full"
+                    >
+                      <Download className="w-4 h-4 mr-2" />
+                      Download CSV
+                    </Button>
+                  </CardContent>
+                </Card>
+              </div>
+              
+              <div className="mt-6 p-4 bg-muted rounded-lg">
+                <h4 className="font-medium mb-2">Report Information</h4>
+                <ul className="text-sm text-muted-foreground space-y-1">
+                  <li>• All reports are generated in CSV format for easy analysis</li>
+                  <li>• Data includes current timestamp and is filtered for relevant information</li>
+                  <li>• User Activity: Includes registration dates, activity metrics, and account status</li>
+                  <li>• Feedback Logs: Contains all ratings and reviews from completed swaps</li>
+                  <li>• Swap Statistics: Provides insights into platform usage and trending skills</li>
+                </ul>
               </div>
             </CardContent>
           </Card>
