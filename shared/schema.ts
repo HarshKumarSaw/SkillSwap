@@ -96,6 +96,45 @@ export const reportedContent = pgTable("reported_content", {
   createdAt: text("created_at").default("NOW()"),
 });
 
+export const conversations = pgTable("conversations", {
+  id: text("id").primaryKey(),
+  participant1Id: text("participant1_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  participant2Id: text("participant2_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  swapRequestId: text("swap_request_id").references(() => swapRequests.id, { onDelete: "set null" }),
+  lastMessageAt: text("last_message_at").default("NOW()"),
+  createdAt: text("created_at").default("NOW()"),
+});
+
+export const messages = pgTable("messages", {
+  id: text("id").primaryKey(),
+  conversationId: text("conversation_id").notNull().references(() => conversations.id, { onDelete: "cascade" }),
+  senderId: text("sender_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  messageType: text("message_type").default("text"), // text, image, file
+  isRead: boolean("is_read").default(false),
+  createdAt: text("created_at").default("NOW()"),
+});
+
+export const notifications = pgTable("notifications", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  type: text("type").notNull(), // message, swap_request, rating, system
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  relatedId: text("related_id"), // ID of related entity (message, swap request, etc.)
+  isRead: boolean("is_read").default(false),
+  createdAt: text("created_at").default("NOW()"),
+});
+
+export const skillEndorsements = pgTable("skill_endorsements", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  skillId: integer("skill_id").notNull().references(() => skills.id, { onDelete: "cascade" }),
+  endorserId: text("endorser_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  comment: text("comment"),
+  createdAt: text("created_at").default("NOW()"),
+});
+
 // Relations
 export const usersRelations = relations(users, ({ many }) => ({
   skillsOffered: many(userSkillsOffered),
@@ -108,6 +147,12 @@ export const usersRelations = relations(users, ({ many }) => ({
   systemMessages: many(systemMessages),
   reportsSubmitted: many(reportedContent, { relationName: "reporter" }),
   reportsReviewed: many(reportedContent, { relationName: "reviewer" }),
+  conversations1: many(conversations, { relationName: "participant1" }),
+  conversations2: many(conversations, { relationName: "participant2" }),
+  messagesSent: many(messages),
+  notifications: many(notifications),
+  skillEndorsements: many(skillEndorsements, { relationName: "user" }),
+  endorsementsGiven: many(skillEndorsements, { relationName: "endorser" }),
 }));
 
 export const skillsRelations = relations(skills, ({ many }) => ({
@@ -195,6 +240,59 @@ export const reportedContentRelations = relations(reportedContent, ({ one }) => 
   }),
 }));
 
+export const conversationsRelations = relations(conversations, ({ one, many }) => ({
+  participant1: one(users, {
+    fields: [conversations.participant1Id],
+    references: [users.id],
+    relationName: "participant1",
+  }),
+  participant2: one(users, {
+    fields: [conversations.participant2Id],
+    references: [users.id],
+    relationName: "participant2",
+  }),
+  swapRequest: one(swapRequests, {
+    fields: [conversations.swapRequestId],
+    references: [swapRequests.id],
+  }),
+  messages: many(messages),
+}));
+
+export const messagesRelations = relations(messages, ({ one }) => ({
+  conversation: one(conversations, {
+    fields: [messages.conversationId],
+    references: [conversations.id],
+  }),
+  sender: one(users, {
+    fields: [messages.senderId],
+    references: [users.id],
+  }),
+}));
+
+export const notificationsRelations = relations(notifications, ({ one }) => ({
+  user: one(users, {
+    fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const skillEndorsementsRelations = relations(skillEndorsements, ({ one }) => ({
+  user: one(users, {
+    fields: [skillEndorsements.userId],
+    references: [users.id],
+    relationName: "user",
+  }),
+  skill: one(skills, {
+    fields: [skillEndorsements.skillId],
+    references: [skills.id],
+  }),
+  endorser: one(users, {
+    fields: [skillEndorsements.endorserId],
+    references: [users.id],
+    relationName: "endorser",
+  }),
+}));
+
 // Insert schemas
 export const insertUserSchema = createInsertSchema(users).omit({
   id: true,
@@ -232,6 +330,27 @@ export const insertReportedContentSchema = createInsertSchema(reportedContent).o
   createdAt: true,
 });
 
+export const insertConversationSchema = createInsertSchema(conversations).omit({
+  id: true,
+  createdAt: true,
+  lastMessageAt: true,
+});
+
+export const insertMessageSchema = createInsertSchema(messages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertNotificationSchema = createInsertSchema(notifications).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertSkillEndorsementSchema = createInsertSchema(skillEndorsements).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -247,6 +366,14 @@ export type SystemMessage = typeof systemMessages.$inferSelect;
 export type InsertSystemMessage = z.infer<typeof insertSystemMessageSchema>;
 export type ReportedContent = typeof reportedContent.$inferSelect;
 export type InsertReportedContent = z.infer<typeof insertReportedContentSchema>;
+export type Conversation = typeof conversations.$inferSelect;
+export type InsertConversation = z.infer<typeof insertConversationSchema>;
+export type Message = typeof messages.$inferSelect;
+export type InsertMessage = z.infer<typeof insertMessageSchema>;
+export type Notification = typeof notifications.$inferSelect;
+export type InsertNotification = z.infer<typeof insertNotificationSchema>;
+export type SkillEndorsement = typeof skillEndorsements.$inferSelect;
+export type InsertSkillEndorsement = z.infer<typeof insertSkillEndorsementSchema>;
 
 // Extended types for frontend use
 export type UserWithSkills = User & {
@@ -257,6 +384,17 @@ export type UserWithSkills = User & {
 export type SwapRequestWithUsers = SwapRequest & {
   requester: User;
   target: User;
+};
+
+export type ConversationWithUsers = Conversation & {
+  participant1: User;
+  participant2: User;
+  lastMessage?: Message;
+  unreadCount: number;
+};
+
+export type MessageWithSender = Message & {
+  sender: User;
 };
 
 // Availability structure for better type safety

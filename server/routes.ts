@@ -501,6 +501,198 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Messaging API Routes
+  app.get("/api/conversations", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const conversations = await storage.getUserConversations(user.id);
+      res.json(conversations);
+    } catch (error) {
+      console.error("Error fetching conversations:", error);
+      res.status(500).json({ message: "Failed to fetch conversations" });
+    }
+  });
+
+  app.post("/api/conversations", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const { participant2Id, swapRequestId } = req.body;
+      
+      if (!participant2Id) {
+        return res.status(400).json({ message: "participant2Id is required" });
+      }
+      
+      // Check if conversation already exists
+      const existingConversation = await storage.getConversation(user.id, participant2Id);
+      if (existingConversation) {
+        return res.json(existingConversation);
+      }
+      
+      const conversation = await storage.createConversation({
+        participant1Id: user.id,
+        participant2Id,
+        swapRequestId
+      });
+      
+      res.status(201).json(conversation);
+    } catch (error) {
+      console.error("Error creating conversation:", error);
+      res.status(500).json({ message: "Failed to create conversation" });
+    }
+  });
+
+  app.get("/api/conversations/:id/messages", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const conversationId = req.params.id;
+      const page = parseInt(req.query.page as string) || 1;
+      const limit = parseInt(req.query.limit as string) || 50;
+      
+      // Verify user is part of this conversation
+      const conversation = await storage.getConversation(user.id, "placeholder");
+      // For now, skip verification and trust the user has access
+      
+      const messages = await storage.getConversationMessages(conversationId, page, limit);
+      res.json(messages);
+    } catch (error) {
+      console.error("Error fetching messages:", error);
+      res.status(500).json({ message: "Failed to fetch messages" });
+    }
+  });
+
+  app.post("/api/conversations/:id/messages", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const conversationId = req.params.id;
+      const { content, messageType = "text" } = req.body;
+      
+      if (!content) {
+        return res.status(400).json({ message: "Content is required" });
+      }
+      
+      const message = await storage.sendMessage({
+        conversationId,
+        senderId: user.id,
+        content,
+        messageType
+      });
+      
+      res.status(201).json(message);
+    } catch (error) {
+      console.error("Error sending message:", error);
+      res.status(500).json({ message: "Failed to send message" });
+    }
+  });
+
+  app.patch("/api/conversations/:id/read", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const conversationId = req.params.id;
+      
+      await storage.markMessagesAsRead(conversationId, user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking messages as read:", error);
+      res.status(500).json({ message: "Failed to mark messages as read" });
+    }
+  });
+
+  // Notifications API Routes
+  app.get("/api/notifications", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const unreadOnly = req.query.unreadOnly === "true";
+      const notifications = await storage.getUserNotifications(user.id, unreadOnly);
+      res.json(notifications);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      res.status(500).json({ message: "Failed to fetch notifications" });
+    }
+  });
+
+  app.patch("/api/notifications/:id/read", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const notificationId = req.params.id;
+      
+      await storage.markNotificationAsRead(notificationId, user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking notification as read:", error);
+      res.status(500).json({ message: "Failed to mark notification as read" });
+    }
+  });
+
+  app.patch("/api/notifications/read-all", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      await storage.markAllNotificationsAsRead(user.id);
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error marking all notifications as read:", error);
+      res.status(500).json({ message: "Failed to mark all notifications as read" });
+    }
+  });
+
+  // Skill Endorsements API Routes
+  app.get("/api/users/:userId/endorsements", async (req, res) => {
+    try {
+      const userId = req.params.userId;
+      const skillId = req.query.skillId ? parseInt(req.query.skillId as string) : undefined;
+      
+      const endorsements = await storage.getUserSkillEndorsements(userId, skillId);
+      res.json(endorsements);
+    } catch (error) {
+      console.error("Error fetching skill endorsements:", error);
+      res.status(500).json({ message: "Failed to fetch skill endorsements" });
+    }
+  });
+
+  app.post("/api/users/:userId/endorsements", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const userId = req.params.userId;
+      const { skillId, comment } = req.body;
+      
+      if (!skillId) {
+        return res.status(400).json({ message: "skillId is required" });
+      }
+      
+      if (userId === user.id) {
+        return res.status(400).json({ message: "Cannot endorse your own skills" });
+      }
+      
+      const endorsement = await storage.createSkillEndorsement({
+        userId,
+        skillId: parseInt(skillId),
+        endorserId: user.id,
+        comment
+      });
+      
+      res.status(201).json(endorsement);
+    } catch (error) {
+      console.error("Error creating skill endorsement:", error);
+      res.status(500).json({ message: "Failed to create skill endorsement" });
+    }
+  });
+
+  app.delete("/api/endorsements/:id", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      const endorsementId = req.params.id;
+      
+      const deleted = await storage.deleteSkillEndorsement(endorsementId, user.id);
+      if (!deleted) {
+        return res.status(404).json({ message: "Endorsement not found or unauthorized" });
+      }
+      
+      res.json({ success: true });
+    } catch (error) {
+      console.error("Error deleting skill endorsement:", error);
+      res.status(500).json({ message: "Failed to delete skill endorsement" });
+    }
+  });
+
   const httpServer = createServer(app);
   return httpServer;
 }

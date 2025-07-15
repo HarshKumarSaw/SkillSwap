@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating, type AdminAction, type InsertAdminAction, type SystemMessage, type InsertSystemMessage, type ReportedContent, type InsertReportedContent } from "@shared/schema";
+import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating, type AdminAction, type InsertAdminAction, type SystemMessage, type InsertSystemMessage, type ReportedContent, type InsertReportedContent, type Conversation, type InsertConversation, type ConversationWithUsers, type Message, type InsertMessage, type MessageWithSender, type Notification, type InsertNotification, type SkillEndorsement, type InsertSkillEndorsement } from "@shared/schema";
 import { pool } from "./db";
 
 export interface PaginatedResult<T> {
@@ -58,6 +58,25 @@ export interface IStorage {
   createReport(report: InsertReportedContent): Promise<ReportedContent>;
   getReports(status?: string, page?: number, limit?: number): Promise<PaginatedResult<ReportedContent & { reporter: User; reviewer?: User }>>;
   updateReport(reportId: string, status: string, reviewerId: string): Promise<ReportedContent>;
+  
+  // Messaging
+  createConversation(conversation: InsertConversation): Promise<Conversation>;
+  getConversation(participant1Id: string, participant2Id: string): Promise<Conversation | undefined>;
+  getUserConversations(userId: string): Promise<ConversationWithUsers[]>;
+  sendMessage(message: InsertMessage): Promise<Message>;
+  getConversationMessages(conversationId: string, page?: number, limit?: number): Promise<PaginatedResult<MessageWithSender>>;
+  markMessagesAsRead(conversationId: string, userId: string): Promise<void>;
+  
+  // Notifications
+  createNotification(notification: InsertNotification): Promise<Notification>;
+  getUserNotifications(userId: string, unreadOnly?: boolean): Promise<Notification[]>;
+  markNotificationAsRead(notificationId: string, userId: string): Promise<void>;
+  markAllNotificationsAsRead(userId: string): Promise<void>;
+  
+  // Skill Endorsements
+  createSkillEndorsement(endorsement: InsertSkillEndorsement): Promise<SkillEndorsement>;
+  getUserSkillEndorsements(userId: string, skillId?: number): Promise<(SkillEndorsement & { endorser: User; skill: Skill })[]>;
+  deleteSkillEndorsement(endorsementId: string, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -1264,6 +1283,296 @@ export class DatabaseStorage implements IStorage {
       );
       
       return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  // Messaging Methods
+  async createConversation(conversation: InsertConversation): Promise<Conversation> {
+    const client = await pool.connect();
+    try {
+      const conversationId = `conv_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const result = await client.query(
+        'INSERT INTO conversations (id, participant1_id, participant2_id, swap_request_id) VALUES ($1, $2, $3, $4) RETURNING *',
+        [conversationId, conversation.participant1Id, conversation.participant2Id, conversation.swapRequestId]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getConversation(participant1Id: string, participant2Id: string): Promise<Conversation | undefined> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM conversations WHERE (participant1_id = $1 AND participant2_id = $2) OR (participant1_id = $2 AND participant2_id = $1)',
+        [participant1Id, participant2Id]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserConversations(userId: string): Promise<ConversationWithUsers[]> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT 
+          c.*,
+          u1.id as p1_id, u1.name as p1_name, u1.email as p1_email, u1.profile_photo as p1_photo,
+          u2.id as p2_id, u2.name as p2_name, u2.email as p2_email, u2.profile_photo as p2_photo,
+          lm.content as last_message_content, lm.created_at as last_message_time,
+          (SELECT COUNT(*) FROM messages WHERE conversation_id = c.id AND sender_id != $1 AND is_read = false) as unread_count
+        FROM conversations c
+        JOIN users u1 ON c.participant1_id = u1.id
+        JOIN users u2 ON c.participant2_id = u2.id
+        LEFT JOIN messages lm ON lm.id = (
+          SELECT id FROM messages WHERE conversation_id = c.id ORDER BY created_at DESC LIMIT 1
+        )
+        WHERE c.participant1_id = $1 OR c.participant2_id = $1
+        ORDER BY c.last_message_at DESC
+      `, [userId]);
+
+      return result.rows.map(row => ({
+        id: row.id,
+        participant1Id: row.participant1_id,
+        participant2Id: row.participant2_id,
+        swapRequestId: row.swap_request_id,
+        lastMessageAt: row.last_message_at,
+        createdAt: row.created_at,
+        participant1: { 
+          id: row.p1_id, 
+          name: row.p1_name, 
+          email: row.p1_email, 
+          profilePhoto: row.p1_photo 
+        },
+        participant2: { 
+          id: row.p2_id, 
+          name: row.p2_name, 
+          email: row.p2_email, 
+          profilePhoto: row.p2_photo 
+        },
+        lastMessage: row.last_message_content ? {
+          content: row.last_message_content,
+          createdAt: row.last_message_time
+        } : undefined,
+        unreadCount: parseInt(row.unread_count) || 0
+      }));
+    } finally {
+      client.release();
+    }
+  }
+
+  async sendMessage(message: InsertMessage): Promise<Message> {
+    const client = await pool.connect();
+    try {
+      const messageId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const result = await client.query(
+        'INSERT INTO messages (id, conversation_id, sender_id, content, message_type) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [messageId, message.conversationId, message.senderId, message.content, message.messageType || 'text']
+      );
+      
+      // Update conversation last message time
+      await client.query(
+        'UPDATE conversations SET last_message_at = NOW() WHERE id = $1',
+        [message.conversationId]
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getConversationMessages(conversationId: string, page: number = 1, limit: number = 50): Promise<PaginatedResult<MessageWithSender>> {
+    const client = await pool.connect();
+    try {
+      const offset = (page - 1) * limit;
+      
+      const countResult = await client.query('SELECT COUNT(*) as total FROM messages WHERE conversation_id = $1', [conversationId]);
+      const totalCount = parseInt(countResult.rows[0].total);
+      
+      const result = await client.query(`
+        SELECT 
+          m.*,
+          u.id as sender_id, u.name as sender_name, u.email as sender_email, u.profile_photo as sender_photo
+        FROM messages m
+        JOIN users u ON m.sender_id = u.id
+        WHERE m.conversation_id = $1
+        ORDER BY m.created_at DESC
+        LIMIT $2 OFFSET $3
+      `, [conversationId, limit, offset]);
+
+      const messages = result.rows.map(row => ({
+        id: row.id,
+        conversationId: row.conversation_id,
+        senderId: row.sender_id,
+        content: row.content,
+        messageType: row.message_type,
+        isRead: row.is_read,
+        createdAt: row.created_at,
+        sender: {
+          id: row.sender_id,
+          name: row.sender_name,
+          email: row.sender_email,
+          profilePhoto: row.sender_photo
+        }
+      }));
+
+      return {
+        data: messages,
+        totalCount,
+        totalPages: Math.ceil(totalCount / limit),
+        currentPage: page,
+        hasNextPage: page < Math.ceil(totalCount / limit),
+        hasPreviousPage: page > 1
+      };
+    } finally {
+      client.release();
+    }
+  }
+
+  async markMessagesAsRead(conversationId: string, userId: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query(
+        'UPDATE messages SET is_read = true WHERE conversation_id = $1 AND sender_id != $2 AND is_read = false',
+        [conversationId, userId]
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  // Notification Methods
+  async createNotification(notification: InsertNotification): Promise<Notification> {
+    const client = await pool.connect();
+    try {
+      const notificationId = `notif_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const result = await client.query(
+        'INSERT INTO notifications (id, user_id, type, title, content, related_id) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+        [notificationId, notification.userId, notification.type, notification.title, notification.content, notification.relatedId]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserNotifications(userId: string, unreadOnly: boolean = false): Promise<Notification[]> {
+    const client = await pool.connect();
+    try {
+      let query = 'SELECT * FROM notifications WHERE user_id = $1';
+      if (unreadOnly) {
+        query += ' AND is_read = false';
+      }
+      query += ' ORDER BY created_at DESC LIMIT 50';
+      
+      const result = await client.query(query, [userId]);
+      return result.rows;
+    } finally {
+      client.release();
+    }
+  }
+
+  async markNotificationAsRead(notificationId: string, userId: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query(
+        'UPDATE notifications SET is_read = true WHERE id = $1 AND user_id = $2',
+        [notificationId, userId]
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  async markAllNotificationsAsRead(userId: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query(
+        'UPDATE notifications SET is_read = true WHERE user_id = $1 AND is_read = false',
+        [userId]
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  // Skill Endorsement Methods
+  async createSkillEndorsement(endorsement: InsertSkillEndorsement): Promise<SkillEndorsement> {
+    const client = await pool.connect();
+    try {
+      const endorsementId = `endorse_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      const result = await client.query(
+        'INSERT INTO skill_endorsements (id, user_id, skill_id, endorser_id, comment) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+        [endorsementId, endorsement.userId, endorsement.skillId, endorsement.endorserId, endorsement.comment]
+      );
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserSkillEndorsements(userId: string, skillId?: number): Promise<(SkillEndorsement & { endorser: User; skill: Skill })[]> {
+    const client = await pool.connect();
+    try {
+      let query = `
+        SELECT 
+          se.*,
+          u.id as endorser_id, u.name as endorser_name, u.email as endorser_email, u.profile_photo as endorser_photo,
+          s.id as skill_id, s.name as skill_name, s.category as skill_category
+        FROM skill_endorsements se
+        JOIN users u ON se.endorser_id = u.id
+        JOIN skills s ON se.skill_id = s.id
+        WHERE se.user_id = $1
+      `;
+      
+      const params = [userId];
+      if (skillId) {
+        query += ' AND se.skill_id = $2';
+        params.push(skillId.toString());
+      }
+      
+      query += ' ORDER BY se.created_at DESC';
+      
+      const result = await client.query(query, params);
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        userId: row.user_id,
+        skillId: row.skill_id,
+        endorserId: row.endorser_id,
+        comment: row.comment,
+        createdAt: row.created_at,
+        endorser: {
+          id: row.endorser_id,
+          name: row.endorser_name,
+          email: row.endorser_email,
+          profilePhoto: row.endorser_photo
+        },
+        skill: {
+          id: row.skill_id,
+          name: row.skill_name,
+          category: row.skill_category
+        }
+      }));
+    } finally {
+      client.release();
+    }
+  }
+
+  async deleteSkillEndorsement(endorsementId: string, userId: string): Promise<boolean> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'DELETE FROM skill_endorsements WHERE id = $1 AND endorser_id = $2 RETURNING id',
+        [endorsementId, userId]
+      );
+      return result.rows.length > 0;
     } finally {
       client.release();
     }
