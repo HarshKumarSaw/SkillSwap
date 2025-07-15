@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin, Clock, Star, MessageSquare, Loader2, User } from "lucide-react";
 import { useState } from "react";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
@@ -72,6 +72,13 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const { user: currentUser, isAuthenticated } = useAuth();
+
+  // Fetch current user with skills when needed for swap popup
+  const { data: currentUserWithSkills, isLoading: isLoadingCurrentUser } = useQuery({
+    queryKey: ['/api/users', currentUser?.id],
+    enabled: isAuthenticated && !!currentUser?.id && showSwapPopup,
+    staleTime: 5 * 60 * 1000, // 5 minutes
+  });
 
   const createSwapRequestMutation = useMutation({
     mutationFn: async (data: {
@@ -250,14 +257,14 @@ export function UserCard({ user, currentPage = 1 }: UserCardProps) {
         onAuthSuccess={handleAuthSuccess}
       />
       
-      {currentUser && (
+      {currentUser && currentUserWithSkills && (
         <SwapRequestPopup
           isOpen={showSwapPopup}
           onOpenChange={setShowSwapPopup}
           targetUser={user}
-          currentUser={currentUser}
+          currentUser={currentUserWithSkills}
           onSubmit={handleSwapRequestSubmit}
-          isLoading={isRequesting || createSwapRequestMutation.isPending}
+          isLoading={isRequesting || createSwapRequestMutation.isPending || isLoadingCurrentUser}
         />
       )}
     </>
