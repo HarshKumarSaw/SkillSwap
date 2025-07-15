@@ -23,7 +23,11 @@ export interface IStorage {
   
   // Authentication
   authenticateUser(email: string, password: string): Promise<User | null>;
-  createUserAccount(name: string, email: string, password: string, location?: string): Promise<User>;
+  createUserAccount(name: string, email: string, password: string, location?: string, securityQuestion?: string, securityAnswer?: string): Promise<User>;
+  
+  // Password Reset
+  getSecurityQuestion(email: string): Promise<string | null>;
+  resetPassword(email: string, securityAnswer: string, newPassword: string): Promise<boolean>;
   
   // Skills
   getAllSkills(): Promise<Skill[]>;
@@ -935,15 +939,15 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async createUserAccount(name: string, email: string, password: string, location?: string): Promise<User> {
+  async createUserAccount(name: string, email: string, password: string, location?: string, securityQuestion?: string, securityAnswer?: string): Promise<User> {
     const client = await pool.connect();
     try {
       // Generate a unique user ID
       const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
       const result = await client.query(
-        `INSERT INTO users (id, name, email, password, location, profile_photo, availability, is_public, rating, join_date, bio, is_admin, is_banned) 
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) 
+        `INSERT INTO users (id, name, email, password, location, profile_photo, availability, is_public, rating, join_date, bio, is_admin, is_banned, security_question, security_answer) 
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) 
          RETURNING *`,
         [
           userId,
@@ -958,10 +962,50 @@ export class DatabaseStorage implements IStorage {
           new Date(),
           `New user on skill swap platform`,
           false,
-          false
+          false,
+          securityQuestion || null,
+          securityAnswer || null
         ]
       );
       return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getSecurityQuestion(email: string): Promise<string | null> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT security_question FROM users WHERE email = $1',
+        [email]
+      );
+      return result.rows[0]?.security_question || null;
+    } finally {
+      client.release();
+    }
+  }
+
+  async resetPassword(email: string, securityAnswer: string, newPassword: string): Promise<boolean> {
+    const client = await pool.connect();
+    try {
+      // Check if the security answer matches
+      const result = await client.query(
+        'SELECT id FROM users WHERE email = $1 AND security_answer = $2',
+        [email, securityAnswer]
+      );
+      
+      if (result.rows.length === 0) {
+        return false; // Incorrect answer or email
+      }
+
+      // Update the password
+      await client.query(
+        'UPDATE users SET password = $1 WHERE email = $2',
+        [newPassword, email]
+      );
+      
+      return true;
     } finally {
       client.release();
     }

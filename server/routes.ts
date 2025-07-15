@@ -41,7 +41,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post("/api/auth/signup", async (req, res) => {
     try {
-      const { name, email, password, location } = req.body;
+      const { name, email, password, location, securityQuestion, securityAnswer } = req.body;
       
       if (!name || !email || !password) {
         return res.status(400).json({ message: "Name, email, and password are required" });
@@ -54,7 +54,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       
       // Create new user account
-      const user = await storage.createUserAccount(name, email, password, location);
+      const user = await storage.createUserAccount(name, email, password, location, securityQuestion, securityAnswer);
       
       // Store in session
       (req as any).session.user = user;

@@ -19,6 +19,8 @@ export const users = pgTable("users", {
   isBanned: boolean("is_banned").default(false),
   banReason: text("ban_reason"),
   bannedAt: text("banned_at"),
+  securityQuestion: text("security_question"), // The chosen security question
+  securityAnswer: text("security_answer"), // Hashed answer to the security question
   createdAt: text("created_at").default("NOW()"),
 });
 
