@@ -68,14 +68,14 @@ export function SwapRequestPopup({
                 <SelectValue placeholder="Choose a skill you offer" />
               </SelectTrigger>
               <SelectContent>
-                {currentUser.skillsOffered.map((skill) => (
+                {(currentUser.skillsOffered || []).map((skill) => (
                   <SelectItem key={skill.id} value={skill.name}>
                     {skill.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {currentUser.skillsOffered.length === 0 && (
+            {(!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) && (
               <p className="text-sm text-muted-foreground">
                 You need to add skills to your profile first.
               </p>
@@ -89,14 +89,14 @@ export function SwapRequestPopup({
                 <SelectValue placeholder="Choose a skill you want to learn" />
               </SelectTrigger>
               <SelectContent>
-                {targetUser.skillsOffered.map((skill) => (
+                {(targetUser.skillsOffered || []).map((skill) => (
                   <SelectItem key={skill.id} value={skill.name}>
                     {skill.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {targetUser.skillsOffered.length === 0 && (
+            {(!targetUser.skillsOffered || targetUser.skillsOffered.length === 0) && (
               <p className="text-sm text-muted-foreground">
                 {targetUser.name} hasn't added any skills yet.
               </p>
@@ -120,7 +120,7 @@ export function SwapRequestPopup({
             </Button>
             <Button 
               type="submit" 
-              disabled={!senderSkill || !receiverSkill || isLoading || currentUser.skillsOffered.length === 0 || targetUser.skillsOffered.length === 0}
+              disabled={!senderSkill || !receiverSkill || isLoading || (!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) || (!targetUser.skillsOffered || targetUser.skillsOffered.length === 0)}
             >
               {isLoading ? (
                 <>
