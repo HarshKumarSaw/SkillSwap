@@ -3,9 +3,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { UserWithSkills } from "@shared/schema";
-import { MessageSquare, Loader2, X } from "lucide-react";
+import { MessageSquare, Loader2, X, ChevronDown } from "lucide-react";
 
 interface SwapRequestPopupProps {
   isOpen: boolean;
@@ -85,12 +87,48 @@ export function SwapRequestPopup({
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-3">
-            <Label>What skills do you offer? (Select at least one)</Label>
+          <div className="space-y-2">
+            <Label>What skills do you offer?</Label>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between"
+                >
+                  {senderSkills.length === 0 
+                    ? "Select at least one skill" 
+                    : `${senderSkills.length} skill${senderSkills.length > 1 ? 's' : ''} selected`}
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <div className="max-h-48 overflow-y-auto p-2">
+                  {(currentUser.skillsOffered || []).map((skill) => (
+                    <div key={skill.id} className="flex items-center space-x-2 p-2 hover:bg-accent rounded cursor-pointer" onClick={() => toggleSenderSkill(skill.name)}>
+                      <Checkbox
+                        id={`sender-${skill.id}`}
+                        checked={senderSkills.includes(skill.name)}
+                        onCheckedChange={() => toggleSenderSkill(skill.name)}
+                      />
+                      <Label htmlFor={`sender-${skill.id}`} className="text-sm font-normal cursor-pointer">
+                        {skill.name}
+                      </Label>
+                    </div>
+                  ))}
+                  {(!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) && (
+                    <p className="text-sm text-muted-foreground p-2">
+                      You need to add skills to your profile first.
+                    </p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             
             {/* Selected skills display */}
             {senderSkills.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {senderSkills.map((skill) => (
                   <span key={skill} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm flex items-center gap-1">
                     {skill}
@@ -102,36 +140,50 @@ export function SwapRequestPopup({
                 ))}
               </div>
             )}
-
-            {/* Skills checklist */}
-            <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
-              {(currentUser.skillsOffered || []).map((skill) => (
-                <div key={skill.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`sender-${skill.id}`}
-                    checked={senderSkills.includes(skill.name)}
-                    onCheckedChange={() => toggleSenderSkill(skill.name)}
-                  />
-                  <Label htmlFor={`sender-${skill.id}`} className="text-sm font-normal cursor-pointer">
-                    {skill.name}
-                  </Label>
-                </div>
-              ))}
-            </div>
-            
-            {(!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) && (
-              <p className="text-sm text-muted-foreground">
-                You need to add skills to your profile first.
-              </p>
-            )}
           </div>
 
-          <div className="space-y-3">
-            <Label>What skills do you want from {targetUser.name}? (Select at least one)</Label>
+          <div className="space-y-2">
+            <Label>What skills do you want from {targetUser.name}?</Label>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between"
+                >
+                  {receiverSkills.length === 0 
+                    ? "Select at least one skill" 
+                    : `${receiverSkills.length} skill${receiverSkills.length > 1 ? 's' : ''} selected`}
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-full p-0">
+                <div className="max-h-48 overflow-y-auto p-2">
+                  {(targetUser.skillsOffered || []).map((skill) => (
+                    <div key={skill.id} className="flex items-center space-x-2 p-2 hover:bg-accent rounded cursor-pointer" onClick={() => toggleReceiverSkill(skill.name)}>
+                      <Checkbox
+                        id={`receiver-${skill.id}`}
+                        checked={receiverSkills.includes(skill.name)}
+                        onCheckedChange={() => toggleReceiverSkill(skill.name)}
+                      />
+                      <Label htmlFor={`receiver-${skill.id}`} className="text-sm font-normal cursor-pointer">
+                        {skill.name}
+                      </Label>
+                    </div>
+                  ))}
+                  {(!targetUser.skillsOffered || targetUser.skillsOffered.length === 0) && (
+                    <p className="text-sm text-muted-foreground p-2">
+                      {targetUser.name} hasn't added any skills yet.
+                    </p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
             
             {/* Selected skills display */}
             {receiverSkills.length > 0 && (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-2 mt-2">
                 {receiverSkills.map((skill) => (
                   <span key={skill} className="bg-secondary/10 text-secondary-foreground px-2 py-1 rounded-md text-sm flex items-center gap-1">
                     {skill}
@@ -142,28 +194,6 @@ export function SwapRequestPopup({
                   </span>
                 ))}
               </div>
-            )}
-
-            {/* Skills checklist */}
-            <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
-              {(targetUser.skillsOffered || []).map((skill) => (
-                <div key={skill.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`receiver-${skill.id}`}
-                    checked={receiverSkills.includes(skill.name)}
-                    onCheckedChange={() => toggleReceiverSkill(skill.name)}
-                  />
-                  <Label htmlFor={`receiver-${skill.id}`} className="text-sm font-normal cursor-pointer">
-                    {skill.name}
-                  </Label>
-                </div>
-              ))}
-            </div>
-            
-            {(!targetUser.skillsOffered || targetUser.skillsOffered.length === 0) && (
-              <p className="text-sm text-muted-foreground">
-                {targetUser.name} hasn't added any skills yet.
-              </p>
             )}
           </div>
 
