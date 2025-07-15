@@ -14,7 +14,7 @@ export interface IStorage {
   // Users
   getUser(id: number): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
-  getUserWithSkills(id: string): Promise<UserWithSkills | undefined>;
+  getUserWithSkills(id: string, allowPrivate?: boolean): Promise<UserWithSkills | undefined>;
   createUser(user: InsertUser): Promise<User>;
   updateUser(id: string, userData: Partial<User>): Promise<User>;
   updateUserSkills(userId: string, skillsOffered: string[], skillsWanted: string[]): Promise<void>;
@@ -100,11 +100,14 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getUserWithSkills(id: string): Promise<UserWithSkills | undefined> {
+  async getUserWithSkills(id: string, allowPrivate: boolean = false): Promise<UserWithSkills | undefined> {
     const client = await pool.connect();
     try {
-      // Get the user
-      const userResult = await client.query('SELECT * FROM users WHERE id = $1 AND is_public = true', [id]);
+      // Get the user - allow private profiles if requested
+      const query = allowPrivate 
+        ? 'SELECT * FROM users WHERE id = $1' 
+        : 'SELECT * FROM users WHERE id = $1 AND is_public = true';
+      const userResult = await client.query(query, [id]);
       if (userResult.rows.length === 0) {
         return undefined;
       }
@@ -200,6 +203,10 @@ export class DatabaseStorage implements IStorage {
       if (userData.availability !== undefined) {
         fields.push(`availability = $${paramIndex++}`);
         values.push(JSON.stringify(userData.availability));
+      }
+      if (userData.isPublic !== undefined) {
+        fields.push(`is_public = $${paramIndex++}`);
+        values.push(userData.isPublic);
       }
 
       if (fields.length === 0) {

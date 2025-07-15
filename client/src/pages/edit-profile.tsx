@@ -28,6 +28,7 @@ export default function EditProfile() {
     location: "",
     bio: "",
     profilePhoto: "",
+    isPublic: true,
     availability: {
       dates: [] as string[],
       times: [] as string[]
@@ -69,6 +70,7 @@ export default function EditProfile() {
         location: userProfile.location || "",
         bio: userProfile.bio || "",
         profilePhoto: userProfile.profilePhoto || userProfile.profile_photo || "",
+        isPublic: userProfile.isPublic ?? true,
         availability: {
           dates: userProfile.availability?.dates || [],
           times: userProfile.availability?.times || []
@@ -243,6 +245,21 @@ export default function EditProfile() {
                   placeholder="https://example.com/photo.jpg"
                 />
               </div>
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="isPublic"
+                  checked={formData.isPublic}
+                  onCheckedChange={(checked) => handleInputChange("isPublic", checked)}
+                />
+                <Label htmlFor="isPublic" className="text-sm cursor-pointer">
+                  Make my profile public (visible to other users)
+                </Label>
+              </div>
+              {!formData.isPublic && (
+                <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                  <p>ℹ️ Your profile is currently private. Other users won't be able to see your profile or send you swap requests.</p>
+                </div>
+              )}
             </CardContent>
           </Card>
 

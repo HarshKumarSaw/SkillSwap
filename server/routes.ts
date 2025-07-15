@@ -149,7 +149,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get("/api/users/:id", async (req, res) => {
     try {
       const { id } = req.params;
-      const user = await storage.getUserWithSkills(id);
+      const currentUserId = req.session?.userId;
+      
+      // If user is viewing their own profile, allow access even if private
+      const user = await storage.getUserWithSkills(id, currentUserId === id);
       
       if (!user) {
         res.status(404).json({ message: "User not found" });
