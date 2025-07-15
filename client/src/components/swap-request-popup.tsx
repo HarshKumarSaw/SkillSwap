@@ -80,17 +80,17 @@ export function SwapRequestPopup({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[500px]">
-        <DialogHeader>
-          <DialogTitle className="flex items-center">
-            <MessageSquare className="w-5 h-5 mr-2" />
+      <DialogContent className="sm:max-w-[520px] max-h-[90vh] overflow-y-auto">
+        <DialogHeader className="pb-6">
+          <DialogTitle className="flex items-center gap-3 text-lg font-semibold">
+            <MessageSquare className="w-5 h-5 text-primary" />
             Request Skill Swap with {targetUser.name}
           </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label>What skills do you offer?</Label>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-foreground">What skills do you offer?</Label>
             
             <Popover open={senderDropdownOpen} onOpenChange={setSenderDropdownOpen}>
               <PopoverTrigger asChild>
@@ -139,12 +139,12 @@ export function SwapRequestPopup({
             
             {/* Selected skills display */}
             {senderSkills.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-lg border">
                 {senderSkills.map((skill) => (
-                  <span key={skill} className="bg-primary/10 text-primary px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                  <span key={skill} className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm flex items-center gap-2 border border-primary/20">
                     {skill}
                     <X 
-                      className="w-3 h-3 cursor-pointer hover:text-primary/60" 
+                      className="w-3 h-3 cursor-pointer hover:text-primary/60 transition-colors" 
                       onClick={() => removeSenderSkill(skill)}
                     />
                   </span>
@@ -153,8 +153,8 @@ export function SwapRequestPopup({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label>What skills do you want from {targetUser.name}?</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-foreground">What skills do you want from {targetUser.name}?</Label>
             
             <Popover open={receiverDropdownOpen} onOpenChange={setReceiverDropdownOpen}>
               <PopoverTrigger asChild>
@@ -203,12 +203,12 @@ export function SwapRequestPopup({
             
             {/* Selected skills display */}
             {receiverSkills.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-lg border">
                 {receiverSkills.map((skill) => (
-                  <span key={skill} className="bg-secondary/10 text-secondary-foreground px-2 py-1 rounded-md text-sm flex items-center gap-1">
+                  <span key={skill} className="bg-secondary/10 text-secondary-foreground px-3 py-1.5 rounded-full text-sm flex items-center gap-2 border border-secondary/20">
                     {skill}
                     <X 
-                      className="w-3 h-3 cursor-pointer hover:text-muted-foreground" 
+                      className="w-3 h-3 cursor-pointer hover:text-muted-foreground transition-colors" 
                       onClick={() => removeReceiverSkill(skill)}
                     />
                   </span>
@@ -217,24 +217,25 @@ export function SwapRequestPopup({
             )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="message">Message (optional)</Label>
+          <div className="space-y-3 pt-2">
+            <Label htmlFor="message" className="text-sm font-medium text-foreground">Message (optional)</Label>
             <Textarea
               id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Add a personal message..."
-              className="min-h-[80px]"
+              className="min-h-[100px] resize-none focus:ring-2 focus:ring-primary/20"
             />
           </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={handleClose}>
+          <div className="flex justify-end space-x-3 pt-6 border-t border-border">
+            <Button type="button" variant="outline" onClick={handleClose} className="px-6">
               Cancel
             </Button>
             <Button 
               type="submit" 
               disabled={senderSkills.length === 0 || receiverSkills.length === 0 || isLoading || (!currentUser.skillsOffered || currentUser.skillsOffered.length === 0) || (!targetUser.skillsOffered || targetUser.skillsOffered.length === 0)}
+              className="px-6 bg-primary hover:bg-primary/90"
             >
               {isLoading ? (
                 <>
