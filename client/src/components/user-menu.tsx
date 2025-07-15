@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { LogIn, LogOut, User, Settings, Edit } from "lucide-react";
+import { LogIn, LogOut, User, Settings, Edit, ArrowRightLeft } from "lucide-react";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthPopup } from "./auth-popup";
 import { useLocation } from "wouter";
@@ -74,6 +74,10 @@ export function UserMenu() {
         <DropdownMenuItem onClick={() => setLocation(`/edit-profile`)}>
           <Edit className="mr-2 h-4 w-4" />
           <span>Edit Profile</span>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLocation(`/swap-requests`)}>
+          <ArrowRightLeft className="mr-2 h-4 w-4" />
+          <span>Swap Requests</span>
         </DropdownMenuItem>
         <DropdownMenuItem>
           <Settings className="mr-2 h-4 w-4" />

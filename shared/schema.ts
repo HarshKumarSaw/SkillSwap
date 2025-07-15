@@ -40,8 +40,20 @@ export const swapRequests = pgTable("swap_requests", {
   targetId: text("receiver_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   senderSkill: text("sender_skill"),
   receiverSkill: text("receiver_skill"),
-  status: text("status").notNull().default("pending"), // pending, accepted, rejected, cancelled
+  status: text("status").notNull().default("pending"), // pending, accepted, rejected, cancelled, completed
   message: text("message"),
+  createdAt: text("created_at").default("NOW()"),
+  updatedAt: text("updated_at").default("NOW()"),
+});
+
+export const swapRatings = pgTable("swap_ratings", {
+  id: text("id").primaryKey(),
+  swapRequestId: text("swap_request_id").notNull().references(() => swapRequests.id, { onDelete: "cascade" }),
+  raterId: text("rater_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  ratedId: text("rated_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  rating: integer("rating").notNull(), // 1-5 stars
+  feedback: text("feedback"),
+  createdAt: text("created_at").default("NOW()"),
 });
 
 // Relations
@@ -50,6 +62,8 @@ export const usersRelations = relations(users, ({ many }) => ({
   skillsWanted: many(userSkillsWanted),
   sentRequests: many(swapRequests, { relationName: "requester" }),
   receivedRequests: many(swapRequests, { relationName: "target" }),
+  ratingsGiven: many(swapRatings, { relationName: "rater" }),
+  ratingsReceived: many(swapRatings, { relationName: "rated" }),
 }));
 
 export const skillsRelations = relations(skills, ({ many }) => ({
@@ -79,7 +93,7 @@ export const userSkillsWantedRelations = relations(userSkillsWanted, ({ one }) =
   }),
 }));
 
-export const swapRequestsRelations = relations(swapRequests, ({ one }) => ({
+export const swapRequestsRelations = relations(swapRequests, ({ one, many }) => ({
   requester: one(users, {
     fields: [swapRequests.requesterId],
     references: [users.id],
@@ -89,6 +103,24 @@ export const swapRequestsRelations = relations(swapRequests, ({ one }) => ({
     fields: [swapRequests.targetId],
     references: [users.id],
     relationName: "target",
+  }),
+  ratings: many(swapRatings),
+}));
+
+export const swapRatingsRelations = relations(swapRatings, ({ one }) => ({
+  swapRequest: one(swapRequests, {
+    fields: [swapRatings.swapRequestId],
+    references: [swapRequests.id],
+  }),
+  rater: one(users, {
+    fields: [swapRatings.raterId],
+    references: [users.id],
+    relationName: "rater",
+  }),
+  rated: one(users, {
+    fields: [swapRatings.ratedId],
+    references: [users.id],
+    relationName: "rated",
   }),
 }));
 
@@ -105,6 +137,13 @@ export const insertSkillSchema = createInsertSchema(skills).omit({
 
 export const insertSwapRequestSchema = createInsertSchema(swapRequests).omit({
   id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export const insertSwapRatingSchema = createInsertSchema(swapRatings).omit({
+  id: true,
+  createdAt: true,
 });
 
 // Types
@@ -114,11 +153,18 @@ export type Skill = typeof skills.$inferSelect;
 export type InsertSkill = z.infer<typeof insertSkillSchema>;
 export type SwapRequest = typeof swapRequests.$inferSelect;
 export type InsertSwapRequest = z.infer<typeof insertSwapRequestSchema>;
+export type SwapRating = typeof swapRatings.$inferSelect;
+export type InsertSwapRating = z.infer<typeof insertSwapRatingSchema>;
 
 // Extended types for frontend use
 export type UserWithSkills = User & {
   skillsOffered: Skill[];
   skillsWanted: Skill[];
+};
+
+export type SwapRequestWithUsers = SwapRequest & {
+  requester: User;
+  target: User;
 };
 
 // Availability structure for better type safety

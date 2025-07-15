@@ -8,6 +8,7 @@ import { AuthProvider } from "@/hooks/use-auth";
 import Home from "@/pages/home";
 import UserProfile from "@/pages/user-profile";
 import EditProfile from "@/pages/edit-profile";
+import SwapRequests from "@/pages/swap-requests";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -16,6 +17,7 @@ function Router() {
       <Route path="/" component={Home} />
       <Route path="/profile/:id" component={UserProfile} />
       <Route path="/edit-profile" component={EditProfile} />
+      <Route path="/swap-requests" component={SwapRequests} />
       <Route component={NotFound} />
     </Switch>
   );

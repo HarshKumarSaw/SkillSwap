@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest } from "@shared/schema";
+import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating } from "@shared/schema";
 import { pool } from "./db";
 
 export interface PaginatedResult<T> {
@@ -31,7 +31,14 @@ export interface IStorage {
   
   // Swap Requests
   createSwapRequest(request: InsertSwapRequest): Promise<SwapRequest>;
-  getUserSwapRequests(userId: number): Promise<SwapRequest[]>;
+  getUserSwapRequests(userId: string): Promise<SwapRequestWithUsers[]>;
+  updateSwapRequestStatus(requestId: string, status: string, userId: string): Promise<SwapRequest>;
+  deleteSwapRequest(requestId: string, userId: string): Promise<boolean>;
+  
+  // Ratings
+  createSwapRating(rating: InsertSwapRating): Promise<SwapRating>;
+  getSwapRating(swapRequestId: string, raterId: string): Promise<SwapRating | undefined>;
+  updateUserRating(userId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -697,14 +704,134 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async getUserSwapRequests(userId: number): Promise<SwapRequest[]> {
+  async getUserSwapRequests(userId: string): Promise<SwapRequestWithUsers[]> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT 
+          sr.*,
+          requester.id as requester_id, requester.name as requester_name, requester.email as requester_email, requester.profile_photo as requester_photo,
+          target.id as target_id, target.name as target_name, target.email as target_email, target.profile_photo as target_photo
+        FROM swap_requests sr
+        JOIN users requester ON sr.sender_id = requester.id
+        JOIN users target ON sr.receiver_id = target.id
+        WHERE sr.sender_id = $1 OR sr.receiver_id = $1
+        ORDER BY sr.created_at DESC
+      `, [userId]);
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        requesterId: row.sender_id,
+        targetId: row.receiver_id,
+        senderSkill: row.sender_skill,
+        receiverSkill: row.receiver_skill,
+        status: row.status,
+        message: row.message,
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+        requester: {
+          id: row.requester_id,
+          name: row.requester_name,
+          email: row.requester_email,
+          profilePhoto: row.requester_photo,
+        },
+        target: {
+          id: row.target_id,
+          name: row.target_name,
+          email: row.target_email,
+          profilePhoto: row.target_photo,
+        }
+      }));
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateSwapRequestStatus(requestId: string, status: string, userId: string): Promise<SwapRequest> {
+    const client = await pool.connect();
+    try {
+      // Verify user has permission to update this request
+      const checkResult = await client.query(
+        'SELECT * FROM swap_requests WHERE id = $1 AND (sender_id = $2 OR receiver_id = $2)',
+        [requestId, userId]
+      );
+      
+      if (checkResult.rows.length === 0) {
+        throw new Error('Unauthorized to update this swap request');
+      }
+      
+      const result = await client.query(
+        'UPDATE swap_requests SET status = $1, updated_at = NOW() WHERE id = $2 RETURNING *',
+        [status, requestId]
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async deleteSwapRequest(requestId: string, userId: string): Promise<boolean> {
+    const client = await pool.connect();
+    try {
+      // Only allow sender to delete their own request, or receiver to delete pending requests
+      const result = await client.query(
+        'DELETE FROM swap_requests WHERE id = $1 AND (sender_id = $2 OR (receiver_id = $2 AND status = \'pending\')) RETURNING id',
+        [requestId, userId]
+      );
+      
+      return result.rows.length > 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  async createSwapRating(rating: InsertSwapRating): Promise<SwapRating> {
+    const client = await pool.connect();
+    try {
+      const ratingId = `rating_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const result = await client.query(
+        'INSERT INTO swap_ratings (id, swap_request_id, rater_id, rated_id, rating, feedback, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW()) RETURNING *',
+        [ratingId, rating.swapRequestId, rating.raterId, rating.ratedId, rating.rating, rating.feedback]
+      );
+      
+      // Update the rated user's overall rating
+      await this.updateUserRating(rating.ratedId);
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getSwapRating(swapRequestId: string, raterId: string): Promise<SwapRating | undefined> {
     const client = await pool.connect();
     try {
       const result = await client.query(
-        'SELECT * FROM swap_requests WHERE sender_id = $1 OR receiver_id = $1',
+        'SELECT * FROM swap_ratings WHERE swap_request_id = $1 AND rater_id = $2',
+        [swapRequestId, raterId]
+      );
+      return result.rows[0] || undefined;
+    } finally {
+      client.release();
+    }
+  }
+
+  async updateUserRating(userId: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT AVG(rating)::numeric(3,2) as avg_rating, COUNT(*) as review_count FROM swap_ratings WHERE rated_id = $1',
         [userId]
       );
-      return result.rows;
+      
+      const { avg_rating, review_count } = result.rows[0];
+      
+      await client.query(
+        'UPDATE users SET rating = $1, review_count = $2 WHERE id = $3',
+        [avg_rating || 0, review_count || 0, userId]
+      );
     } finally {
       client.release();
     }

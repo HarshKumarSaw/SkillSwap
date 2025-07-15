@@ -1,7 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
-import { insertSwapRequestSchema } from "@shared/schema";
+import { insertSwapRequestSchema, insertSwapRatingSchema } from "@shared/schema";
 import { z } from "zod";
 import { pool } from "./db";
 
@@ -215,6 +215,99 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         console.error("Error creating swap request:", error);
         res.status(500).json({ message: "Failed to create swap request" });
+      }
+    }
+  });
+
+  // Get user's swap requests
+  app.get("/api/swap-requests", async (req, res) => {
+    try {
+      const user = (req as any).session?.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const swapRequests = await storage.getUserSwapRequests(user.id);
+      res.json(swapRequests);
+    } catch (error) {
+      console.error("Error fetching swap requests:", error);
+      res.status(500).json({ message: "Failed to fetch swap requests" });
+    }
+  });
+
+  // Update swap request status
+  app.patch("/api/swap-requests/:id/status", async (req, res) => {
+    try {
+      const user = (req as any).session?.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { status } = req.body;
+      if (!status || !["accepted", "rejected", "cancelled", "completed"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status" });
+      }
+
+      const updatedRequest = await storage.updateSwapRequestStatus(req.params.id, status, user.id);
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Error updating swap request:", error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Unauthorized to update this request" });
+      } else {
+        res.status(500).json({ message: "Failed to update swap request" });
+      }
+    }
+  });
+
+  // Delete swap request
+  app.delete("/api/swap-requests/:id", async (req, res) => {
+    try {
+      const user = (req as any).session?.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const deleted = await storage.deleteSwapRequest(req.params.id, user.id);
+      if (!deleted) {
+        return res.status(403).json({ message: "Unauthorized to delete this request" });
+      }
+
+      res.json({ message: "Swap request deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting swap request:", error);
+      res.status(500).json({ message: "Failed to delete swap request" });
+    }
+  });
+
+  // Create rating for completed swap
+  app.post("/api/swap-requests/:id/rating", async (req, res) => {
+    try {
+      const user = (req as any).session?.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const validatedData = insertSwapRatingSchema.parse({
+        ...req.body,
+        swapRequestId: req.params.id,
+        raterId: user.id
+      });
+
+      // Check if rating already exists
+      const existingRating = await storage.getSwapRating(req.params.id, user.id);
+      if (existingRating) {
+        return res.status(400).json({ message: "You have already rated this swap" });
+      }
+
+      const rating = await storage.createSwapRating(validatedData);
+      res.status(201).json(rating);
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid rating data", errors: error.errors });
+      } else {
+        console.error("Error creating rating:", error);
+        res.status(500).json({ message: "Failed to create rating" });
       }
     }
   });
