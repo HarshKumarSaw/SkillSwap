@@ -166,6 +166,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user feedback
+  app.get("/api/users/:id/feedback", async (req, res) => {
+    try {
+      const { id } = req.params;
+      const feedback = await storage.getUserFeedback(id);
+      res.json(feedback);
+    } catch (error) {
+      console.error("Error fetching user feedback:", error);
+      res.status(500).json({ message: "Failed to fetch user feedback" });
+    }
+  });
+
   // Update user profile
   app.put("/api/users/:id", async (req, res) => {
     try {

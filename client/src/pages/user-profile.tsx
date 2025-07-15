@@ -4,6 +4,8 @@ import { UserWithSkills } from "@shared/schema";
 import { SkillTag } from "@/components/skill-tag";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { MapPin, Clock, Star, ArrowLeft, MessageSquare, Loader2, User } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -108,6 +110,11 @@ export default function UserProfile() {
   }
 
   const isLoading = userLoading;
+
+  const { data: feedback = [], isLoading: feedbackLoading } = useQuery({
+    queryKey: [`/api/users/${id}/feedback`],
+    enabled: !!id,
+  });
 
   const createSwapRequestMutation = useMutation({
     mutationFn: async (targetId: string) => {
@@ -313,6 +320,54 @@ export default function UserProfile() {
                 </div>
               ) : (
                 <p className="text-muted-foreground">No skills wanted yet</p>
+              )}
+            </div>
+
+            {/* Feedback Section */}
+            <div>
+              <h3 className="text-lg font-semibold mb-3">Feedback & Reviews</h3>
+              {feedbackLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <span className="ml-2 text-muted-foreground">Loading feedback...</span>
+                </div>
+              ) : feedback.length > 0 ? (
+                <div className="space-y-3">
+                  {feedback.map((item: any) => (
+                    <div key={item.id} className="bg-muted/50 rounded-lg p-4">
+                      <div className="flex items-start gap-3">
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage src={item.rater.profilePhoto || ""} />
+                          <AvatarFallback>{item.rater.name[0]}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1">
+                          <div className="flex items-center gap-2 mb-1">
+                            <span className="font-medium text-sm">{item.rater.name}</span>
+                            <div className="flex items-center">
+                              {[...Array(5)].map((_, i) => (
+                                <Star
+                                  key={i}
+                                  className={`h-3 w-3 ${
+                                    i < item.rating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                                  }`}
+                                />
+                              ))}
+                            </div>
+                            <Badge variant="outline" className="text-xs">
+                              {item.ratingType === 'post_request' ? 'Initial' : 'Completed'}
+                            </Badge>
+                          </div>
+                          <p className="text-sm text-muted-foreground">{item.feedback}</p>
+                          <p className="text-xs text-muted-foreground mt-1">
+                            {new Date(item.createdAt).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-muted-foreground">No feedback available yet</p>
               )}
             </div>
 

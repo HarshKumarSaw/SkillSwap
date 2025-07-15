@@ -11,6 +11,12 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 **July 15, 2025**:
+- ✓ **Enhanced Feedback System** - Users can now provide immediate feedback after sending swap requests
+- ✓ **Dual Rating Types** - Separate rating types for post-request feedback and post-completion reviews
+- ✓ **User Profile Feedback Display** - Added feedback section to profile pages showing ratings and reviews
+- ✓ **Sample Feedback Data** - Added realistic feedback entries for multiple users to demonstrate system
+- ✓ **Context-Aware UI** - Rating dialog shows different text for initial feedback vs completion ratings
+- ✓ **Backend Support** - Updated API endpoints and database methods to handle rating types properly
 - ✓ **Phase 2: Admin System Complete** - Implemented comprehensive admin dashboard with user management, content moderation, and system messaging
 - ✓ **Admin Authentication** - Created admin user (admin@skillswap.com, password: 12345) with role-based access control
 - ✓ **User Management** - Ban/unban functionality with reason tracking and complete audit logging

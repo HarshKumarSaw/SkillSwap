@@ -38,6 +38,7 @@ export interface IStorage {
   // Ratings
   createSwapRating(rating: InsertSwapRating): Promise<SwapRating>;
   getSwapRating(swapRequestId: string, raterId: string, ratingType?: string): Promise<SwapRating | undefined>;
+  getUserFeedback(userId: string): Promise<(SwapRating & { rater: User })[]>;
   updateUserRating(userId: string): Promise<void>;
   
   // Admin Functions
@@ -863,6 +864,40 @@ export class DatabaseStorage implements IStorage {
       
       const result = await client.query(query, params);
       return result.rows[0] || undefined;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserFeedback(userId: string): Promise<(SwapRating & { rater: User })[]> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(`
+        SELECT 
+          sr.id, sr.swap_request_id, sr.rater_id, sr.rated_id, sr.rating, 
+          sr.feedback, sr.rating_type, sr.created_at,
+          u.id as rater_id, u.name as rater_name, u.profile_photo as rater_photo
+        FROM swap_ratings sr
+        JOIN users u ON sr.rater_id = u.id
+        WHERE sr.rated_id = $1 AND sr.feedback IS NOT NULL
+        ORDER BY sr.created_at DESC
+      `, [userId]);
+      
+      return result.rows.map(row => ({
+        id: row.id,
+        swapRequestId: row.swap_request_id,
+        raterId: row.rater_id,
+        ratedId: row.rated_id,
+        rating: row.rating,
+        feedback: row.feedback,
+        ratingType: row.rating_type,
+        createdAt: row.created_at,
+        rater: {
+          id: row.rater_id,
+          name: row.rater_name,
+          profilePhoto: row.rater_photo
+        }
+      }));
     } finally {
       client.release();
     }
