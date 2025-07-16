@@ -88,6 +88,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+  // Password reset routes
+  app.post("/api/auth/get-security-question", async (req, res) => {
+    try {
+      const { email } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      const securityQuestion = await storage.getSecurityQuestion(email);
+      
+      if (!securityQuestion) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      res.json({ securityQuestion });
+    } catch (error) {
+      console.error("Get security question error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/auth/reset-password", async (req, res) => {
+    try {
+      const { email, securityAnswer, newPassword } = req.body;
+      
+      if (!email || !securityAnswer || !newPassword) {
+        return res.status(400).json({ message: "Email, security answer, and new password are required" });
+      }
+      
+      const resetSuccessful = await storage.resetPassword(email, securityAnswer, newPassword);
+      
+      if (!resetSuccessful) {
+        return res.status(400).json({ message: "Incorrect security answer or email" });
+      }
+      
+      res.json({ message: "Password reset successful" });
+    } catch (error) {
+      console.error("Reset password error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
   // Database test route
   app.get("/api/test-db", async (req, res) => {
     try {
