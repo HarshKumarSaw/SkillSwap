@@ -74,10 +74,13 @@
   .swap-popup-mobile {
     left: 1rem !important;
     right: 1rem !important;
+    top: 1rem !important;
+    bottom: 1rem !important;
     transform: none !important;
     width: calc(100vw - 2rem) !important;
     max-width: calc(100vw - 2rem) !important;
-    margin-left: 0 !important;
-    margin-right: 0 !important;
+    height: auto !important;
+    max-height: calc(100vh - 2rem) !important;
+    margin: 0 !important;
   }
 }
