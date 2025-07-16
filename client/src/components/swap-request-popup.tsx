@@ -80,7 +80,7 @@ export function SwapRequestPopup({
 
   return (
     <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="w-[calc(100vw-2rem)] max-w-[520px] max-h-[90vh] overflow-y-auto mx-4 my-8 sm:mx-0 sm:my-0 sm:w-full rounded-lg">
+      <DialogContent className="w-[calc(100vw-3rem)] max-w-[520px] max-h-[90vh] overflow-y-auto !mx-6 !my-8 sm:!mx-0 sm:!my-0 sm:w-full rounded-lg">
         <DialogHeader className="pb-6">
           <DialogTitle className="flex items-center gap-3 text-lg font-semibold">
             <MessageSquare className="w-5 h-5 text-primary" />
