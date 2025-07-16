@@ -97,7 +97,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Email is required" });
       }
       
+      console.log(`Getting security question for email: ${email}`);
+      const startTime = Date.now();
+      
       const securityQuestion = await storage.getSecurityQuestion(email);
+      
+      console.log(`Security question lookup took ${Date.now() - startTime}ms`);
       
       if (!securityQuestion) {
         return res.status(404).json({ message: "User not found" });

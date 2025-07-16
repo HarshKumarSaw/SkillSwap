@@ -164,7 +164,16 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
   // Password reset mutations
   const getSecurityQuestionMutation = useMutation({
     mutationFn: async (email: string) => {
-      const response = await apiRequest("POST", "/api/auth/get-security-question", { email });
+      // Create a timeout promise
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error("Request timeout")), 10000); // 10 second timeout
+      });
+      
+      // Race between the API call and timeout
+      const apiPromise = apiRequest("POST", "/api/auth/get-security-question", { email });
+      
+      const response = await Promise.race([apiPromise, timeoutPromise]) as Response;
+      
       if (!response.ok) {
         throw new Error("User not found");
       }
@@ -175,10 +184,13 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
       setResetStep("question");
       passwordResetForm.setValue("email", resetEmail);
     },
-    onError: () => {
+    onError: (error) => {
+      const isTimeout = error.message === "Request timeout";
       toast({
-        title: "User not found",
-        description: "No account found with this email address.",
+        title: isTimeout ? "Request timed out" : "User not found",
+        description: isTimeout 
+          ? "The server is taking too long to respond. Please try again." 
+          : "No account found with this email address.",
         variant: "destructive",
       });
     },
@@ -504,7 +516,7 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
                   {getSecurityQuestionMutation.isPending ? (
                     <>
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Finding account...
+                      Loading security question...
                     </>
                   ) : (
                     <>

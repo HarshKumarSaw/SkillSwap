@@ -1,5 +1,6 @@
-import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating, type AdminAction, type InsertAdminAction, type SystemMessage, type InsertSystemMessage, type ReportedContent, type InsertReportedContent, type Conversation, type InsertConversation, type ConversationWithUsers, type Message, type InsertMessage, type MessageWithSender, type Notification, type InsertNotification, type SkillEndorsement, type InsertSkillEndorsement } from "@shared/schema";
-import { pool } from "./db";
+import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating, type AdminAction, type InsertAdminAction, type SystemMessage, type InsertSystemMessage, type ReportedContent, type InsertReportedContent, type Conversation, type InsertConversation, type ConversationWithUsers, type Message, type InsertMessage, type MessageWithSender, type Notification, type InsertNotification, type SkillEndorsement, type InsertSkillEndorsement, users } from "@shared/schema";
+import { pool, db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -974,40 +975,40 @@ export class DatabaseStorage implements IStorage {
   }
 
   async getSecurityQuestion(email: string): Promise<string | null> {
-    const client = await pool.connect();
     try {
-      const result = await client.query(
-        'SELECT security_question FROM users WHERE email = $1',
-        [email]
-      );
-      return result.rows[0]?.security_question || null;
-    } finally {
-      client.release();
+      const result = await db.select({ securityQuestion: users.securityQuestion })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      
+      return result[0]?.securityQuestion || null;
+    } catch (error) {
+      console.error('Error getting security question:', error);
+      return null;
     }
   }
 
   async resetPassword(email: string, securityAnswer: string, newPassword: string): Promise<boolean> {
-    const client = await pool.connect();
     try {
       // Check if the security answer matches
-      const result = await client.query(
-        'SELECT id FROM users WHERE email = $1 AND security_answer = $2',
-        [email, securityAnswer]
-      );
+      const userResult = await db.select({ id: users.id })
+        .from(users)
+        .where(and(eq(users.email, email), eq(users.securityAnswer, securityAnswer)))
+        .limit(1);
       
-      if (result.rows.length === 0) {
+      if (userResult.length === 0) {
         return false; // Incorrect answer or email
       }
 
       // Update the password
-      await client.query(
-        'UPDATE users SET password = $1 WHERE email = $2',
-        [newPassword, email]
-      );
+      await db.update(users)
+        .set({ password: newPassword })
+        .where(eq(users.email, email));
       
       return true;
-    } finally {
-      client.release();
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      return false;
     }
   }
 
