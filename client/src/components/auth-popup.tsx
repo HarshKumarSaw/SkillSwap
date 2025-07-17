@@ -15,6 +15,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { UserPlus, LogIn, Mail, Lock, User, MapPin, Loader2, KeyRound, ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useLocation } from "wouter";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -61,6 +62,7 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
   const [securityQuestion, setSecurityQuestion] = useState("");
   const { toast } = useToast();
   const { setUser } = useAuth();
+  const [, setLocation] = useLocation();
 
   const loginForm = useForm<LoginForm>({
     resolver: zodResolver(loginSchema),
@@ -111,7 +113,13 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
       // Close popup and trigger success handler
       onOpenChange(false);
       loginForm.reset();
-      onAuthSuccess();
+      
+      // Redirect admin users to admin dashboard
+      if (data.role === 'admin') {
+        setLocation('/admin-dashboard');
+      } else {
+        onAuthSuccess();
+      }
     },
     onError: (error) => {
       toast({
@@ -142,7 +150,13 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
       // Close popup and trigger success handler
       onOpenChange(false);
       signupForm.reset();
-      onAuthSuccess();
+      
+      // Redirect admin users to admin dashboard
+      if (data.role === 'admin') {
+        setLocation('/admin-dashboard');
+      } else {
+        onAuthSuccess();
+      }
     },
     onError: (error) => {
       toast({

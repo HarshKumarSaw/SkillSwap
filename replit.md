@@ -11,6 +11,13 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 **July 17, 2025**:
+- ✓ **Admin Dashboard Auto-Redirect** - Admin users are automatically redirected to admin dashboard after login instead of home page
+- ✓ **Complete Delete Account System** - Implemented full account deletion with backend API, confirmation dialog, and comprehensive data cleanup
+- ✓ **Account Deletion Security** - Proper authentication checks and session management for secure account deletion
+- ✓ **Data Cascade Deletion** - Removes all user data including profile, skills, swap requests, ratings, messages, and notifications
+- ✓ **Fixed Dark Mode Toggle** - Settings page dark mode toggle now properly connects to theme provider system
+- ✓ **Edit Swap Request Fix** - Fixed skills dropdowns to properly display user's offered skills and target user's skills
+- ✓ **Enhanced Edit Dialog** - Improved edit swap request dialog with correct data fetching and validation
 - ✓ **Mobile-Optimized Swap Requests Page** - Complete responsive design with mobile-first approach for swap request management
 - ✓ **Responsive Button Layout** - Smaller buttons on mobile with adaptive text and icon sizing
 - ✓ **Enhanced Mobile Cards** - Optimized card layout with better spacing and touch targets
