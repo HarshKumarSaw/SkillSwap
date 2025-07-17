@@ -85,7 +85,7 @@ export function UserMenu() {
             <span>Admin Dashboard</span>
           </DropdownMenuItem>
         )}
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={() => setLocation(`/settings`)}>
           <Settings className="mr-2 h-4 w-4" />
           <span>Settings</span>
         </DropdownMenuItem>

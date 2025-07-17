@@ -12,6 +12,7 @@ import SwapRequests from "@/pages/swap-requests";
 import AdminDashboard from "@/pages/admin-dashboard";
 import MessagesPage from "@/pages/messages";
 import NotificationsPage from "@/pages/notifications";
+import Settings from "@/pages/settings";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -23,6 +24,7 @@ function Router() {
       <Route path="/swap-requests" component={SwapRequests} />
       <Route path="/messages" component={MessagesPage} />
       <Route path="/notifications" component={NotificationsPage} />
+      <Route path="/settings" component={Settings} />
       <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
