@@ -325,7 +325,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/swap-requests", async (req, res) => {
     try {
       const validatedData = insertSwapRequestSchema.parse(req.body);
+      console.log(`Creating swap request from ${validatedData.requesterId} to ${validatedData.targetId}`);
       const swapRequest = await storage.createSwapRequest(validatedData);
+      console.log(`Swap request created successfully: ${swapRequest.id}`);
       res.status(201).json(swapRequest);
     } catch (error) {
       if (error instanceof z.ZodError) {

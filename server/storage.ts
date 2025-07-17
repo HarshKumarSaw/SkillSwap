@@ -742,6 +742,16 @@ export class DatabaseStorage implements IStorage {
   async createSwapRequest(request: InsertSwapRequest): Promise<SwapRequest> {
     const client = await pool.connect();
     try {
+      // First, delete any existing pending swap request from the same sender to the same receiver
+      const deleteResult = await client.query(
+        'DELETE FROM swap_requests WHERE sender_id = $1 AND receiver_id = $2 AND status = $3',
+        [request.requesterId, request.targetId, 'pending']
+      );
+      
+      if (deleteResult.rowCount && deleteResult.rowCount > 0) {
+        console.log(`Deleted ${deleteResult.rowCount} existing pending swap request(s) from ${request.requesterId} to ${request.targetId}`);
+      }
+      
       // Generate a unique ID for the swap request
       const requestId = `swap_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
