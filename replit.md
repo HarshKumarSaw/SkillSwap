@@ -30,6 +30,7 @@ Preferred communication style: Simple, everyday language.
 - ✓ All database credentials now properly managed via environment variables only
 - ✓ **Mobile Popup Responsiveness** - Fixed swap request popup to display properly on mobile with appropriate margins on all sides
 - ✓ **Mobile-Optimized Edit Profile** - Redesigned edit profile page with clean, readable mobile interface including larger touch targets, better spacing, floating action buttons, and responsive layouts
+- ✓ **Searchable Skills Dropdowns** - Replaced long checkbox lists with compact searchable dropdowns for skills selection with autocomplete functionality
 
 **July 14, 2025**:
 - ✓ Updated database configuration to use DATABASE_URL environment variable properly

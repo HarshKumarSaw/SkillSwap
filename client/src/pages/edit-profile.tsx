@@ -10,7 +10,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { ArrowLeft, Save, X, Plus } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from "@/components/ui/command";
+import { ArrowLeft, Save, X, Plus, ChevronDown, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { UserWithSkills } from "@shared/schema";
@@ -37,6 +39,8 @@ export default function EditProfile() {
 
   const [skillsOffered, setSkillsOffered] = useState<string[]>([]);
   const [skillsWanted, setSkillsWanted] = useState<string[]>([]);
+  const [offeredSkillsOpen, setOfferedSkillsOpen] = useState(false);
+  const [wantedSkillsOpen, setWantedSkillsOpen] = useState(false);
 
   // Redirect if not authenticated
   if (!isAuthenticated) {
@@ -152,6 +156,24 @@ export default function EditProfile() {
           ? prev.filter(skill => skill !== skillName)
           : [...prev, skillName]
       );
+    }
+  };
+
+  const addSkill = (skillName: string, type: 'offered' | 'wanted') => {
+    if (type === 'offered' && !skillsOffered.includes(skillName)) {
+      setSkillsOffered(prev => [...prev, skillName]);
+      setOfferedSkillsOpen(false);
+    } else if (type === 'wanted' && !skillsWanted.includes(skillName)) {
+      setSkillsWanted(prev => [...prev, skillName]);
+      setWantedSkillsOpen(false);
+    }
+  };
+
+  const removeSkill = (skillName: string, type: 'offered' | 'wanted') => {
+    if (type === 'offered') {
+      setSkillsOffered(prev => prev.filter(skill => skill !== skillName));
+    } else {
+      setSkillsWanted(prev => prev.filter(skill => skill !== skillName));
     }
   };
 
@@ -276,27 +298,54 @@ export default function EditProfile() {
             <CardHeader className="pb-3 sm:pb-6">
               <CardTitle className="text-lg sm:text-xl">Skills I Can Offer</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {allSkills.map((skill) => (
-                  <div key={skill.id} className="flex items-center space-x-3 py-1">
-                    <Checkbox
-                      id={`offered-${skill.id}`}
-                      checked={skillsOffered.includes(skill.name)}
-                      onCheckedChange={() => handleSkillToggle(skill.name, 'offered')}
-                      className="scale-110"
-                    />
-                    <Label
-                      htmlFor={`offered-${skill.id}`}
-                      className="text-sm sm:text-base cursor-pointer leading-relaxed"
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Add Skills</Label>
+                <Popover open={offeredSkillsOpen} onOpenChange={setOfferedSkillsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={offeredSkillsOpen}
+                      className="w-full justify-between h-11 text-base"
                     >
-                      {skill.name}
-                    </Label>
-                  </div>
-                ))}
+                      Select skills to offer...
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search skills..." className="h-11" />
+                      <CommandList>
+                        <CommandEmpty>No skills found.</CommandEmpty>
+                        <CommandGroup>
+                          {allSkills
+                            .filter(skill => !skillsOffered.includes(skill.name))
+                            .slice(0, 100)
+                            .map((skill) => (
+                            <CommandItem
+                              key={skill.id}
+                              value={skill.name}
+                              onSelect={() => addSkill(skill.name, 'offered')}
+                              className="cursor-pointer"
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${
+                                  skillsOffered.includes(skill.name) ? "opacity-100" : "opacity-0"
+                                }`}
+                              />
+                              {skill.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
+              
               {skillsOffered.length > 0 && (
-                <div className="mt-6 space-y-3">
+                <div className="space-y-3">
                   <Label className="text-sm font-medium text-muted-foreground">Selected Skills:</Label>
                   <div className="flex flex-wrap gap-2">
                     {skillsOffered.map((skill) => (
@@ -310,7 +359,7 @@ export default function EditProfile() {
                           variant="ghost"
                           size="sm"
                           className="ml-2 h-4 w-4 p-0 hover:bg-transparent"
-                          onClick={() => handleSkillToggle(skill, 'offered')}
+                          onClick={() => removeSkill(skill, 'offered')}
                         >
                           <X className="h-3 w-3" />
                         </Button>
@@ -327,27 +376,54 @@ export default function EditProfile() {
             <CardHeader className="pb-3 sm:pb-6">
               <CardTitle className="text-lg sm:text-xl">Skills I Want to Learn</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-                {allSkills.map((skill) => (
-                  <div key={skill.id} className="flex items-center space-x-3 py-1">
-                    <Checkbox
-                      id={`wanted-${skill.id}`}
-                      checked={skillsWanted.includes(skill.name)}
-                      onCheckedChange={() => handleSkillToggle(skill.name, 'wanted')}
-                      className="scale-110"
-                    />
-                    <Label
-                      htmlFor={`wanted-${skill.id}`}
-                      className="text-sm sm:text-base cursor-pointer leading-relaxed"
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Add Skills</Label>
+                <Popover open={wantedSkillsOpen} onOpenChange={setWantedSkillsOpen}>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      role="combobox"
+                      aria-expanded={wantedSkillsOpen}
+                      className="w-full justify-between h-11 text-base"
                     >
-                      {skill.name}
-                    </Label>
-                  </div>
-                ))}
+                      Select skills to learn...
+                      <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-0" align="start">
+                    <Command>
+                      <CommandInput placeholder="Search skills..." className="h-11" />
+                      <CommandList>
+                        <CommandEmpty>No skills found.</CommandEmpty>
+                        <CommandGroup>
+                          {allSkills
+                            .filter(skill => !skillsWanted.includes(skill.name))
+                            .slice(0, 100)
+                            .map((skill) => (
+                            <CommandItem
+                              key={skill.id}
+                              value={skill.name}
+                              onSelect={() => addSkill(skill.name, 'wanted')}
+                              className="cursor-pointer"
+                            >
+                              <Check
+                                className={`mr-2 h-4 w-4 ${
+                                  skillsWanted.includes(skill.name) ? "opacity-100" : "opacity-0"
+                                }`}
+                              />
+                              {skill.name}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </CommandList>
+                    </Command>
+                  </PopoverContent>
+                </Popover>
               </div>
+              
               {skillsWanted.length > 0 && (
-                <div className="mt-6 space-y-3">
+                <div className="space-y-3">
                   <Label className="text-sm font-medium text-muted-foreground">Selected Skills:</Label>
                   <div className="flex flex-wrap gap-2">
                     {skillsWanted.map((skill) => (
@@ -361,7 +437,7 @@ export default function EditProfile() {
                           variant="ghost"
                           size="sm"
                           className="ml-2 h-4 w-4 p-0 hover:bg-transparent"
-                          onClick={() => handleSkillToggle(skill, 'wanted')}
+                          onClick={() => removeSkill(skill, 'wanted')}
                         >
                           <X className="h-3 w-3" />
                         </Button>
