@@ -313,10 +313,10 @@ export default function EditProfile() {
                       <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0" align="start">
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] max-w-[95vw] p-0" align="start">
                     <Command>
-                      <CommandInput placeholder="Search skills..." className="h-11" />
-                      <CommandList>
+                      <CommandInput placeholder="Search skills..." className="h-11 text-base" />
+                      <CommandList className="max-h-[50vh] overflow-y-auto">
                         <CommandEmpty>No skills found.</CommandEmpty>
                         <CommandGroup>
                           {allSkills
@@ -327,10 +327,10 @@ export default function EditProfile() {
                               key={skill.id}
                               value={skill.name}
                               onSelect={() => addSkill(skill.name, 'offered')}
-                              className="cursor-pointer"
+                              className="cursor-pointer py-3 px-4 text-base"
                             >
                               <Check
-                                className={`mr-2 h-4 w-4 ${
+                                className={`mr-3 h-4 w-4 ${
                                   skillsOffered.includes(skill.name) ? "opacity-100" : "opacity-0"
                                 }`}
                               />
@@ -391,10 +391,10 @@ export default function EditProfile() {
                       <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-0" align="start">
+                  <PopoverContent className="w-[var(--radix-popover-trigger-width)] max-w-[95vw] p-0" align="start">
                     <Command>
-                      <CommandInput placeholder="Search skills..." className="h-11" />
-                      <CommandList>
+                      <CommandInput placeholder="Search skills..." className="h-11 text-base" />
+                      <CommandList className="max-h-[50vh] overflow-y-auto">
                         <CommandEmpty>No skills found.</CommandEmpty>
                         <CommandGroup>
                           {allSkills
@@ -405,10 +405,10 @@ export default function EditProfile() {
                               key={skill.id}
                               value={skill.name}
                               onSelect={() => addSkill(skill.name, 'wanted')}
-                              className="cursor-pointer"
+                              className="cursor-pointer py-3 px-4 text-base"
                             >
                               <Check
-                                className={`mr-2 h-4 w-4 ${
+                                className={`mr-3 h-4 w-4 ${
                                   skillsWanted.includes(skill.name) ? "opacity-100" : "opacity-0"
                                 }`}
                               />
