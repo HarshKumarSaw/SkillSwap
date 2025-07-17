@@ -397,6 +397,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Update swap request content
+  app.patch("/api/swap-requests/:id", async (req, res) => {
+    try {
+      const user = (req as any).session?.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const { senderSkill, receiverSkill, message } = req.body;
+
+      const updatedRequest = await storage.updateSwapRequest(req.params.id, {
+        senderSkill,
+        receiverSkill,
+        message
+      }, user.id);
+      
+      res.json(updatedRequest);
+    } catch (error) {
+      console.error("Error updating swap request:", error);
+      if (error instanceof Error && error.message.includes("Unauthorized")) {
+        res.status(403).json({ message: "Unauthorized to update this request" });
+      } else {
+        res.status(500).json({ message: "Failed to update swap request" });
+      }
+    }
+  });
+
   // Delete swap request
   app.delete("/api/swap-requests/:id", async (req, res) => {
     try {

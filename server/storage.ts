@@ -832,6 +832,54 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async updateSwapRequest(requestId: string, updates: { senderSkill?: string; receiverSkill?: string; message?: string }, userId: string): Promise<SwapRequest> {
+    const client = await pool.connect();
+    try {
+      // Verify user is the sender of this request and it's still pending
+      const checkResult = await client.query(
+        'SELECT * FROM swap_requests WHERE id = $1 AND sender_id = $2 AND status = \'pending\'',
+        [requestId, userId]
+      );
+      
+      if (checkResult.rows.length === 0) {
+        throw new Error('Unauthorized to update this swap request or request is not pending');
+      }
+
+      const setClause = [];
+      const values = [];
+      let paramIndex = 1;
+
+      if (updates.senderSkill !== undefined) {
+        setClause.push(`sender_skill = $${paramIndex++}`);
+        values.push(updates.senderSkill);
+      }
+      if (updates.receiverSkill !== undefined) {
+        setClause.push(`receiver_skill = $${paramIndex++}`);
+        values.push(updates.receiverSkill);
+      }
+      if (updates.message !== undefined) {
+        setClause.push(`message = $${paramIndex++}`);
+        values.push(updates.message);
+      }
+
+      if (setClause.length === 0) {
+        throw new Error('No updates provided');
+      }
+
+      setClause.push(`updated_at = NOW()`);
+      values.push(requestId);
+
+      const result = await client.query(
+        `UPDATE swap_requests SET ${setClause.join(', ')} WHERE id = $${paramIndex} RETURNING *`,
+        values
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
   async deleteSwapRequest(requestId: string, userId: string): Promise<boolean> {
     const client = await pool.connect();
     try {

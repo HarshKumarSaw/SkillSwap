@@ -8,15 +8,17 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle, Trash2, ArrowLeft, MessageSquare } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, ArrowLeft, MessageSquare, Edit } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import type { SwapRequestWithUsers } from "@shared/schema";
+import EditSwapRequestDialog from "@/components/edit-swap-request-dialog";
 
 export default function SwapRequests() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const [editingRequest, setEditingRequest] = useState<SwapRequestWithUsers | null>(null);
 
 
   const { data: swapRequests = [], isLoading } = useQuery({
@@ -135,39 +137,54 @@ export default function SwapRequests() {
       <Card key={request.id} className="border-0 shadow-sm sm:border sm:shadow-md">
         <CardHeader className="pb-3 sm:pb-4">
           <div className="relative">
-            {/* Delete button positioned in upper right corner */}
+            {/* Edit and Delete buttons positioned in upper right corner */}
             {(request.status === "pending" || request.status === "rejected") && isOwner && (
-              <AlertDialog>
-                <AlertDialogTrigger asChild>
+              <div className="absolute top-0 right-0 flex gap-2">
+                {/* Edit button - only for pending requests */}
+                {request.status === "pending" && (
                   <Button
                     size="sm"
-                    variant="destructive"
-                    className="absolute top-0 right-0 h-10 w-10 p-0 hover:bg-destructive/90"
+                    variant="outline"
+                    onClick={() => setEditingRequest(request)}
+                    className="h-10 w-10 p-0 hover:bg-accent"
                   >
-                    <Trash2 className="h-5 w-5" />
+                    <Edit className="h-4 w-4" />
                   </Button>
-                </AlertDialogTrigger>
-                <AlertDialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm sm:max-w-md p-6 rounded-lg border bg-background shadow-lg">
-                  <AlertDialogHeader className="space-y-3">
-                    <AlertDialogTitle className="text-lg font-semibold">Delete Swap Request</AlertDialogTitle>
-                    <AlertDialogDescription className="text-sm text-muted-foreground">
-                      Are you sure you want to delete this swap request? This action cannot be undone.
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2 pt-6">
-                    <AlertDialogCancel className="w-full sm:w-auto h-10">Cancel</AlertDialogCancel>
-                    <AlertDialogAction
-                      onClick={() => handleDelete(request.id)}
-                      className="w-full sm:w-auto h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                )}
+                
+                {/* Delete button */}
+                <AlertDialog>
+                  <AlertDialogTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="destructive"
+                      className="h-10 w-10 p-0 hover:bg-destructive/90"
                     >
-                      Delete
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
+                      <Trash2 className="h-5 w-5" />
+                    </Button>
+                  </AlertDialogTrigger>
+                  <AlertDialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm sm:max-w-md p-6 rounded-lg border bg-background shadow-lg">
+                    <AlertDialogHeader className="space-y-3">
+                      <AlertDialogTitle className="text-lg font-semibold">Delete Swap Request</AlertDialogTitle>
+                      <AlertDialogDescription className="text-sm text-muted-foreground">
+                        Are you sure you want to delete this swap request? This action cannot be undone.
+                      </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2 pt-6">
+                      <AlertDialogCancel className="w-full sm:w-auto h-10">Cancel</AlertDialogCancel>
+                      <AlertDialogAction
+                        onClick={() => handleDelete(request.id)}
+                        className="w-full sm:w-auto h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      >
+                        Delete
+                      </AlertDialogAction>
+                    </AlertDialogFooter>
+                  </AlertDialogContent>
+                </AlertDialog>
+              </div>
             )}
             
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pr-8">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pr-20">
               <div className="flex items-center space-x-3">
                 <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                   <AvatarImage src={otherUser.profilePhoto || ""} />
@@ -278,7 +295,14 @@ export default function SwapRequests() {
         </TabsContent>
       </Tabs>
 
-
+      {/* Edit swap request dialog */}
+      {editingRequest && (
+        <EditSwapRequestDialog
+          request={editingRequest}
+          isOpen={!!editingRequest}
+          onOpenChange={(open) => !open && setEditingRequest(null)}
+        />
+      )}
     </div>
   );
 }
