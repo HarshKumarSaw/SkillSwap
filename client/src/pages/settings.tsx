@@ -8,12 +8,13 @@ import { Separator } from "@/components/ui/separator";
 import { ArrowLeft, User, Bell, Shield, Moon, Sun, Globe, Mail, Lock } from "lucide-react";
 import { Link } from "wouter";
 import { useState } from "react";
+import { useTheme } from "@/components/theme-provider";
 
 export default function Settings() {
   const { user, isAuthenticated } = useAuth();
+  const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(false);
-  const [darkMode, setDarkMode] = useState(false);
   const [publicProfile, setPublicProfile] = useState(true);
 
   if (!isAuthenticated) {
@@ -178,8 +179,8 @@ export default function Settings() {
               </div>
               <Switch 
                 id="dark-mode"
-                checked={darkMode}
-                onCheckedChange={setDarkMode}
+                checked={theme === "dark"}
+                onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
               />
             </div>
           </CardContent>
