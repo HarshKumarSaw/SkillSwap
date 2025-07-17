@@ -271,17 +271,12 @@ export default function EditProfile() {
                 />
               </div>
 
-              {/* Profile Photo */}
-              <div className="space-y-3">
-                <Label htmlFor="profilePhoto" className="text-sm font-semibold text-foreground">Profile Photo</Label>
-                <Input
-                  id="profilePhoto"
-                  value={formData.profilePhoto}
-                  onChange={(e) => handleInputChange("profilePhoto", e.target.value)}
-                  placeholder="https://example.com/your-photo.jpg"
-                  className="h-12 text-base border-2 focus:border-primary"
-                />
-              </div>
+              {/* Profile Photo Upload */}
+              <ProfilePhotoUpload
+                currentPhoto={formData.profilePhoto}
+                onPhotoChange={(url) => handleInputChange("profilePhoto", url)}
+                userName={formData.name}
+              />
 
               {/* Visibility Settings */}
               <div className="border-t pt-6">
