@@ -147,7 +147,7 @@ export default function SwapRequests() {
                     <Trash2 className="h-5 w-5" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="mx-4 my-4 max-w-sm sm:max-w-md w-[calc(100vw-32px)] sm:w-auto">
+                <AlertDialogContent className="mx-4 w-[calc(100vw-32px)] max-w-sm sm:mx-auto sm:w-full sm:max-w-md">
                   <AlertDialogHeader className="space-y-2 sm:space-y-3">
                     <AlertDialogTitle className="text-base sm:text-lg font-semibold">Delete Swap Request</AlertDialogTitle>
                     <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
