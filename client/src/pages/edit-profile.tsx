@@ -16,6 +16,7 @@ import { ArrowLeft, Save, X, Plus, ChevronDown, Check } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { UserWithSkills } from "@shared/schema";
+import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
 
 export default function EditProfile() {
   const { user, isAuthenticated } = useAuth();

@@ -4,6 +4,8 @@ import { storage } from "./storage";
 import { insertSwapRequestSchema, insertSwapRatingSchema, insertAdminActionSchema, insertSystemMessageSchema, insertReportedContentSchema } from "@shared/schema";
 import { z } from "zod";
 import { pool } from "./db";
+import multer from "multer";
+import { uploadToCloudinary } from "./cloudinary";
 
 /**
  * 🚨 DATABASE REFERENCE 🚨
@@ -12,6 +14,21 @@ import { pool } from "./db";
  */
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Configure multer for file uploads
+  const upload = multer({
+    storage: multer.memoryStorage(),
+    limits: {
+      fileSize: 5 * 1024 * 1024, // 5MB limit
+    },
+    fileFilter: (req, file, cb) => {
+      if (file.mimetype.startsWith('image/')) {
+        cb(null, true);
+      } else {
+        cb(new Error('Only image files are allowed'));
+      }
+    }
+  });
+
   // Authentication routes
   app.post("/api/auth/login", async (req, res) => {
     try {
@@ -133,6 +150,44 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Reset password error:", error);
       res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // Profile photo upload endpoint
+  app.post("/api/upload/profile-photo", upload.single('photo'), async (req, res) => {
+    try {
+      // Check authentication
+      const user = (req as any).session?.user;
+      if (!user) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      if (!req.file) {
+        return res.status(400).json({ message: "No file uploaded" });
+      }
+
+      // Upload to Cloudinary
+      const result = await uploadToCloudinary(req.file.buffer, req.file.originalname) as any;
+      
+      if (!result?.secure_url) {
+        return res.status(500).json({ message: "Failed to upload image" });
+      }
+
+      // Update user's profile photo in database
+      await storage.updateUser(user.id, { profilePhoto: result.secure_url });
+
+      // Update session data
+      (req as any).session.user.profilePhoto = result.secure_url;
+
+      res.json({ 
+        url: result.secure_url,
+        message: "Profile photo uploaded successfully" 
+      });
+    } catch (error) {
+      console.error("Profile photo upload error:", error);
+      res.status(500).json({ 
+        message: error instanceof Error ? error.message : "Failed to upload profile photo" 
+      });
     }
   });
 
