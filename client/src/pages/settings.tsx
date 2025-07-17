@@ -5,17 +5,49 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { ArrowLeft, User, Bell, Shield, Moon, Sun, Globe, Mail, Lock } from "lucide-react";
-import { Link } from "wouter";
+import { Link, useLocation } from "wouter";
 import { useState } from "react";
 import { useTheme } from "@/components/theme-provider";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Settings() {
-  const { user, isAuthenticated } = useAuth();
+  const { user, isAuthenticated, logout } = useAuth();
   const { theme, setTheme } = useTheme();
   const [notifications, setNotifications] = useState(true);
   const [emailUpdates, setEmailUpdates] = useState(false);
   const [publicProfile, setPublicProfile] = useState(true);
+  const [, setLocation] = useLocation();
+  const { toast } = useToast();
+
+  const deleteAccountMutation = useMutation({
+    mutationFn: async () => {
+      const response = await apiRequest("DELETE", "/api/auth/account", null);
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Failed to delete account");
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Account deleted",
+        description: "Your account and all associated data have been permanently deleted.",
+      });
+      logout(); // Clear local auth state
+      setLocation("/"); // Redirect to home
+    },
+    onError: (error) => {
+      toast({
+        title: "Failed to delete account",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   if (!isAuthenticated) {
     return (
@@ -198,9 +230,37 @@ export default function Settings() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <Button variant="destructive" size="sm">
-              Delete Account
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="destructive" size="sm" disabled={deleteAccountMutation.isPending}>
+                  {deleteAccountMutation.isPending ? "Deleting..." : "Delete Account"}
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete your account and remove all your data from our servers, including:
+                    <ul className="list-disc ml-6 mt-2 space-y-1">
+                      <li>Your profile and personal information</li>
+                      <li>All your skill listings and preferences</li>
+                      <li>Your swap requests and conversation history</li>
+                      <li>Your ratings and reviews</li>
+                      <li>All associated data and settings</li>
+                    </ul>
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => deleteAccountMutation.mutate()}
+                    className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  >
+                    Delete Account
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
             <p className="text-sm text-muted-foreground mt-2">
               This action cannot be undone. This will permanently delete your account and remove all your data.
             </p>

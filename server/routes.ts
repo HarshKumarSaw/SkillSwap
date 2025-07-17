@@ -105,6 +105,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     });
   });
 
+
+
   // Password reset routes
   app.post("/api/auth/get-security-question", async (req, res) => {
     try {
@@ -495,6 +497,32 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
     next();
   };
+
+  // Delete account route
+  app.delete("/api/auth/account", requireAuth, async (req, res) => {
+    try {
+      const user = req.session.user;
+      
+      // Delete the user account and all associated data
+      const success = await storage.deleteUserAccount(user.id);
+      
+      if (success) {
+        // Destroy the session after successful deletion
+        (req as any).session.destroy((err: any) => {
+          if (err) {
+            console.error("Session destroy error after account deletion:", err);
+          }
+          res.clearCookie('connect.sid');
+          res.json({ message: "Account deleted successfully" });
+        });
+      } else {
+        res.status(500).json({ message: "Failed to delete account" });
+      }
+    } catch (error) {
+      console.error("Delete account error:", error);
+      res.status(500).json({ message: "Failed to delete account" });
+    }
+  });
 
   // Admin Routes
   app.get("/api/admin/users", requireAdmin, async (req, res) => {

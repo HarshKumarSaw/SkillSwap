@@ -34,6 +34,9 @@ export interface IStorage {
   getAllSkills(): Promise<Skill[]>;
   getSkillsByCategory(): Promise<Record<string, Skill[]>>;
   
+  // Account Management
+  deleteUserAccount(userId: string): Promise<boolean>;
+  
   // Swap Requests
   createSwapRequest(request: InsertSwapRequest): Promise<SwapRequest>;
   getUserSwapRequests(userId: string): Promise<SwapRequestWithUsers[]>;
@@ -1738,6 +1741,57 @@ export class DatabaseStorage implements IStorage {
         [endorsementId, userId]
       );
       return result.rows.length > 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  async deleteUserAccount(userId: string): Promise<boolean> {
+    const client = await pool.connect();
+    try {
+      // Begin transaction
+      await client.query('BEGIN');
+      
+      // Delete user's skill endorsements (both given and received)
+      await client.query('DELETE FROM skill_endorsements WHERE endorser_id = $1 OR user_id = $1', [userId]);
+      
+      // Delete user's skill associations
+      await client.query('DELETE FROM user_skills_offered WHERE user_id = $1', [userId]);
+      await client.query('DELETE FROM user_skills_wanted WHERE user_id = $1', [userId]);
+      
+      // Delete user's swap requests (both sent and received)
+      await client.query('DELETE FROM swap_requests WHERE sender_id = $1 OR receiver_id = $1', [userId]);
+      
+      // Delete user's swap ratings (both given and received)
+      await client.query('DELETE FROM swap_ratings WHERE rater_id = $1 OR rated_id = $1', [userId]);
+      
+      // Delete user's conversations and messages
+      await client.query('DELETE FROM messages WHERE sender_id = $1', [userId]);
+      await client.query('DELETE FROM conversations WHERE participant1_id = $1 OR participant2_id = $1', [userId]);
+      
+      // Delete user's notifications
+      await client.query('DELETE FROM notifications WHERE user_id = $1', [userId]);
+      
+      // Delete user's reports (both made and received)
+      await client.query('DELETE FROM reported_content WHERE reporter_id = $1', [userId]);
+      
+      // Delete user's admin actions (if any)
+      await client.query('DELETE FROM admin_actions WHERE admin_id = $1', [userId]);
+      
+      // Delete user's system message creations (if any)
+      await client.query('DELETE FROM system_messages WHERE admin_id = $1', [userId]);
+      
+      // Finally, delete the user account
+      const result = await client.query('DELETE FROM users WHERE id = $1 RETURNING id', [userId]);
+      
+      // Commit transaction
+      await client.query('COMMIT');
+      
+      return result.rows.length > 0;
+    } catch (error) {
+      // Rollback transaction on error
+      await client.query('ROLLBACK');
+      throw error;
     } finally {
       client.release();
     }
