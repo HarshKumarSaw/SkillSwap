@@ -419,8 +419,8 @@ export default function UserProfile() {
                   </>
                 ) : currentUser?.id === user.id ? (
                   <>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit Profile
+                    <User className="mr-2 h-4 w-4" />
+                    Your Profile
                   </>
                 ) : (
                   <>
