@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
 import { CheckCircle, XCircle, Trash2, ArrowLeft, MessageSquare, Edit } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "wouter";
 import type { SwapRequestWithUsers } from "@shared/schema";
 import EditSwapRequestDialog from "@/components/edit-swap-request-dialog";
@@ -21,10 +21,20 @@ export default function SwapRequests() {
   const [editingRequest, setEditingRequest] = useState<SwapRequestWithUsers | null>(null);
 
 
-  const { data: swapRequests = [], isLoading } = useQuery({
+  const { data: swapRequests = [], isLoading, refetch } = useQuery({
     queryKey: ["/api/swap-requests"],
     enabled: isAuthenticated,
+    refetchOnWindowFocus: true,
+    refetchOnMount: true,
+    staleTime: 0, // Always refetch fresh data
   });
+
+  // Force refetch when component mounts or user changes
+  useEffect(() => {
+    if (isAuthenticated) {
+      refetch();
+    }
+  }, [isAuthenticated, refetch]);
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ requestId, status }: { requestId: string; status: string }) => {

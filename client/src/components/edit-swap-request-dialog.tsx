@@ -52,7 +52,14 @@ export default function EditSwapRequestDialog({
     enabled: !!user?.id,
   });
 
-  const userSkills = userData?.offeredSkills || [];
+  // Get target user's skills
+  const { data: targetUserData } = useQuery({
+    queryKey: ["/api/users", request.target.id],
+    enabled: !!request.target.id,
+  });
+
+  const userSkills = userData?.skillsOffered || [];
+  const targetUserSkills = targetUserData?.skillsOffered || [];
 
   // Reset form when dialog opens
   useEffect(() => {
@@ -99,6 +106,7 @@ export default function EditSwapRequestDialog({
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/swap-requests"] });
+      queryClient.refetchQueries({ queryKey: ["/api/swap-requests"] });
       toast({ title: "Request updated successfully" });
       onOpenChange(false);
     },
@@ -163,19 +171,19 @@ export default function EditSwapRequestDialog({
               </PopoverTrigger>
               <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
                 <div className="max-h-48 overflow-y-auto">
-                  {userSkills.map((skill: string) => (
+                  {userSkills.map((skill: any) => (
                     <div
-                      key={skill}
+                      key={skill.id}
                       className="flex items-center space-x-2 p-3 hover:bg-accent cursor-pointer"
-                      onClick={() => toggleSenderSkill(skill)}
+                      onClick={() => toggleSenderSkill(skill.name)}
                     >
                       <Checkbox 
-                        checked={senderSkills.includes(skill)}
+                        checked={senderSkills.includes(skill.name)}
                         readOnly
                         className="pointer-events-none"
                       />
                       <span className="text-sm flex-1">
-                        {skill}
+                        {skill.name}
                       </span>
                     </div>
                   ))}
@@ -222,23 +230,23 @@ export default function EditSwapRequestDialog({
               </PopoverTrigger>
               <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
                 <div className="max-h-48 overflow-y-auto">
-                  {request.target.skillsOffered?.map((skill: string) => (
+                  {targetUserSkills.map((skill: any) => (
                     <div
-                      key={skill}
+                      key={skill.id}
                       className="flex items-center space-x-2 p-3 hover:bg-accent cursor-pointer"
-                      onClick={() => toggleReceiverSkill(skill)}
+                      onClick={() => toggleReceiverSkill(skill.name)}
                     >
                       <Checkbox 
-                        checked={receiverSkills.includes(skill)}
+                        checked={receiverSkills.includes(skill.name)}
                         readOnly
                         className="pointer-events-none"
                       />
                       <span className="text-sm flex-1">
-                        {skill}
+                        {skill.name}
                       </span>
                     </div>
                   ))}
-                  {(!request.target.skillsOffered || request.target.skillsOffered.length === 0) && (
+                  {(!targetUserSkills || targetUserSkills.length === 0) && (
                     <p className="text-sm text-muted-foreground p-3">
                       {request.target.name} hasn't added any skills yet.
                     </p>
