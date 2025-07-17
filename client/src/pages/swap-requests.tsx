@@ -140,7 +140,7 @@ export default function SwapRequests() {
                 size="sm"
                 onClick={() => handleDelete(request.id)}
                 variant="ghost"
-                className="absolute top-0 right-0 h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+                className="absolute top-0 right-0 h-6 w-6 p-0 text-destructive hover:bg-destructive hover:text-destructive-foreground"
               >
                 <Trash2 className="h-3 w-3" />
               </Button>
