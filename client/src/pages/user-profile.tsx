@@ -165,18 +165,14 @@ export default function UserProfile() {
   const handleSwapRequest = () => {
     if (!user) return;
     
-    if (!isAuthenticated) {
-      setShowAuthPopup(true);
+    // If viewing own profile, navigate to edit profile
+    if (currentUser?.id === user.id) {
+      setLocation(`/edit-profile`);
       return;
     }
     
-    // Prevent users from requesting swap with themselves
-    if (currentUser?.id === user.id) {
-      toast({
-        title: "Cannot request swap",
-        description: "You cannot request a skill swap with yourself.",
-        variant: "destructive",
-      });
+    if (!isAuthenticated) {
+      setShowAuthPopup(true);
       return;
     }
     
@@ -408,7 +404,7 @@ export default function UserProfile() {
             <div className="pt-4 border-t border-border">
               <Button
                 onClick={handleSwapRequest}
-                disabled={isRequesting || createSwapRequestMutation.isPending || currentUser?.id === user.id}
+                disabled={isRequesting || createSwapRequestMutation.isPending}
                 className="w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90 disabled:opacity-50"
                 size="lg"
               >
@@ -420,7 +416,7 @@ export default function UserProfile() {
                 ) : currentUser?.id === user.id ? (
                   <>
                     <User className="mr-2 h-4 w-4" />
-                    Your Profile
+                    Edit Profile
                   </>
                 ) : (
                   <>
