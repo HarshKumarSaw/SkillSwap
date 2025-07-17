@@ -219,6 +219,13 @@ export default function EditProfile() {
               <CardTitle className="text-lg sm:text-xl">Basic Information</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
+              {/* Profile Photo Upload */}
+              <ProfilePhotoUpload
+                currentPhoto={formData.profilePhoto}
+                onPhotoChange={(url) => handleInputChange("profilePhoto", url)}
+                userName={formData.name}
+              />
+              
               {/* Name and Email Row */}
               <div className="space-y-6 sm:grid sm:grid-cols-2 sm:gap-6 sm:space-y-0">
                 <div className="space-y-3">
@@ -270,13 +277,6 @@ export default function EditProfile() {
                   className="text-base resize-none border-2 focus:border-primary"
                 />
               </div>
-
-              {/* Profile Photo Upload */}
-              <ProfilePhotoUpload
-                currentPhoto={formData.profilePhoto}
-                onPhotoChange={(url) => handleInputChange("profilePhoto", url)}
-                userName={formData.name}
-              />
 
               {/* Visibility Settings */}
               <div className="border-t pt-6">

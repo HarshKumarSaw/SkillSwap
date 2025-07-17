@@ -10,6 +10,16 @@ Preferred communication style: Simple, everyday language.
 
 ## Recent Changes
 
+**July 17, 2025**:
+- ✓ **Profile Photo Upload System** - Implemented complete Cloudinary-based profile photo upload functionality
+- ✓ **Cloudinary Integration** - Configured Cloudinary API keys and image processing with automatic optimization (400x400, face detection, auto quality)
+- ✓ **Edit Profile Photo UI** - Added ProfilePhotoUpload component with file upload and URL input options positioned at top of edit profile page
+- ✓ **Image Validation** - Added file type validation (images only) and size limits (5MB maximum)
+- ✓ **Upload Progress Feedback** - Users get real-time upload status with loading states and success/error notifications
+- ✓ **Backend API Support** - Created secure /api/upload/profile-photo endpoint with proper authentication checks
+- ✓ **Database Integration** - Profile photo URLs are properly stored and updated in PostgreSQL database
+- ✓ **Session Management** - Profile photo changes are reflected in user sessions immediately
+
 **July 15, 2025**:
 - ✓ **Enhanced Feedback System** - Users can now provide immediate feedback after sending swap requests
 - ✓ **Dual Rating Types** - Separate rating types for post-request feedback and post-completion reviews
