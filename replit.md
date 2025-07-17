@@ -11,6 +11,10 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 **July 17, 2025**:
+- ✓ **Duplicate Swap Request Prevention** - Automatically deletes previous pending requests when user sends new request to same target
+- ✓ **Smart Request Management** - Only deletes pending requests, preserves accepted/rejected/completed requests for history
+- ✓ **Enhanced Logging** - Added comprehensive logging for swap request creation and duplicate handling
+- ✓ **Complete Environment Configuration** - Created comprehensive .env file with all required secrets (DATABASE_URL, Cloudinary credentials)
 - ✓ **Profile Photo Upload System** - Implemented complete Cloudinary-based profile photo upload functionality
 - ✓ **Cloudinary Integration** - Configured Cloudinary API keys and image processing with automatic optimization (400x400, face detection, auto quality)
 - ✓ **Edit Profile Photo UI** - Added ProfilePhotoUpload component with file upload and URL input options positioned at top of edit profile page
