@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
-import { MapPin, Clock, Star, ArrowLeft, MessageSquare, Loader2, User } from "lucide-react";
+import { MapPin, Clock, Star, ArrowLeft, MessageSquare, Loader2, User, Flag } from "lucide-react";
 import { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
@@ -15,6 +15,10 @@ import { useAuth } from "@/hooks/use-auth";
 import { AuthPopup } from "@/components/auth-popup";
 import { SwapRequestPopup } from "@/components/swap-request-popup";
 import { RatingDialog } from "@/components/rating-dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 // Helper function to format availability
 const formatAvailability = (availability: any): string => {
@@ -77,6 +81,9 @@ export default function UserProfile() {
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [showSwapPopup, setShowSwapPopup] = useState(false);
   const [showRatingDialog, setShowRatingDialog] = useState(false);
+  const [showReportDialog, setShowReportDialog] = useState(false);
+  const [reportReason, setReportReason] = useState("");
+  const [reportDescription, setReportDescription] = useState("");
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -171,6 +178,60 @@ export default function UserProfile() {
       setIsRequesting(false);
     },
   });
+
+  const createReportMutation = useMutation({
+    mutationFn: async (data: {
+      contentType: string;
+      contentId: string;
+      reason: string;
+      description?: string;
+    }) => {
+      const response = await apiRequest("/api/reports", {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      return response.json();
+    },
+    onSuccess: () => {
+      toast({
+        title: "Report submitted",
+        description: `Your report about ${user?.name} has been submitted to the admin team.`,
+      });
+      setShowReportDialog(false);
+      setReportReason("");
+      setReportDescription("");
+    },
+    onError: (error) => {
+      console.error("Error creating report:", error);
+      toast({
+        title: "Error",
+        description: "Failed to submit report. Please try again.",
+        variant: "destructive",
+      });
+    },
+  });
+
+  const handleReport = () => {
+    if (!isAuthenticated) {
+      setShowAuthPopup(true);
+      return;
+    }
+    setShowReportDialog(true);
+  };
+
+  const handleReportSubmit = () => {
+    if (!reportReason || !user) return;
+    
+    createReportMutation.mutate({
+      contentType: "user",
+      contentId: user.id,
+      reason: reportReason,
+      description: reportDescription || undefined,
+    });
+  };
 
   const handleSwapRequest = () => {
     if (!user) return;
@@ -425,29 +486,44 @@ export default function UserProfile() {
             </div>
 
             <div className="pt-4 border-t border-border">
-              <Button
-                onClick={handleSwapRequest}
-                disabled={isRequesting || createSwapRequestMutation.isPending}
-                className="w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90 disabled:opacity-50"
-                size="lg"
-              >
-                {isRequesting || createSwapRequestMutation.isPending ? (
-                  <>
-                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Requesting...
-                  </>
-                ) : currentUser?.id === user.id ? (
-                  <>
-                    <User className="mr-2 h-4 w-4" />
-                    Edit Profile
-                  </>
-                ) : (
-                  <>
-                    <MessageSquare className="mr-2 h-4 w-4" />
-                    Request Skill Swap
-                  </>
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button
+                  onClick={handleSwapRequest}
+                  disabled={isRequesting || createSwapRequestMutation.isPending}
+                  className="w-full sm:w-auto bg-primary dark:bg-[#0b3675] hover:bg-primary/90 dark:hover:bg-[#0b3675]/90 disabled:opacity-50"
+                  size="lg"
+                >
+                  {isRequesting || createSwapRequestMutation.isPending ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Requesting...
+                    </>
+                  ) : currentUser?.id === user.id ? (
+                    <>
+                      <User className="mr-2 h-4 w-4" />
+                      Edit Profile
+                    </>
+                  ) : (
+                    <>
+                      <MessageSquare className="mr-2 h-4 w-4" />
+                      Request Skill Swap
+                    </>
+                  )}
+                </Button>
+                
+                {/* Only show report button when viewing another user's profile */}
+                {currentUser?.id !== user.id && (
+                  <Button
+                    onClick={handleReport}
+                    variant="outline"
+                    size="lg"
+                    className="w-full sm:w-auto"
+                  >
+                    <Flag className="mr-2 h-4 w-4" />
+                    Report User
+                  </Button>
                 )}
-              </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -504,6 +580,69 @@ export default function UserProfile() {
           }}
         />
       )}
+
+      {/* Report User Dialog */}
+      <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Report User</DialogTitle>
+            <DialogDescription>
+              Report {user?.name} to the admin team. Please provide a reason for the report.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="reason">Reason for report</Label>
+              <Select value={reportReason} onValueChange={setReportReason}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a reason" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="inappropriate_content">Inappropriate Content</SelectItem>
+                  <SelectItem value="spam">Spam</SelectItem>
+                  <SelectItem value="harassment">Harassment</SelectItem>
+                  <SelectItem value="fake_profile">Fake Profile</SelectItem>
+                  <SelectItem value="scam">Scam or Fraudulent Activity</SelectItem>
+                  <SelectItem value="other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Additional details (optional)</Label>
+              <Textarea
+                id="description"
+                placeholder="Provide additional details about the issue..."
+                value={reportDescription}
+                onChange={(e) => setReportDescription(e.target.value)}
+                rows={3}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setShowReportDialog(false)}
+              disabled={createReportMutation.isPending}
+            >
+              Cancel
+            </Button>
+            <Button
+              onClick={handleReportSubmit}
+              disabled={!reportReason || createReportMutation.isPending}
+              className="bg-destructive hover:bg-destructive/90"
+            >
+              {createReportMutation.isPending ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Report"
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
