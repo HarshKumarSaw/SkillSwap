@@ -14,8 +14,9 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Loader2 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Loader2, X, ChevronDown } from "lucide-react";
 import type { SwapRequestWithUsers } from "@shared/schema";
 
 interface EditSwapRequestDialogProps {
@@ -33,9 +34,12 @@ export default function EditSwapRequestDialog({
   const { toast } = useToast();
   const queryClient = useQueryClient();
   
-  const [senderSkill, setSenderSkill] = useState(request.senderSkill);
-  const [receiverSkill, setReceiverSkill] = useState(request.receiverSkill);
+  // Parse the current skills from the request (they might be comma-separated)
+  const [senderSkills, setSenderSkills] = useState<string[]>([]);
+  const [receiverSkills, setReceiverSkills] = useState<string[]>([]);
   const [message, setMessage] = useState(request.message || "");
+  const [senderDropdownOpen, setSenderDropdownOpen] = useState(false);
+  const [receiverDropdownOpen, setReceiverDropdownOpen] = useState(false);
 
   // Get skills for dropdowns
   const { data: skillsData = {} } = useQuery({
@@ -53,11 +57,36 @@ export default function EditSwapRequestDialog({
   // Reset form when dialog opens
   useEffect(() => {
     if (isOpen) {
-      setSenderSkill(request.senderSkill);
-      setReceiverSkill(request.receiverSkill);
+      // Parse comma-separated skills
+      setSenderSkills(request.senderSkill ? request.senderSkill.split(', ').filter(s => s.trim()) : []);
+      setReceiverSkills(request.receiverSkill ? request.receiverSkill.split(', ').filter(s => s.trim()) : []);
       setMessage(request.message || "");
     }
   }, [isOpen, request]);
+
+  const toggleSenderSkill = (skillName: string) => {
+    setSenderSkills(prev => 
+      prev.includes(skillName) 
+        ? prev.filter(s => s !== skillName)
+        : [...prev, skillName]
+    );
+  };
+
+  const toggleReceiverSkill = (skillName: string) => {
+    setReceiverSkills(prev => 
+      prev.includes(skillName) 
+        ? prev.filter(s => s !== skillName)
+        : [...prev, skillName]
+    );
+  };
+
+  const removeSenderSkill = (skillName: string) => {
+    setSenderSkills(prev => prev.filter(s => s !== skillName));
+  };
+
+  const removeReceiverSkill = (skillName: string) => {
+    setReceiverSkills(prev => prev.filter(s => s !== skillName));
+  };
 
   const updateRequestMutation = useMutation({
     mutationFn: async (updates: { senderSkill: string; receiverSkill: string; message: string }) => {
@@ -86,17 +115,18 @@ export default function EditSwapRequestDialog({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!senderSkill || !receiverSkill) {
+    if (senderSkills.length === 0 || receiverSkills.length === 0) {
       toast({
-        title: "Please select both skills",
+        title: "Please select skills",
+        description: "You must select at least one skill you offer and one skill you want.",
         variant: "destructive",
       });
       return;
     }
 
     updateRequestMutation.mutate({
-      senderSkill,
-      receiverSkill,
+      senderSkill: senderSkills.join(', '),
+      receiverSkill: receiverSkills.join(', '),
       message,
     });
   };
@@ -106,7 +136,7 @@ export default function EditSwapRequestDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="w-[calc(100vw-2rem)] sm:w-full max-w-[520px] max-h-[90vh] overflow-y-auto my-4 sm:my-0 rounded-lg">
         <DialogHeader>
           <DialogTitle>Edit Swap Request</DialogTitle>
           <DialogDescription>
@@ -114,47 +144,132 @@ export default function EditSwapRequestDialog({
           </DialogDescription>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="senderSkill">Skill You Offer</Label>
-            <Select value={senderSkill} onValueChange={setSenderSkill}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a skill you offer" />
-              </SelectTrigger>
-              <SelectContent>
-                {userSkills.map((skill: string) => (
-                  <SelectItem key={skill} value={skill}>
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-foreground">What skills do you offer?</Label>
+            
+            <Popover open={senderDropdownOpen} onOpenChange={setSenderDropdownOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between"
+                >
+                  {senderSkills.length === 0 
+                    ? "Select at least one skill" 
+                    : `${senderSkills.length} skill${senderSkills.length > 1 ? 's' : ''} selected`}
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                <div className="max-h-48 overflow-y-auto">
+                  {userSkills.map((skill: string) => (
+                    <div
+                      key={skill}
+                      className="flex items-center space-x-2 p-3 hover:bg-accent cursor-pointer"
+                      onClick={() => toggleSenderSkill(skill)}
+                    >
+                      <Checkbox 
+                        checked={senderSkills.includes(skill)}
+                        readOnly
+                        className="pointer-events-none"
+                      />
+                      <span className="text-sm flex-1">
+                        {skill}
+                      </span>
+                    </div>
+                  ))}
+                  {(!userSkills || userSkills.length === 0) && (
+                    <p className="text-sm text-muted-foreground p-3">
+                      You haven't added any skills yet. Update your profile to add skills.
+                    </p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+            
+            {/* Selected skills display */}
+            {senderSkills.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-lg border">
+                {senderSkills.map((skill) => (
+                  <span key={skill} className="bg-primary/10 text-primary px-3 py-1.5 rounded-full text-sm flex items-center gap-2 border border-primary/20">
                     {skill}
-                  </SelectItem>
+                    <X 
+                      className="w-3 h-3 cursor-pointer hover:text-muted-foreground transition-colors" 
+                      onClick={() => removeSenderSkill(skill)}
+                    />
+                  </span>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="receiverSkill">Skill You Want</Label>
-            <Select value={receiverSkill} onValueChange={setReceiverSkill}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a skill you want" />
-              </SelectTrigger>
-              <SelectContent>
-                {allSkills.map((skill: any) => (
-                  <SelectItem key={skill.id} value={skill.name}>
-                    {skill.name}
-                  </SelectItem>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-foreground">What skills do you want from {request.target.name}?</Label>
+            
+            <Popover open={receiverDropdownOpen} onOpenChange={setReceiverDropdownOpen}>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  role="combobox"
+                  className="w-full justify-between"
+                >
+                  {receiverSkills.length === 0 
+                    ? "Select at least one skill" 
+                    : `${receiverSkills.length} skill${receiverSkills.length > 1 ? 's' : ''} selected`}
+                  <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[var(--radix-popover-trigger-width)] p-0">
+                <div className="max-h-48 overflow-y-auto">
+                  {request.target.skillsOffered?.map((skill: string) => (
+                    <div
+                      key={skill}
+                      className="flex items-center space-x-2 p-3 hover:bg-accent cursor-pointer"
+                      onClick={() => toggleReceiverSkill(skill)}
+                    >
+                      <Checkbox 
+                        checked={receiverSkills.includes(skill)}
+                        readOnly
+                        className="pointer-events-none"
+                      />
+                      <span className="text-sm flex-1">
+                        {skill}
+                      </span>
+                    </div>
+                  ))}
+                  {(!request.target.skillsOffered || request.target.skillsOffered.length === 0) && (
+                    <p className="text-sm text-muted-foreground p-3">
+                      {request.target.name} hasn't added any skills yet.
+                    </p>
+                  )}
+                </div>
+              </PopoverContent>
+            </Popover>
+            
+            {/* Selected skills display */}
+            {receiverSkills.length > 0 && (
+              <div className="flex flex-wrap gap-2 p-3 bg-muted/30 rounded-lg border">
+                {receiverSkills.map((skill) => (
+                  <span key={skill} className="bg-secondary/10 text-secondary-foreground px-3 py-1.5 rounded-full text-sm flex items-center gap-2 border border-secondary/20">
+                    {skill}
+                    <X 
+                      className="w-3 h-3 cursor-pointer hover:text-muted-foreground transition-colors" 
+                      onClick={() => removeReceiverSkill(skill)}
+                    />
+                  </span>
                 ))}
-              </SelectContent>
-            </Select>
+              </div>
+            )}
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="message">Message (Optional)</Label>
+          <div className="space-y-3">
+            <Label className="text-sm font-medium text-foreground">Message (Optional)</Label>
             <Textarea
-              id="message"
               value={message}
               onChange={(e) => setMessage(e.target.value)}
               placeholder="Add a message to your request..."
-              className="min-h-[100px]"
+              className="min-h-[100px] text-sm"
             />
           </div>
 
@@ -169,7 +284,7 @@ export default function EditSwapRequestDialog({
             </Button>
             <Button 
               type="submit" 
-              disabled={updateRequestMutation.isPending}
+              disabled={updateRequestMutation.isPending || senderSkills.length === 0 || receiverSkills.length === 0}
             >
               {updateRequestMutation.isPending && (
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
