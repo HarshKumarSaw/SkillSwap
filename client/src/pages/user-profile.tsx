@@ -186,10 +186,8 @@ export default function UserProfile() {
       reason: string;
       description?: string;
     }) => {
-      return await apiRequest("/api/reports", {
-        method: "POST",
-        body: JSON.stringify(data),
-      });
+      const response = await apiRequest("POST", "/api/reports", data);
+      return response.json();
     },
     onSuccess: () => {
       toast({
