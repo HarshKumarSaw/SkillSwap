@@ -147,18 +147,18 @@ export default function SwapRequests() {
                     <Trash2 className="h-5 w-5" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent>
+                <AlertDialogContent className="mx-4 max-w-md">
                   <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Swap Request</AlertDialogTitle>
-                    <AlertDialogDescription>
+                    <AlertDialogTitle className="text-lg sm:text-xl">Delete Swap Request</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm sm:text-base">
                       Are you sure you want to delete this swap request? This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogFooter className="flex-col sm:flex-row gap-2 sm:gap-0">
+                    <AlertDialogCancel className="w-full sm:w-auto">Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => handleDelete(request.id)}
-                      className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className="w-full sm:w-auto bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
                       Delete
                     </AlertDialogAction>
