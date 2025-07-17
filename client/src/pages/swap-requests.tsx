@@ -147,18 +147,18 @@ export default function SwapRequests() {
                     <Trash2 className="h-5 w-5" />
                   </Button>
                 </AlertDialogTrigger>
-                <AlertDialogContent className="mx-4 w-[calc(100vw-32px)] max-w-sm sm:mx-auto sm:w-full sm:max-w-md">
-                  <AlertDialogHeader className="space-y-2 sm:space-y-3">
-                    <AlertDialogTitle className="text-base sm:text-lg font-semibold">Delete Swap Request</AlertDialogTitle>
-                    <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
+                <AlertDialogContent className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[90vw] max-w-sm sm:max-w-md p-6 rounded-lg border bg-background shadow-lg">
+                  <AlertDialogHeader className="space-y-3">
+                    <AlertDialogTitle className="text-lg font-semibold">Delete Swap Request</AlertDialogTitle>
+                    <AlertDialogDescription className="text-sm text-muted-foreground">
                       Are you sure you want to delete this swap request? This action cannot be undone.
                     </AlertDialogDescription>
                   </AlertDialogHeader>
-                  <AlertDialogFooter className="flex-col-reverse sm:flex-row gap-3 sm:gap-2 pt-4 sm:pt-6">
-                    <AlertDialogCancel className="w-full sm:w-auto h-10 sm:h-9">Cancel</AlertDialogCancel>
+                  <AlertDialogFooter className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-2 pt-6">
+                    <AlertDialogCancel className="w-full sm:w-auto h-10">Cancel</AlertDialogCancel>
                     <AlertDialogAction
                       onClick={() => handleDelete(request.id)}
-                      className="w-full sm:w-auto h-10 sm:h-9 bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                      className="w-full sm:w-auto h-10 bg-destructive text-destructive-foreground hover:bg-destructive/90"
                     >
                       Delete
                     </AlertDialogAction>
