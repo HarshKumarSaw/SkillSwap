@@ -11,6 +11,12 @@ Preferred communication style: Simple, everyday language.
 ## Recent Changes
 
 **July 17, 2025**:
+- ✓ **Mobile-Optimized Swap Requests Page** - Complete responsive design with mobile-first approach for swap request management
+- ✓ **Responsive Button Layout** - Smaller buttons on mobile with adaptive text and icon sizing
+- ✓ **Enhanced Mobile Cards** - Optimized card layout with better spacing and touch targets
+- ✓ **Improved Mobile Navigation** - Better tab layout and spacing for mobile devices
+- ✓ **Touch-Friendly Interface** - Larger touch targets and improved button accessibility on mobile
+- ✓ **Fixed Swap Request Buttons** - Removed unnecessary cancel button, fixed delete functionality with proper API integration
 - ✓ **Duplicate Swap Request Prevention** - Automatically deletes previous pending requests when user sends new request to same target
 - ✓ **Smart Request Management** - Only deletes pending requests, preserves accepted/rejected/completed requests for history
 - ✓ **Enhanced Logging** - Added comprehensive logging for swap request creation and duplicate handling

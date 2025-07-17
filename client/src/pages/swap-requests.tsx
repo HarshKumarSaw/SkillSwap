@@ -135,74 +135,81 @@ export default function SwapRequests() {
     const isOwner = type === "sent";
     
     return (
-      <Card key={request.id} className="mb-4">
-        <CardHeader className="pb-3">
-          <div className="flex items-center justify-between">
+      <Card key={request.id} className="border-0 shadow-sm sm:border sm:shadow-md">
+        <CardHeader className="pb-3 sm:pb-4">
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
             <div className="flex items-center space-x-3">
-              <Avatar>
+              <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
                 <AvatarImage src={otherUser.profilePhoto || ""} />
-                <AvatarFallback>{otherUser.name[0]}</AvatarFallback>
+                <AvatarFallback className="text-sm sm:text-base">{otherUser.name[0]}</AvatarFallback>
               </Avatar>
-              <div>
-                <CardTitle className="text-lg">{otherUser.name}</CardTitle>
-                <Badge variant={getStatusBadgeVariant(request.status)} className={getStatusColor(request.status)}>
+              <div className="flex-1 min-w-0">
+                <CardTitle className="text-base sm:text-lg truncate">{otherUser.name}</CardTitle>
+                <Badge variant={getStatusBadgeVariant(request.status)} className={`${getStatusColor(request.status)} text-xs sm:text-sm mt-1`}>
                   {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                 </Badge>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex flex-wrap gap-2 sm:gap-2 justify-end sm:justify-start">
               {request.status === "pending" && !isOwner && (
                 <>
-                  <Button size="sm" onClick={() => handleAccept(request.id)} variant="default">
-                    <CheckCircle className="h-4 w-4 mr-1" />
+                  <Button size="sm" onClick={() => handleAccept(request.id)} variant="default" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
+                    <CheckCircle className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
                     Accept
                   </Button>
-                  <Button size="sm" onClick={() => handleReject(request.id)} variant="destructive">
-                    <XCircle className="h-4 w-4 mr-1" />
+                  <Button size="sm" onClick={() => handleReject(request.id)} variant="destructive" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
+                    <XCircle className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
                     Reject
                   </Button>
                 </>
               )}
               {request.status === "accepted" && (
-                <Button size="sm" onClick={() => handleComplete(request.id)} variant="default">
-                  <CheckCircle className="h-4 w-4 mr-1" />
-                  Mark Complete
+                <Button size="sm" onClick={() => handleComplete(request.id)} variant="default" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
+                  <CheckCircle className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
+                  Complete
                 </Button>
               )}
               {(request.status === "pending" || request.status === "rejected") && isOwner && (
-                <Button size="sm" onClick={() => handleDelete(request.id)} variant="destructive">
-                  <Trash2 className="h-4 w-4 mr-1" />
+                <Button size="sm" onClick={() => handleDelete(request.id)} variant="destructive" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
+                  <Trash2 className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
                   Delete
                 </Button>
               )}
               {/* Allow feedback on any sent request */}
               {isOwner && (
-                <Button size="sm" onClick={() => handleRate(request)} variant="outline">
-                  <MessageSquare className="h-4 w-4 mr-1" />
-                  Give Feedback
+                <Button size="sm" onClick={() => handleRate(request)} variant="outline" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
+                  <MessageSquare className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Give </span>Feedback
                 </Button>
               )}
               {/* Traditional rating for completed requests */}
               {request.status === "completed" && !isOwner && (
-                <Button size="sm" onClick={() => handleRate(request)} variant="outline">
-                  <Star className="h-4 w-4 mr-1" />
-                  Rate Experience
+                <Button size="sm" onClick={() => handleRate(request)} variant="outline" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
+                  <Star className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
+                  <span className="hidden sm:inline">Rate Experience</span>
+                  <span className="sm:hidden">Rate</span>
                 </Button>
               )}
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-2">
-            <div className="flex justify-between text-sm">
-              <span><strong>{type === "sent" ? "You offer:" : "They offer:"}</strong> {type === "sent" ? request.senderSkill : request.receiverSkill}</span>
-              <span><strong>{type === "sent" ? "You want:" : "You provide:"}</strong> {type === "sent" ? request.receiverSkill : request.senderSkill}</span>
+        <CardContent className="pt-2 sm:pt-3">
+          <div className="space-y-3 sm:space-y-2">
+            <div className="flex flex-col sm:flex-row sm:justify-between gap-2 sm:gap-0">
+              <div className="text-xs sm:text-sm">
+                <span className="font-medium text-muted-foreground">{type === "sent" ? "You offer:" : "They offer:"}</span>
+                <span className="ml-1 text-foreground">{type === "sent" ? request.senderSkill : request.receiverSkill}</span>
+              </div>
+              <div className="text-xs sm:text-sm">
+                <span className="font-medium text-muted-foreground">{type === "sent" ? "You want:" : "You provide:"}</span>
+                <span className="ml-1 text-foreground">{type === "sent" ? request.receiverSkill : request.senderSkill}</span>
+              </div>
             </div>
             {request.message && (
               <div className="bg-muted p-3 rounded-md">
                 <div className="flex items-start gap-2">
-                  <MessageSquare className="h-4 w-4 mt-0.5 text-muted-foreground" />
-                  <p className="text-sm">{request.message}</p>
+                  <MessageSquare className="h-3 w-3 mt-0.5 text-muted-foreground sm:h-4 sm:w-4" />
+                  <p className="text-xs sm:text-sm leading-relaxed">{request.message}</p>
                 </div>
               </div>
             )}
@@ -216,34 +223,38 @@ export default function SwapRequests() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">My Swap Requests</h1>
+    <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
+      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 px-1">My Swap Requests</h1>
       
       <Tabs defaultValue="received" className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="received">Received ({receivedRequests.length})</TabsTrigger>
-          <TabsTrigger value="sent">Sent ({sentRequests.length})</TabsTrigger>
+        <TabsList className="grid w-full grid-cols-2 h-12 sm:h-10">
+          <TabsTrigger value="received" className="text-sm sm:text-base">
+            Received ({receivedRequests.length})
+          </TabsTrigger>
+          <TabsTrigger value="sent" className="text-sm sm:text-base">
+            Sent ({sentRequests.length})
+          </TabsTrigger>
         </TabsList>
         
-        <TabsContent value="received" className="mt-6">
+        <TabsContent value="received" className="mt-4 sm:mt-6">
           {receivedRequests.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No swap requests received yet.</p>
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-muted-foreground text-sm sm:text-base">No swap requests received yet.</p>
             </div>
           ) : (
-            <div>
+            <div className="space-y-3 sm:space-y-4">
               {receivedRequests.map((request) => renderRequestCard(request, "received"))}
             </div>
           )}
         </TabsContent>
         
-        <TabsContent value="sent" className="mt-6">
+        <TabsContent value="sent" className="mt-4 sm:mt-6">
           {sentRequests.length === 0 ? (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No swap requests sent yet.</p>
+            <div className="text-center py-8 sm:py-12">
+              <p className="text-muted-foreground text-sm sm:text-base">No swap requests sent yet.</p>
             </div>
           ) : (
-            <div>
+            <div className="space-y-3 sm:space-y-4">
               {sentRequests.map((request) => renderRequestCard(request, "sent"))}
             </div>
           )}
