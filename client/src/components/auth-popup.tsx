@@ -116,7 +116,7 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
       
       // Redirect admin users to admin dashboard
       if (data.role === 'admin') {
-        setLocation('/admin-dashboard');
+        setLocation('/admin');
       } else {
         onAuthSuccess();
       }
@@ -153,7 +153,7 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
       
       // Redirect admin users to admin dashboard
       if (data.role === 'admin') {
-        setLocation('/admin-dashboard');
+        setLocation('/admin');
       } else {
         onAuthSuccess();
       }

@@ -74,6 +74,37 @@ export default function AdminDashboard() {
   const [banReason, setBanReason] = useState("");
   const [newMessage, setNewMessage] = useState({ title: "", message: "", type: "announcement" });
 
+  // Fetch admin data - Always call hooks first
+  const { data: users } = useQuery({
+    queryKey: ['/api/admin/users'],
+    queryFn: () => apiRequest("GET", "/api/admin/users").then(res => res.json()),
+    enabled: !!(user && user.role === 'admin'),
+  });
+
+  const { data: swapRequests } = useQuery({
+    queryKey: ['/api/admin/swap-requests'],
+    queryFn: () => apiRequest("GET", "/api/admin/swap-requests").then(res => res.json()),
+    enabled: !!(user && user.role === 'admin'),
+  });
+
+  const { data: adminActions } = useQuery({
+    queryKey: ['/api/admin/actions'],
+    queryFn: () => apiRequest("GET", "/api/admin/actions").then(res => res.json()),
+    enabled: !!(user && user.role === 'admin'),
+  });
+
+  const { data: reports } = useQuery({
+    queryKey: ['/api/admin/reports'],
+    queryFn: () => apiRequest("GET", "/api/admin/reports").then(res => res.json()),
+    enabled: !!(user && user.role === 'admin'),
+  });
+
+  const { data: systemMessages } = useQuery({
+    queryKey: ['/api/system-messages'],
+    queryFn: () => apiRequest("GET", "/api/system-messages").then(res => res.json()),
+    enabled: !!(user && user.role === 'admin'),
+  });
+
   // Download functions
   const downloadReport = async (reportType: string, filename: string) => {
     try {
@@ -103,55 +134,10 @@ export default function AdminDashboard() {
     }
   };
 
-  // Check if user is admin
-  if (!user || user.role !== 'admin') {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Card>
-          <CardContent className="p-8 text-center">
-            <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
-            <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
-            <p className="text-muted-foreground">You need admin privileges to access this page.</p>
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
-
-  // Fetch admin data
-  const { data: users } = useQuery({
-    queryKey: ['/api/admin/users'],
-    queryFn: () => apiRequest('/api/admin/users').then(res => res.json()),
-  });
-
-  const { data: swapRequests } = useQuery({
-    queryKey: ['/api/admin/swap-requests'],
-    queryFn: () => apiRequest('/api/admin/swap-requests').then(res => res.json()),
-  });
-
-  const { data: adminActions } = useQuery({
-    queryKey: ['/api/admin/actions'],
-    queryFn: () => apiRequest('/api/admin/actions').then(res => res.json()),
-  });
-
-  const { data: reports } = useQuery({
-    queryKey: ['/api/admin/reports'],
-    queryFn: () => apiRequest('/api/admin/reports').then(res => res.json()),
-  });
-
-  const { data: systemMessages } = useQuery({
-    queryKey: ['/api/system-messages'],
-    queryFn: () => apiRequest('/api/system-messages').then(res => res.json()),
-  });
-
-  // Mutations
+  // Mutations - Call all hooks before conditional returns
   const banUserMutation = useMutation({
     mutationFn: async ({ userId, reason }: { userId: string; reason: string }) => {
-      const response = await apiRequest(`/api/admin/users/${userId}/ban`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ reason }),
-      });
+      const response = await apiRequest("POST", `/api/admin/users/${userId}/ban`, { reason });
       return response.json();
     },
     onSuccess: () => {
@@ -168,9 +154,7 @@ export default function AdminDashboard() {
 
   const unbanUserMutation = useMutation({
     mutationFn: async (userId: string) => {
-      const response = await apiRequest(`/api/admin/users/${userId}/unban`, {
-        method: 'POST',
-      });
+      const response = await apiRequest("POST", `/api/admin/users/${userId}/unban`);
       return response.json();
     },
     onSuccess: () => {
@@ -185,11 +169,7 @@ export default function AdminDashboard() {
 
   const createSystemMessageMutation = useMutation({
     mutationFn: async (message: typeof newMessage) => {
-      const response = await apiRequest('/api/admin/system-messages', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(message),
-      });
+      const response = await apiRequest("POST", "/api/admin/system-messages", message);
       return response.json();
     },
     onSuccess: () => {
@@ -204,11 +184,7 @@ export default function AdminDashboard() {
 
   const updateReportMutation = useMutation({
     mutationFn: async ({ reportId, status }: { reportId: string; status: string }) => {
-      const response = await apiRequest(`/api/admin/reports/${reportId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status }),
-      });
+      const response = await apiRequest("PATCH", `/api/admin/reports/${reportId}`, { status });
       return response.json();
     },
     onSuccess: () => {
@@ -219,6 +195,21 @@ export default function AdminDashboard() {
       toast({ title: "Failed to update report", variant: "destructive" });
     },
   });
+
+  // Check if user is admin - After all hooks are called
+  if (!user || user.role !== 'admin') {
+    return (
+      <div className="container mx-auto px-4 py-8">
+        <Card>
+          <CardContent className="p-8 text-center">
+            <Shield className="w-16 h-16 mx-auto mb-4 text-muted-foreground" />
+            <h2 className="text-2xl font-bold mb-2">Access Denied</h2>
+            <p className="text-muted-foreground">You need admin privileges to access this page.</p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="container mx-auto px-4 py-8">
