@@ -186,14 +186,10 @@ export default function UserProfile() {
       reason: string;
       description?: string;
     }) => {
-      const response = await apiRequest("/api/reports", {
+      return await apiRequest("/api/reports", {
         method: "POST",
         body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
       });
-      return response.json();
     },
     onSuccess: () => {
       toast({
@@ -583,7 +579,7 @@ export default function UserProfile() {
 
       {/* Report User Dialog */}
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto mx-4">
           <DialogHeader>
             <DialogTitle>Report User</DialogTitle>
             <DialogDescription>
@@ -618,18 +614,19 @@ export default function UserProfile() {
               />
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-0">
             <Button
               variant="outline"
               onClick={() => setShowReportDialog(false)}
               disabled={createReportMutation.isPending}
+              className="w-full sm:w-auto"
             >
               Cancel
             </Button>
             <Button
               onClick={handleReportSubmit}
               disabled={!reportReason || createReportMutation.isPending}
-              className="bg-destructive hover:bg-destructive/90"
+              className="bg-destructive hover:bg-destructive/90 w-full sm:w-auto"
             >
               {createReportMutation.isPending ? (
                 <>
