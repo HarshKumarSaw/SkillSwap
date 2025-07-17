@@ -26,32 +26,36 @@ export default function SwapRequests() {
 
   const updateStatusMutation = useMutation({
     mutationFn: async ({ requestId, status }: { requestId: string; status: string }) => {
-      return apiRequest(`/api/swap-requests/${requestId}/status`, {
-        method: "PATCH",
-        body: JSON.stringify({ status }),
-        headers: { "Content-Type": "application/json" },
-      });
+      const response = await apiRequest("PATCH", `/api/swap-requests/${requestId}/status`, { status });
+      if (!response.ok) {
+        throw new Error("Failed to update request");
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/swap-requests"] });
       toast({ title: "Request updated successfully" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Update error:", error);
       toast({ title: "Failed to update request", variant: "destructive" });
     },
   });
 
   const deleteRequestMutation = useMutation({
     mutationFn: async (requestId: string) => {
-      return apiRequest(`/api/swap-requests/${requestId}`, {
-        method: "DELETE",
-      });
+      const response = await apiRequest("DELETE", `/api/swap-requests/${requestId}`);
+      if (!response.ok) {
+        throw new Error("Failed to delete request");
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/swap-requests"] });
       toast({ title: "Request deleted successfully" });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Delete error:", error);
       toast({ title: "Failed to delete request", variant: "destructive" });
     },
   });
@@ -115,9 +119,7 @@ export default function SwapRequests() {
     updateStatusMutation.mutate({ requestId, status: "completed" });
   };
 
-  const handleCancel = (requestId: string) => {
-    updateStatusMutation.mutate({ requestId, status: "cancelled" });
-  };
+
 
   const handleDelete = (requestId: string) => {
     deleteRequestMutation.mutate(requestId);
@@ -167,14 +169,10 @@ export default function SwapRequests() {
                   Mark Complete
                 </Button>
               )}
-              {request.status === "pending" && isOwner && (
-                <Button size="sm" onClick={() => handleCancel(request.id)} variant="outline">
-                  Cancel
-                </Button>
-              )}
-              {(request.status === "pending" || request.status === "rejected") && (
+              {(request.status === "pending" || request.status === "rejected") && isOwner && (
                 <Button size="sm" onClick={() => handleDelete(request.id)} variant="destructive">
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="h-4 w-4 mr-1" />
+                  Delete
                 </Button>
               )}
               {/* Allow feedback on any sent request */}
