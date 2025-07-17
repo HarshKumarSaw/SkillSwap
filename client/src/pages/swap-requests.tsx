@@ -7,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle, Trash2, Star, MessageSquare } from "lucide-react";
+import { CheckCircle, XCircle, Trash2, Star, MessageSquare, ArrowLeft } from "lucide-react";
 import { RatingDialog } from "@/components/rating-dialog";
 import { useState } from "react";
+import { Link } from "wouter";
 import type { SwapRequestWithUsers } from "@shared/schema";
 
 export default function SwapRequests() {
@@ -224,7 +225,14 @@ export default function SwapRequests() {
 
   return (
     <div className="container mx-auto px-3 sm:px-4 py-4 sm:py-8">
-      <h1 className="text-2xl sm:text-3xl font-bold mb-6 sm:mb-8 px-1">My Swap Requests</h1>
+      <div className="flex items-center gap-3 mb-6 sm:mb-8 px-1">
+        <Link href="/">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 sm:h-9 sm:w-9">
+            <ArrowLeft className="h-4 w-4 sm:h-5 sm:w-5" />
+          </Button>
+        </Link>
+        <h1 className="text-2xl sm:text-3xl font-bold">My Swap Requests</h1>
+      </div>
       
       <Tabs defaultValue="received" className="w-full">
         <TabsList className="grid w-full grid-cols-2 h-12 sm:h-10">
