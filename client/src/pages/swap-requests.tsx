@@ -7,8 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { CheckCircle, XCircle, Trash2, Star, MessageSquare, ArrowLeft } from "lucide-react";
-import { RatingDialog } from "@/components/rating-dialog";
+import { CheckCircle, XCircle, Trash2, ArrowLeft, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { Link } from "wouter";
 import type { SwapRequestWithUsers } from "@shared/schema";
@@ -17,8 +16,7 @@ export default function SwapRequests() {
   const { user, isAuthenticated } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [ratingDialogOpen, setRatingDialogOpen] = useState(false);
-  const [selectedRequest, setSelectedRequest] = useState<SwapRequestWithUsers | null>(null);
+
 
   const { data: swapRequests = [], isLoading } = useQuery({
     queryKey: ["/api/swap-requests"],
@@ -126,10 +124,7 @@ export default function SwapRequests() {
     deleteRequestMutation.mutate(requestId);
   };
 
-  const handleRate = (request: SwapRequestWithUsers) => {
-    setSelectedRequest(request);
-    setRatingDialogOpen(true);
-  };
+
 
   const renderRequestCard = (request: SwapRequestWithUsers, type: "sent" | "received") => {
     const otherUser = type === "sent" ? request.target : request.requester;
@@ -176,21 +171,7 @@ export default function SwapRequests() {
                   Delete
                 </Button>
               )}
-              {/* Allow feedback on any sent request */}
-              {isOwner && (
-                <Button size="sm" onClick={() => handleRate(request)} variant="outline" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
-                  <MessageSquare className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Give </span>Feedback
-                </Button>
-              )}
-              {/* Traditional rating for completed requests */}
-              {request.status === "completed" && !isOwner && (
-                <Button size="sm" onClick={() => handleRate(request)} variant="outline" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
-                  <Star className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
-                  <span className="hidden sm:inline">Rate Experience</span>
-                  <span className="sm:hidden">Rate</span>
-                </Button>
-              )}
+
             </div>
           </div>
         </CardHeader>
@@ -269,17 +250,7 @@ export default function SwapRequests() {
         </TabsContent>
       </Tabs>
 
-      {selectedRequest && (
-        <RatingDialog
-          open={ratingDialogOpen}
-          onOpenChange={setRatingDialogOpen}
-          swapRequest={selectedRequest}
-          onRatingSubmitted={() => {
-            setRatingDialogOpen(false);
-            setSelectedRequest(null);
-          }}
-        />
-      )}
+
     </div>
   );
 }

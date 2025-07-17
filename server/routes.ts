@@ -355,6 +355,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Check if users have accepted swap requests between them
+  app.get("/api/users/:id/can-give-feedback", async (req, res) => {
+    try {
+      const currentUser = (req as any).session?.user;
+      if (!currentUser) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const targetUserId = req.params.id;
+      const canGiveFeedback = await storage.canGiveFeedback(currentUser.id, targetUserId);
+      res.json({ canGiveFeedback });
+    } catch (error) {
+      console.error("Error checking feedback permission:", error);
+      res.status(500).json({ message: "Failed to check feedback permission" });
+    }
+  });
+
   // Update swap request status
   app.patch("/api/swap-requests/:id/status", async (req, res) => {
     try {

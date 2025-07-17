@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
 import { AuthPopup } from "@/components/auth-popup";
 import { SwapRequestPopup } from "@/components/swap-request-popup";
+import { RatingDialog } from "@/components/rating-dialog";
 
 // Helper function to format availability
 const formatAvailability = (availability: any): string => {
@@ -75,6 +76,7 @@ export default function UserProfile() {
   const [isRequesting, setIsRequesting] = useState(false);
   const [showAuthPopup, setShowAuthPopup] = useState(false);
   const [showSwapPopup, setShowSwapPopup] = useState(false);
+  const [showRatingDialog, setShowRatingDialog] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -117,6 +119,14 @@ export default function UserProfile() {
     queryKey: [`/api/users/${id}/feedback`],
     enabled: !!id,
   });
+
+  // Check if current user can give feedback to this user
+  const { data: canGiveFeedbackData } = useQuery({
+    queryKey: [`/api/users/${id}/can-give-feedback`],
+    enabled: !!id && !!currentUser && currentUser.id !== id,
+  });
+
+  const canGiveFeedback = canGiveFeedbackData?.canGiveFeedback || false;
 
   // Fetch current user with skills when needed for swap popup
   const { data: currentUserWithSkills, isLoading: isLoadingCurrentUser } = useQuery({
@@ -355,7 +365,20 @@ export default function UserProfile() {
 
             {/* Feedback Section */}
             <div>
-              <h3 className="text-lg font-semibold mb-3">Feedback & Reviews</h3>
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold">Feedback & Reviews</h3>
+                {canGiveFeedback && currentUser && (
+                  <Button
+                    onClick={() => setShowRatingDialog(true)}
+                    variant="outline"
+                    size="sm"
+                    className="flex items-center gap-2"
+                  >
+                    <Star className="h-4 w-4" />
+                    Give Feedback
+                  </Button>
+                )}
+              </div>
               {feedbackLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
@@ -444,6 +467,41 @@ export default function UserProfile() {
           currentUser={currentUserWithSkills}
           onSubmit={handleSwapRequestSubmit}
           isLoading={isRequesting || createSwapRequestMutation.isPending || isLoadingCurrentUser}
+        />
+      )}
+
+      {currentUser && user && (
+        <RatingDialog
+          open={showRatingDialog}
+          onOpenChange={setShowRatingDialog}
+          swapRequest={{
+            id: "dummy-request",
+            requesterId: currentUser.id,
+            targetId: user.id,
+            senderSkill: "General Skill",
+            receiverSkill: "General Skill",
+            status: "accepted",
+            message: "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            requester: {
+              id: currentUser.id,
+              name: currentUser.name,
+              email: currentUser.email,
+              profilePhoto: currentUser.profilePhoto,
+            },
+            target: {
+              id: user.id,
+              name: user.name,
+              email: user.email,
+              profilePhoto: user.profilePhoto,
+            }
+          }}
+          onRatingSubmitted={() => {
+            setShowRatingDialog(false);
+            // Refresh feedback data
+            queryClient.invalidateQueries({ queryKey: [`/api/users/${id}/feedback`] });
+          }}
         />
       )}
     </div>

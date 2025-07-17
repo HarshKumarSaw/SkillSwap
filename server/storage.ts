@@ -847,6 +847,21 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  async canGiveFeedback(currentUserId: string, targetUserId: string): Promise<boolean> {
+    const client = await pool.connect();
+    try {
+      // Check if there's at least one accepted swap request between the users
+      const result = await client.query(
+        'SELECT 1 FROM swap_requests WHERE status = $1 AND ((sender_id = $2 AND receiver_id = $3) OR (sender_id = $3 AND receiver_id = $2)) LIMIT 1',
+        ['accepted', currentUserId, targetUserId]
+      );
+      
+      return result.rows.length > 0;
+    } finally {
+      client.release();
+    }
+  }
+
   async createSwapRating(rating: InsertSwapRating): Promise<SwapRating> {
     const client = await pool.connect();
     try {
