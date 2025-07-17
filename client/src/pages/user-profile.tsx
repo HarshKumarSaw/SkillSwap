@@ -577,18 +577,20 @@ export default function UserProfile() {
 
       {/* Report User Dialog */}
       <Dialog open={showReportDialog} onOpenChange={setShowReportDialog}>
-        <DialogContent className="sm:max-w-[425px] max-h-[90vh] overflow-y-auto mx-4">
-          <DialogHeader>
-            <DialogTitle>Report User</DialogTitle>
-            <DialogDescription>
+        <DialogContent className="w-[95vw] max-w-[425px] max-h-[85vh] overflow-y-auto p-4 sm:p-6">
+          <DialogHeader className="space-y-3 pb-4">
+            <DialogTitle className="text-lg font-semibold">Report User</DialogTitle>
+            <DialogDescription className="text-sm text-muted-foreground">
               Report {user?.name} to the admin team. Please provide a reason for the report.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid gap-2">
-              <Label htmlFor="reason">Reason for report</Label>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="reason" className="text-sm font-medium">
+                Reason for report *
+              </Label>
               <Select value={reportReason} onValueChange={setReportReason}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select a reason" />
                 </SelectTrigger>
                 <SelectContent>
@@ -601,30 +603,33 @@ export default function UserProfile() {
                 </SelectContent>
               </Select>
             </div>
-            <div className="grid gap-2">
-              <Label htmlFor="description">Additional details (optional)</Label>
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium">
+                Additional details (optional)
+              </Label>
               <Textarea
                 id="description"
                 placeholder="Provide additional details about the issue..."
                 value={reportDescription}
                 onChange={(e) => setReportDescription(e.target.value)}
                 rows={3}
+                className="resize-none"
               />
             </div>
           </div>
-          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-0">
+          <DialogFooter className="flex flex-col-reverse sm:flex-row gap-3 pt-6">
             <Button
               variant="outline"
               onClick={() => setShowReportDialog(false)}
               disabled={createReportMutation.isPending}
-              className="w-full sm:w-auto"
+              className="w-full sm:w-auto order-2 sm:order-1"
             >
               Cancel
             </Button>
             <Button
               onClick={handleReportSubmit}
               disabled={!reportReason || createReportMutation.isPending}
-              className="bg-destructive hover:bg-destructive/90 w-full sm:w-auto"
+              className="bg-destructive hover:bg-destructive/90 w-full sm:w-auto order-1 sm:order-2"
             >
               {createReportMutation.isPending ? (
                 <>
