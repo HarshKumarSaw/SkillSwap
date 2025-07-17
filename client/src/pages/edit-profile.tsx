@@ -159,54 +159,57 @@ export default function EditProfile() {
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Header */}
+      {/* Mobile-Optimized Header */}
       <header className="bg-card shadow-sm border-b border-border sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-16">
-            <div className="flex items-center space-x-4">
+        <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-14 sm:h-16">
+            <div className="flex items-center space-x-2 sm:space-x-4">
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={() => setLocation(`/profile/${user?.id}`)}
+                className="p-2 sm:p-3"
               >
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to Profile
+                <ArrowLeft className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline">Back to Profile</span>
               </Button>
-              <h1 className="text-xl font-bold text-foreground">Edit Profile</h1>
+              <h1 className="text-lg sm:text-xl font-bold text-foreground">Edit Profile</h1>
             </div>
             <Button
               onClick={handleSubmit}
               disabled={isLoading}
-              className="bg-primary hover:bg-primary/90"
+              className="bg-primary hover:bg-primary/90 hidden sm:flex"
+              size="sm"
             >
               <Save className="w-4 h-4 mr-2" />
-              {isLoading ? "Saving..." : "Save Changes"}
+              {isLoading ? "Saving..." : "Save"}
             </Button>
           </div>
         </div>
       </header>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="max-w-4xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-8">
+        <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
           {/* Basic Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Basic Information</CardTitle>
+          <Card className="border-0 shadow-sm sm:border sm:shadow-md">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl">Basic Information</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="name">Name</Label>
+            <CardContent className="space-y-4 sm:space-y-5">
+              <div className="space-y-4 sm:grid sm:grid-cols-2 sm:gap-4 sm:space-y-0">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium">Name</Label>
                   <Input
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange("name", e.target.value)}
                     placeholder="Your full name"
                     required
+                    className="h-11 text-base"
                   />
                 </div>
-                <div>
-                  <Label htmlFor="email">Email</Label>
+                <div className="space-y-2">
+                  <Label htmlFor="email" className="text-sm font-medium">Email</Label>
                   <Input
                     id="email"
                     type="email"
@@ -214,49 +217,54 @@ export default function EditProfile() {
                     onChange={(e) => handleInputChange("email", e.target.value)}
                     placeholder="your@email.com"
                     required
+                    className="h-11 text-base"
                   />
                 </div>
               </div>
-              <div>
-                <Label htmlFor="location">Location</Label>
+              <div className="space-y-2">
+                <Label htmlFor="location" className="text-sm font-medium">Location</Label>
                 <Input
                   id="location"
                   value={formData.location}
                   onChange={(e) => handleInputChange("location", e.target.value)}
                   placeholder="City, Country"
+                  className="h-11 text-base"
                 />
               </div>
-              <div>
-                <Label htmlFor="bio">Bio</Label>
+              <div className="space-y-2">
+                <Label htmlFor="bio" className="text-sm font-medium">Bio</Label>
                 <Textarea
                   id="bio"
                   value={formData.bio}
                   onChange={(e) => handleInputChange("bio", e.target.value)}
                   placeholder="Tell others about yourself..."
                   rows={3}
+                  className="text-base resize-none"
                 />
               </div>
-              <div>
-                <Label htmlFor="profilePhoto">Profile Photo URL</Label>
+              <div className="space-y-2">
+                <Label htmlFor="profilePhoto" className="text-sm font-medium">Profile Photo URL</Label>
                 <Input
                   id="profilePhoto"
                   value={formData.profilePhoto}
                   onChange={(e) => handleInputChange("profilePhoto", e.target.value)}
                   placeholder="https://example.com/photo.jpg"
+                  className="h-11 text-base"
                 />
               </div>
-              <div className="flex items-center space-x-2">
+              <div className="flex items-start space-x-3 py-2">
                 <Checkbox
                   id="isPublic"
                   checked={formData.isPublic}
                   onCheckedChange={(checked) => handleInputChange("isPublic", checked)}
+                  className="mt-0.5"
                 />
-                <Label htmlFor="isPublic" className="text-sm cursor-pointer">
+                <Label htmlFor="isPublic" className="text-sm cursor-pointer leading-relaxed">
                   Make my profile public (visible to other users)
                 </Label>
               </div>
               {!formData.isPublic && (
-                <div className="text-sm text-muted-foreground bg-muted p-3 rounded-md">
+                <div className="text-sm text-muted-foreground bg-muted/70 p-4 rounded-lg border">
                   <p>ℹ️ Your profile is currently private. Other users won't be able to see your profile or send you swap requests.</p>
                 </div>
               )}
@@ -264,22 +272,23 @@ export default function EditProfile() {
           </Card>
 
           {/* Skills Offered */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills I Can Offer</CardTitle>
+          <Card className="border-0 shadow-sm sm:border sm:shadow-md">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl">Skills I Can Offer</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {allSkills.map((skill) => (
-                  <div key={skill.id} className="flex items-center space-x-2">
+                  <div key={skill.id} className="flex items-center space-x-3 py-1">
                     <Checkbox
                       id={`offered-${skill.id}`}
                       checked={skillsOffered.includes(skill.name)}
                       onCheckedChange={() => handleSkillToggle(skill.name, 'offered')}
+                      className="scale-110"
                     />
                     <Label
                       htmlFor={`offered-${skill.id}`}
-                      className="text-sm cursor-pointer"
+                      className="text-sm sm:text-base cursor-pointer leading-relaxed"
                     >
                       {skill.name}
                     </Label>
@@ -287,20 +296,20 @@ export default function EditProfile() {
                 ))}
               </div>
               {skillsOffered.length > 0 && (
-                <div className="mt-4">
-                  <Label className="text-sm font-medium">Selected Skills:</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                <div className="mt-6 space-y-3">
+                  <Label className="text-sm font-medium text-muted-foreground">Selected Skills:</Label>
+                  <div className="flex flex-wrap gap-2">
                     {skillsOffered.map((skill) => (
                       <Badge
                         key={skill}
                         variant="secondary"
-                        className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200"
+                        className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 px-3 py-1.5 text-sm"
                       >
                         {skill}
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="ml-1 h-4 w-4 p-0"
+                          className="ml-2 h-4 w-4 p-0 hover:bg-transparent"
                           onClick={() => handleSkillToggle(skill, 'offered')}
                         >
                           <X className="h-3 w-3" />
@@ -314,22 +323,23 @@ export default function EditProfile() {
           </Card>
 
           {/* Skills Wanted */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Skills I Want to Learn</CardTitle>
+          <Card className="border-0 shadow-sm sm:border sm:shadow-md">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl">Skills I Want to Learn</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 {allSkills.map((skill) => (
-                  <div key={skill.id} className="flex items-center space-x-2">
+                  <div key={skill.id} className="flex items-center space-x-3 py-1">
                     <Checkbox
                       id={`wanted-${skill.id}`}
                       checked={skillsWanted.includes(skill.name)}
                       onCheckedChange={() => handleSkillToggle(skill.name, 'wanted')}
+                      className="scale-110"
                     />
                     <Label
                       htmlFor={`wanted-${skill.id}`}
-                      className="text-sm cursor-pointer"
+                      className="text-sm sm:text-base cursor-pointer leading-relaxed"
                     >
                       {skill.name}
                     </Label>
@@ -337,20 +347,20 @@ export default function EditProfile() {
                 ))}
               </div>
               {skillsWanted.length > 0 && (
-                <div className="mt-4">
-                  <Label className="text-sm font-medium">Selected Skills:</Label>
-                  <div className="flex flex-wrap gap-2 mt-2">
+                <div className="mt-6 space-y-3">
+                  <Label className="text-sm font-medium text-muted-foreground">Selected Skills:</Label>
+                  <div className="flex flex-wrap gap-2">
                     {skillsWanted.map((skill) => (
                       <Badge
                         key={skill}
                         variant="secondary"
-                        className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
+                        className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-3 py-1.5 text-sm"
                       >
                         {skill}
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="ml-1 h-4 w-4 p-0"
+                          className="ml-2 h-4 w-4 p-0 hover:bg-transparent"
                           onClick={() => handleSkillToggle(skill, 'wanted')}
                         >
                           <X className="h-3 w-3" />
@@ -364,39 +374,41 @@ export default function EditProfile() {
           </Card>
 
           {/* Availability */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Availability</CardTitle>
+          <Card className="border-0 shadow-sm sm:border sm:shadow-md">
+            <CardHeader className="pb-3 sm:pb-6">
+              <CardTitle className="text-lg sm:text-xl">Availability</CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
+            <CardContent className="space-y-6">
+              <div className="space-y-3">
                 <Label className="text-sm font-medium">Available Days</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {["weekends", "weekdays", "everyday"].map((date) => (
-                    <div key={date} className="flex items-center space-x-2">
+                    <div key={date} className="flex items-center space-x-3 py-1">
                       <Checkbox
                         id={`date-${date}`}
                         checked={formData.availability.dates.includes(date)}
                         onCheckedChange={() => handleAvailabilityChange('dates', date)}
+                        className="scale-110"
                       />
-                      <Label htmlFor={`date-${date}`} className="text-sm cursor-pointer">
+                      <Label htmlFor={`date-${date}`} className="text-sm sm:text-base cursor-pointer leading-relaxed">
                         {date.charAt(0).toUpperCase() + date.slice(1)}
                       </Label>
                     </div>
                   ))}
                 </div>
               </div>
-              <div>
+              <div className="space-y-3">
                 <Label className="text-sm font-medium">Available Times</Label>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {["morning", "evening", "night"].map((time) => (
-                    <div key={time} className="flex items-center space-x-2">
+                    <div key={time} className="flex items-center space-x-3 py-1">
                       <Checkbox
                         id={`time-${time}`}
                         checked={formData.availability.times.includes(time)}
                         onCheckedChange={() => handleAvailabilityChange('times', time)}
+                        className="scale-110"
                       />
-                      <Label htmlFor={`time-${time}`} className="text-sm cursor-pointer">
+                      <Label htmlFor={`time-${time}`} className="text-sm sm:text-base cursor-pointer leading-relaxed">
                         {time.charAt(0).toUpperCase() + time.slice(1)}
                       </Label>
                     </div>
@@ -406,12 +418,13 @@ export default function EditProfile() {
             </CardContent>
           </Card>
 
-          {/* Submit Button */}
-          <div className="flex justify-end space-x-4">
+          {/* Submit Buttons - Desktop */}
+          <div className="hidden sm:flex justify-end space-x-4 pt-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => setLocation(`/profile/${user?.id}`)}
+              size="lg"
             >
               Cancel
             </Button>
@@ -419,12 +432,44 @@ export default function EditProfile() {
               type="submit"
               disabled={isLoading}
               className="bg-primary hover:bg-primary/90"
+              size="lg"
             >
               <Save className="w-4 h-4 mr-2" />
               {isLoading ? "Saving..." : "Save Changes"}
             </Button>
           </div>
+
+          {/* Mobile Bottom Actions */}
+          <div className="sm:hidden pb-20">
+            <div className="text-center text-sm text-muted-foreground py-4">
+              Use the floating buttons below to save or cancel
+            </div>
+          </div>
         </form>
+      </div>
+
+      {/* Mobile Floating Action Buttons */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-background/95 backdrop-blur-sm border-t border-border sm:hidden">
+        <div className="flex space-x-3 max-w-md mx-auto">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => setLocation(`/profile/${user?.id}`)}
+            className="flex-1 h-12 text-base font-medium"
+            size="lg"
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={handleSubmit}
+            disabled={isLoading}
+            className="flex-1 h-12 text-base font-medium bg-primary hover:bg-primary/90"
+            size="lg"
+          >
+            <Save className="w-4 h-4 mr-2" />
+            {isLoading ? "Saving..." : "Save Changes"}
+          </Button>
+        </div>
       </div>
     </div>
   );
