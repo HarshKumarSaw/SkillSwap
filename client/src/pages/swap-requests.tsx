@@ -133,20 +133,33 @@ export default function SwapRequests() {
     return (
       <Card key={request.id} className="border-0 shadow-sm sm:border sm:shadow-md">
         <CardHeader className="pb-3 sm:pb-4">
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0">
-            <div className="flex items-center space-x-3">
-              <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
-                <AvatarImage src={otherUser.profilePhoto || ""} />
-                <AvatarFallback className="text-sm sm:text-base">{otherUser.name[0]}</AvatarFallback>
-              </Avatar>
-              <div className="flex-1 min-w-0">
-                <CardTitle className="text-base sm:text-lg truncate">{otherUser.name}</CardTitle>
-                <Badge variant={getStatusBadgeVariant(request.status)} className={`${getStatusColor(request.status)} text-xs sm:text-sm mt-1`}>
-                  {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
-                </Badge>
+          <div className="relative">
+            {/* Delete button positioned in upper right corner */}
+            {(request.status === "pending" || request.status === "rejected") && isOwner && (
+              <Button
+                size="sm"
+                onClick={() => handleDelete(request.id)}
+                variant="ghost"
+                className="absolute top-0 right-0 h-6 w-6 p-0 hover:bg-destructive hover:text-destructive-foreground"
+              >
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            )}
+            
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-0 pr-8">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-10 w-10 sm:h-12 sm:w-12">
+                  <AvatarImage src={otherUser.profilePhoto || ""} />
+                  <AvatarFallback className="text-sm sm:text-base">{otherUser.name[0]}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 min-w-0">
+                  <CardTitle className="text-base sm:text-lg truncate">{otherUser.name}</CardTitle>
+                  <Badge variant={getStatusBadgeVariant(request.status)} className={`${getStatusColor(request.status)} text-xs sm:text-sm mt-1`}>
+                    {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
+                  </Badge>
+                </div>
               </div>
-            </div>
-            <div className="flex flex-wrap gap-2 sm:gap-2 justify-end sm:justify-start">
+              <div className="flex flex-wrap gap-2 sm:gap-2 justify-end sm:justify-start">
               {request.status === "pending" && !isOwner && (
                 <>
                   <Button size="sm" onClick={() => handleAccept(request.id)} variant="default" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
@@ -165,13 +178,7 @@ export default function SwapRequests() {
                   Complete
                 </Button>
               )}
-              {(request.status === "pending" || request.status === "rejected") && isOwner && (
-                <Button size="sm" onClick={() => handleDelete(request.id)} variant="destructive" className="h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm">
-                  <Trash2 className="h-3 w-3 mr-1 sm:h-4 sm:w-4" />
-                  Delete
-                </Button>
-              )}
-
+              </div>
             </div>
           </div>
         </CardHeader>
