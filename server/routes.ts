@@ -713,8 +713,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             COUNT(DISTINCT ratings_given.id) as ratings_given,
             COUNT(DISTINCT ratings_received.id) as ratings_received
           FROM users u
-          LEFT JOIN swap_requests sr_sent ON u.id = sr_sent.requester_id
-          LEFT JOIN swap_requests sr_received ON u.id = sr_received.target_id
+          LEFT JOIN swap_requests sr_sent ON u.id = sr_sent.sender_id
+          LEFT JOIN swap_requests sr_received ON u.id = sr_received.receiver_id
           LEFT JOIN swap_ratings ratings_given ON u.id = ratings_given.rater_id
           LEFT JOIN swap_ratings ratings_received ON u.id = ratings_received.rated_id
           GROUP BY u.id, u.name, u.email, u.location, u.rating, u.review_count, u.is_public, u.is_banned, u.created_at
@@ -747,8 +747,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const result = await client.query(`
           SELECT 
             sr.id as swap_request_id,
-            sr.requester_skill,
-            sr.target_skill,
+            sr.sender_skill,
+            sr.receiver_skill,
             sr.status,
             sr.created_at as swap_created_at,
             rater.name as rater_name,
@@ -766,9 +766,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         `);
 
         const csvContent = [
-          'Swap Request ID,Requester Skill,Target Skill,Swap Status,Swap Created At,Rater Name,Rater Email,Rated Name,Rated Email,Rating,Feedback,Rating Created At',
+          'Swap Request ID,Sender Skill,Receiver Skill,Swap Status,Swap Created At,Rater Name,Rater Email,Rated Name,Rated Email,Rating,Feedback,Rating Created At',
           ...result.rows.map(row => 
-            `"${row.swap_request_id}","${row.requester_skill}","${row.target_skill}","${row.status}","${row.swap_created_at}","${row.rater_name}","${row.rater_email}","${row.rated_name}","${row.rated_email}",${row.rating},"${(row.feedback || '').replace(/"/g, '""')}","${row.rating_created_at}"`
+            `"${row.swap_request_id}","${row.sender_skill}","${row.receiver_skill}","${row.status}","${row.swap_created_at}","${row.rater_name}","${row.rater_email}","${row.rated_name}","${row.rated_email}",${row.rating},"${(row.feedback || '').replace(/"/g, '""')}","${row.rating_created_at}"`
           )
         ].join('\n');
 
@@ -796,23 +796,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
             COUNT(CASE WHEN status = 'rejected' THEN 1 END) as rejected_requests,
             COUNT(CASE WHEN status = 'completed' THEN 1 END) as completed_requests,
             AVG(CASE WHEN status = 'completed' THEN 
-              EXTRACT(epoch FROM (completed_at::timestamp - created_at::timestamp))/86400 
+              EXTRACT(epoch FROM (updated_at::timestamp - created_at::timestamp))/86400 
             END) as avg_completion_days
           FROM swap_requests
         `);
 
         const skillsResult = await client.query(`
           SELECT 
-            requester_skill as skill,
+            sender_skill as skill,
             COUNT(*) as requests_count
           FROM swap_requests
-          GROUP BY requester_skill
+          WHERE sender_skill IS NOT NULL
+          GROUP BY sender_skill
           UNION
           SELECT 
-            target_skill as skill,
+            receiver_skill as skill,
             COUNT(*) as requests_count
           FROM swap_requests
-          GROUP BY target_skill
+          WHERE receiver_skill IS NOT NULL
+          GROUP BY receiver_skill
           ORDER BY requests_count DESC
           LIMIT 20
         `);
