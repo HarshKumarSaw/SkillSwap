@@ -218,18 +218,18 @@ export default function AdminDashboard() {
 
         {/* Stats Overview */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
-          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-[#0b3675]/20 dark:to-[#0b3675]/40">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-              <CardTitle className="text-sm font-semibold text-blue-800 dark:text-blue-200">Total Users</CardTitle>
-              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white shadow-md">
+              <CardTitle className="text-sm font-semibold text-blue-800 dark:text-[#6ba6f5]">Total Users</CardTitle>
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 dark:bg-[#0b3675] text-white shadow-md">
                 <Users className="w-5 h-5" />
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-blue-900 dark:text-blue-100 mb-1">
+              <div className="text-3xl font-bold text-blue-900 dark:text-[#6ba6f5] mb-1">
                 {users?.totalCount || 0}
               </div>
-              <p className="text-xs text-blue-700 dark:text-blue-300">Active platform members</p>
+              <p className="text-xs text-blue-700 dark:text-[#6ba6f5]/80">Active platform members</p>
             </CardContent>
           </Card>
 
@@ -283,7 +283,7 @@ export default function AdminDashboard() {
         <Tabs defaultValue="users" className="space-y-6">
           <div className="overflow-x-auto pb-2">
             <TabsList className="flex w-max min-w-full lg:grid lg:grid-cols-6 gap-1 bg-white/80 dark:bg-slate-900/80 p-1.5 rounded-xl shadow-sm backdrop-blur-sm h-auto">
-              <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg font-medium transition-all flex-shrink-0 text-xs px-2 py-2.5 min-w-[60px] sm:min-w-0 sm:px-4">
+              <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 dark:data-[state=active]:bg-[#0b3675] data-[state=active]:text-white rounded-lg font-medium transition-all flex-shrink-0 text-xs px-2 py-2.5 min-w-[60px] sm:min-w-0 sm:px-4">
                 <Users className="w-4 h-4 sm:mr-2" />
                 <span className="hidden sm:inline ml-1">Users</span>
               </TabsTrigger>
@@ -314,7 +314,7 @@ export default function AdminDashboard() {
             <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
               <CardHeader className="border-b border-slate-200/50 dark:border-slate-700/50 pb-6">
                 <div className="flex items-center gap-3">
-                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 dark:bg-[#0b3675] text-white">
                     <Users className="w-5 h-5" />
                   </div>
                   <div>
@@ -331,7 +331,7 @@ export default function AdminDashboard() {
                     <div key={user.id} className="group flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 border border-slate-200 dark:border-slate-700 rounded-xl hover:shadow-md transition-all duration-200 bg-gradient-to-r from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50">
                       <div className="flex-1">
                         <div className="flex items-center gap-3 mb-2">
-                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 dark:from-[#0b3675] to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
                             {user.name.charAt(0).toUpperCase()}
                           </div>
                           <div>
@@ -342,7 +342,7 @@ export default function AdminDashboard() {
                         <div className="flex gap-2 flex-wrap">
                           <Badge 
                             variant={user.role === 'admin' ? 'default' : 'secondary'} 
-                            className={user.role === 'admin' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}
+                            className={user.role === 'admin' ? 'bg-blue-600 dark:bg-[#0b3675] hover:bg-blue-700 dark:hover:bg-[#0b3675]/90' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}
                           >
                             {user.role}
                           </Badge>
@@ -606,7 +606,7 @@ export default function AdminDashboard() {
               <div className="space-y-4 sm:space-y-6">
                 <Dialog>
                   <DialogTrigger asChild>
-                    <Button className="w-full sm:w-auto text-xs sm:text-sm">
+                    <Button className="w-full sm:w-auto text-xs sm:text-sm bg-blue-600 dark:bg-[#0b3675] hover:bg-blue-700 dark:hover:bg-[#0b3675]/90">
                       <Plus className="w-3 h-3 sm:w-4 sm:h-4 mr-2" />
                       Create Message
                     </Button>
@@ -658,7 +658,7 @@ export default function AdminDashboard() {
                       <Button
                         onClick={() => createSystemMessageMutation.mutate(newMessage)}
                         disabled={!newMessage.title.trim() || !newMessage.message.trim() || createSystemMessageMutation.isPending}
-                        className="w-full sm:w-auto text-sm"
+                        className="w-full sm:w-auto text-sm bg-blue-600 dark:bg-[#0b3675] hover:bg-blue-700 dark:hover:bg-[#0b3675]/90"
                       >
                         Create Message
                       </Button>
