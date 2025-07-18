@@ -1,0 +1,4 @@
+# Backup Directory
+This directory will contain your database backup files.
+
+Note: Backup files should not be committed to version control if they contain sensitive data.

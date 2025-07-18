@@ -10,7 +10,8 @@ Welcome to the SkillSwap platform documentation. This folder contains comprehens
 
 ### 🛠 Development Guides
 - **[Database Configuration](./DATABASE_CONFIG.md)** - PostgreSQL setup and schema management
-- **[Database Backup Plan](./DATABASE_BACKUP_PLAN.md)** - Data preservation and migration strategy
+- **[Quick Backup Guide](./QUICK_BACKUP_GUIDE.md)** - Ready-to-use backup solution (Option 1)
+- **[Complete Backup Plan](./DATABASE_BACKUP_PLAN.md)** - Enterprise backup strategy (Options 2-3)
 - **[Deployment Guide](./DEPLOYMENT.md)** - Production deployment instructions
 - **[Project Documentation](./replit.md)** - Complete project history and architecture
 

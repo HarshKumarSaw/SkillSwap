@@ -166,7 +166,7 @@ npm start          # Start production server
 
 ### Quick Links
 - **[Database Setup](./docs/DATABASE_CONFIG.md)** - PostgreSQL configuration and troubleshooting
-- **[Database Backup](./docs/DATABASE_BACKUP_PLAN.md)** - Data preservation and migration strategy
+- **[Quick Backup](./docs/QUICK_BACKUP_GUIDE.md)** - Ready-to-use backup solution
 - **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment instructions  
 - **[Project Documentation](./docs/replit.md)** - Complete project history and architecture
 - **[Environment Variables](./.env.example)** - Required configuration template

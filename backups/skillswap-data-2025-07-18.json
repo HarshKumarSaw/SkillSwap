@@ -1,0 +1,1881 @@
+{
+  "users": [
+    {
+      "id": "user2",
+      "name": "Hiroshi Tanaka",
+      "email": "hiroshi.tanaka@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Tokyo, Japan",
+      "profile_photo": "https://images.unsplash.com/photo-1556474835-b0f3ac40d4d1?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekdays"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.90",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user3",
+      "name": "Camila Santos",
+      "email": "camila.santos@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "São Paulo, Brazil",
+      "profile_photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "morning"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.70",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user4",
+      "name": "Rajesh Gupta",
+      "email": "rajesh.gupta@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Mumbai, India",
+      "profile_photo": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "everyday"
+        ],
+        "times": [
+          "morning",
+          "night"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.60",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user5",
+      "name": "Ingrid Larsson",
+      "email": "ingrid.larsson@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Stockholm, Sweden",
+      "profile_photo": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.90",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user_1752820480180_q6ja2w12d",
+      "name": "Harsh Kumar Saw",
+      "email": "harshsaw01@gmail.com",
+      "bio": "New user on skill swap platform",
+      "location": "Bhilai, Chhattisgarh ",
+      "profile_photo": "https://res.cloudinary.com/dnvfbbbfr/image/upload/v1752820993/skill-swap/profile-photos/profile_1752820991154_1000040258.png.png",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "0.00",
+      "role": "user",
+      "created_at": "2025-07-18 06:34:40.301643+00"
+    },
+    {
+      "id": "user6",
+      "name": "Mohammed Al-Rashid",
+      "email": "mohammed.alrashid@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Dubai, UAE",
+      "profile_photo": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekdays"
+        ],
+        "times": [
+          "morning"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.40",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user_1752820786720_qemunpz3h",
+      "name": "New Test User",
+      "email": "newtest@example.com",
+      "bio": "New user on skill swap platform",
+      "location": "Test City",
+      "profile_photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "0.00",
+      "role": "user",
+      "created_at": "2025-07-18 06:39:46.840443+00"
+    },
+    {
+      "id": "user10",
+      "name": "Liam Murphy",
+      "email": "liam.murphy@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Dublin, Ireland",
+      "profile_photo": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "night"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.50",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user13",
+      "name": "Fatima Al-Zahra",
+      "email": "fatima.alzahra@email.com",
+      "bio": "Backend developer specializing in API design and microservices architecture. I enjoy building robust systems that scale. Passionate about clean code and test-driven development. Mentor at coding bootcamps and women in tech advocate.",
+      "location": "Casablanca, Morocco",
+      "profile_photo": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "morning"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.60",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user18",
+      "name": "Sophia Kowalski",
+      "email": "sophia.kowalski@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Warsaw, Poland",
+      "profile_photo": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekdays"
+        ],
+        "times": [
+          "morning",
+          "night"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.60",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user12",
+      "name": "Zhou Wei",
+      "email": "zhou.wei@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Shanghai, China",
+      "profile_photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekdays"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.70",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user8",
+      "name": "Kwame Asante",
+      "email": "kwame.asante@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Accra, Ghana",
+      "profile_photo": "https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "everyday"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.60",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user19",
+      "name": "Diego Herrera",
+      "email": "diego.herrera@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Mexico City, Mexico",
+      "profile_photo": "https://images.unsplash.com/photo-1582750433449-648ed127bb54?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.80",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user1",
+      "name": "Aisha Okafor",
+      "email": "aisha.okafor@email.com",
+      "bio": "Passionate graphic designer and digital artist with 5+ years creating compelling visual stories. I love experimenting with new design trends and helping others bring their creative visions to life. When I'm not designing, you'll find me exploring local art galleries or teaching kids digital art workshops.",
+      "location": "Lagos, Nigeria",
+      "profile_photo": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "morning"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.80",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user17",
+      "name": "Chen Ming",
+      "email": "chen.ming@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Taipei, Taiwan",
+      "profile_photo": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "everyday"
+        ],
+        "times": [
+          "morning"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.70",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user20",
+      "name": "Kenji Nakamura",
+      "email": "kenji.nakamura@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Osaka, Japan",
+      "profile_photo": "https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "everyday"
+        ],
+        "times": [
+          "evening",
+          "night"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.40",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user14",
+      "name": "Jakob Nielsen",
+      "email": "jakob.nielsen@email.com",
+      "bio": "Business intelligence analyst and data visualization expert. I transform complex datasets into actionable insights using tools like Tableau and Power BI. Help organizations make data-driven decisions. Chess master and strategy game enthusiast.",
+      "location": "Copenhagen, Denmark",
+      "profile_photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "everyday"
+        ],
+        "times": [
+          "morning",
+          "evening",
+          "night"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.80",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user9",
+      "name": "Isabella Martinez",
+      "email": "isabella.martinez@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Barcelona, Spain",
+      "profile_photo": "https://images.unsplash.com/photo-1489424731084-a5d8b219a5bb?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekdays"
+        ],
+        "times": [
+          "morning",
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.80",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user7",
+      "name": "Elena Petrov",
+      "email": "elena.petrov@email.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Moscow, Russia",
+      "profile_photo": "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "night"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.70",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user11",
+      "name": "Priya Sharma",
+      "email": "priya.sharma@email.com",
+      "bio": "Business analyst and project manager with experience bridging the gap between technical and business teams. I excel at requirements gathering and stakeholder management. Certified Scrum Master. Love cooking traditional Indian cuisine.",
+      "location": "Bangalore, India",
+      "profile_photo": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "everyday"
+        ],
+        "times": [
+          "morning",
+          "night"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.90",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user15",
+      "name": "Amara Okonkwo",
+      "email": "amara.okonkwo@email.com",
+      "bio": "Software quality assurance engineer and automation testing specialist. I ensure products meet the highest standards before reaching users. Expert in test automation frameworks and continuous integration. Volunteer coding instructor for underserved communities.",
+      "location": "Nairobi, Kenya",
+      "profile_photo": "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekdays"
+        ],
+        "times": [
+          "night"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.50",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user16",
+      "name": "Leila Hosseini",
+      "email": "leila.hosseini@email.com",
+      "bio": "Product manager with a background in user research and agile methodologies. I excel at turning user insights into successful products. Experience in both B2B and B2C environments. Passionate about accessibility and inclusive design.",
+      "location": "Tehran, Iran",
+      "profile_photo": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=400&fit=crop&crop=face",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "4.30",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "user_1752509806910_s3b3bsodq",
+      "name": "Test User",
+      "email": "test@example.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": "Test City",
+      "profile_photo": "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+      "availability": {
+        "dates": [
+          "weekends"
+        ],
+        "times": [
+          "evening"
+        ]
+      },
+      "is_public": true,
+      "rating": "0.00",
+      "role": "user",
+      "created_at": "2025-07-15 11:59:51.439245+00"
+    },
+    {
+      "id": "admin_user_1",
+      "name": "Admin User",
+      "email": "admin@skillswap.com",
+      "bio": "Passionate professional eager to share knowledge and learn new skills through meaningful exchanges.",
+      "location": null,
+      "profile_photo": null,
+      "availability": [],
+      "is_public": false,
+      "rating": "0.00",
+      "role": "admin",
+      "created_at": "2025-07-15 11:59:53.885594+00"
+    }
+  ],
+  "skills": [
+    {
+      "id": 1,
+      "name": "Graphic Design",
+      "category": "Design"
+    },
+    {
+      "id": 2,
+      "name": "UI/UX Design",
+      "category": "Design"
+    },
+    {
+      "id": 3,
+      "name": "Logo Design",
+      "category": "Design"
+    },
+    {
+      "id": 4,
+      "name": "Web Design",
+      "category": "Design"
+    },
+    {
+      "id": 5,
+      "name": "Brand Identity",
+      "category": "Design"
+    },
+    {
+      "id": 6,
+      "name": "Adobe Photoshop",
+      "category": "Design"
+    },
+    {
+      "id": 7,
+      "name": "Adobe Illustrator",
+      "category": "Design"
+    },
+    {
+      "id": 8,
+      "name": "Figma",
+      "category": "Design"
+    },
+    {
+      "id": 9,
+      "name": "Color Theory",
+      "category": "Design"
+    },
+    {
+      "id": 10,
+      "name": "Typography",
+      "category": "Design"
+    },
+    {
+      "id": 11,
+      "name": "Space Planning",
+      "category": "Design"
+    },
+    {
+      "id": 12,
+      "name": "Interior Design",
+      "category": "Design"
+    },
+    {
+      "id": 13,
+      "name": "Web Development",
+      "category": "Programming"
+    },
+    {
+      "id": 14,
+      "name": "JavaScript",
+      "category": "Programming"
+    },
+    {
+      "id": 15,
+      "name": "React",
+      "category": "Programming"
+    },
+    {
+      "id": 16,
+      "name": "Node.js",
+      "category": "Programming"
+    },
+    {
+      "id": 17,
+      "name": "Python",
+      "category": "Programming"
+    },
+    {
+      "id": 18,
+      "name": "Java",
+      "category": "Programming"
+    },
+    {
+      "id": 19,
+      "name": "PHP",
+      "category": "Programming"
+    },
+    {
+      "id": 20,
+      "name": "Mobile Development",
+      "category": "Programming"
+    },
+    {
+      "id": 21,
+      "name": "Swift",
+      "category": "Programming"
+    },
+    {
+      "id": 22,
+      "name": "Android Development",
+      "category": "Programming"
+    },
+    {
+      "id": 23,
+      "name": "Database Design",
+      "category": "Programming"
+    },
+    {
+      "id": 24,
+      "name": "API Development",
+      "category": "Programming"
+    },
+    {
+      "id": 25,
+      "name": "CSS Design",
+      "category": "Programming"
+    },
+    {
+      "id": 26,
+      "name": "Digital Marketing",
+      "category": "Marketing"
+    },
+    {
+      "id": 27,
+      "name": "SEO",
+      "category": "Marketing"
+    },
+    {
+      "id": 28,
+      "name": "Social Media Marketing",
+      "category": "Marketing"
+    },
+    {
+      "id": 29,
+      "name": "Content Marketing",
+      "category": "Marketing"
+    },
+    {
+      "id": 30,
+      "name": "Email Marketing",
+      "category": "Marketing"
+    },
+    {
+      "id": 31,
+      "name": "PPC Advertising",
+      "category": "Marketing"
+    },
+    {
+      "id": 32,
+      "name": "Brand Strategy",
+      "category": "Marketing"
+    },
+    {
+      "id": 33,
+      "name": "Market Research",
+      "category": "Marketing"
+    },
+    {
+      "id": 34,
+      "name": "Sales Strategy",
+      "category": "Marketing"
+    },
+    {
+      "id": 35,
+      "name": "Business Development",
+      "category": "Marketing"
+    },
+    {
+      "id": 36,
+      "name": "Spanish",
+      "category": "Languages"
+    },
+    {
+      "id": 37,
+      "name": "French",
+      "category": "Languages"
+    },
+    {
+      "id": 38,
+      "name": "German",
+      "category": "Languages"
+    },
+    {
+      "id": 39,
+      "name": "Mandarin",
+      "category": "Languages"
+    },
+    {
+      "id": 40,
+      "name": "Japanese",
+      "category": "Languages"
+    },
+    {
+      "id": 41,
+      "name": "Italian",
+      "category": "Languages"
+    },
+    {
+      "id": 42,
+      "name": "Portuguese",
+      "category": "Languages"
+    },
+    {
+      "id": 43,
+      "name": "Russian",
+      "category": "Languages"
+    },
+    {
+      "id": 44,
+      "name": "Korean",
+      "category": "Languages"
+    },
+    {
+      "id": 45,
+      "name": "Arabic",
+      "category": "Languages"
+    },
+    {
+      "id": 46,
+      "name": "Culinary Arts",
+      "category": "Culinary"
+    },
+    {
+      "id": 47,
+      "name": "Baking",
+      "category": "Culinary"
+    },
+    {
+      "id": 48,
+      "name": "Pastry Making",
+      "category": "Culinary"
+    },
+    {
+      "id": 49,
+      "name": "Wine Pairing",
+      "category": "Culinary"
+    },
+    {
+      "id": 50,
+      "name": "Nutrition Coaching",
+      "category": "Culinary"
+    },
+    {
+      "id": 51,
+      "name": "Meal Planning",
+      "category": "Culinary"
+    },
+    {
+      "id": 52,
+      "name": "Food Photography",
+      "category": "Culinary"
+    },
+    {
+      "id": 53,
+      "name": "Food Styling",
+      "category": "Culinary"
+    },
+    {
+      "id": 54,
+      "name": "Restaurant Management",
+      "category": "Culinary"
+    },
+    {
+      "id": 55,
+      "name": "Personal Training",
+      "category": "Fitness"
+    },
+    {
+      "id": 56,
+      "name": "Yoga Instruction",
+      "category": "Fitness"
+    },
+    {
+      "id": 57,
+      "name": "Rock Climbing",
+      "category": "Fitness"
+    },
+    {
+      "id": 58,
+      "name": "Swimming",
+      "category": "Fitness"
+    },
+    {
+      "id": 59,
+      "name": "Marathon Running",
+      "category": "Fitness"
+    },
+    {
+      "id": 60,
+      "name": "CrossFit",
+      "category": "Fitness"
+    },
+    {
+      "id": 61,
+      "name": "Pilates",
+      "category": "Fitness"
+    },
+    {
+      "id": 62,
+      "name": "Martial Arts",
+      "category": "Fitness"
+    },
+    {
+      "id": 63,
+      "name": "Dance",
+      "category": "Fitness"
+    },
+    {
+      "id": 64,
+      "name": "Sports Coaching",
+      "category": "Fitness"
+    },
+    {
+      "id": 65,
+      "name": "Outdoor Safety",
+      "category": "Fitness"
+    },
+    {
+      "id": 66,
+      "name": "Guitar",
+      "category": "Music"
+    },
+    {
+      "id": 67,
+      "name": "Piano",
+      "category": "Music"
+    },
+    {
+      "id": 68,
+      "name": "Violin",
+      "category": "Music"
+    },
+    {
+      "id": 69,
+      "name": "Drums",
+      "category": "Music"
+    },
+    {
+      "id": 70,
+      "name": "Singing",
+      "category": "Music"
+    },
+    {
+      "id": 71,
+      "name": "Music Production",
+      "category": "Music"
+    },
+    {
+      "id": 72,
+      "name": "Sound Engineering",
+      "category": "Music"
+    },
+    {
+      "id": 73,
+      "name": "Songwriting",
+      "category": "Music"
+    },
+    {
+      "id": 74,
+      "name": "Music Theory",
+      "category": "Music"
+    },
+    {
+      "id": 75,
+      "name": "DJ Skills",
+      "category": "Music"
+    },
+    {
+      "id": 76,
+      "name": "Data Science",
+      "category": "Technology"
+    },
+    {
+      "id": 77,
+      "name": "Machine Learning",
+      "category": "Technology"
+    },
+    {
+      "id": 78,
+      "name": "Cybersecurity",
+      "category": "Technology"
+    },
+    {
+      "id": 79,
+      "name": "Cloud Computing",
+      "category": "Technology"
+    },
+    {
+      "id": 80,
+      "name": "DevOps",
+      "category": "Technology"
+    },
+    {
+      "id": 81,
+      "name": "3D Modeling",
+      "category": "Technology"
+    },
+    {
+      "id": 82,
+      "name": "3D Printing",
+      "category": "Technology"
+    },
+    {
+      "id": 83,
+      "name": "Electronics",
+      "category": "Technology"
+    },
+    {
+      "id": 84,
+      "name": "Drone Photography",
+      "category": "Technology"
+    },
+    {
+      "id": 85,
+      "name": "Video Editing",
+      "category": "Technology"
+    },
+    {
+      "id": 86,
+      "name": "Woodworking",
+      "category": "Crafts"
+    },
+    {
+      "id": 87,
+      "name": "Furniture Making",
+      "category": "Crafts"
+    },
+    {
+      "id": 88,
+      "name": "Pottery",
+      "category": "Crafts"
+    },
+    {
+      "id": 89,
+      "name": "Jewelry Making",
+      "category": "Crafts"
+    },
+    {
+      "id": 90,
+      "name": "Leather Working",
+      "category": "Crafts"
+    },
+    {
+      "id": 91,
+      "name": "Knitting",
+      "category": "Crafts"
+    },
+    {
+      "id": 92,
+      "name": "Sewing",
+      "category": "Crafts"
+    },
+    {
+      "id": 93,
+      "name": "Painting",
+      "category": "Crafts"
+    },
+    {
+      "id": 94,
+      "name": "Sculpture",
+      "category": "Crafts"
+    },
+    {
+      "id": 95,
+      "name": "Metalworking",
+      "category": "Crafts"
+    },
+    {
+      "id": 96,
+      "name": "Project Management",
+      "category": "Professional"
+    },
+    {
+      "id": 97,
+      "name": "Public Speaking",
+      "category": "Professional"
+    },
+    {
+      "id": 98,
+      "name": "Technical Writing",
+      "category": "Professional"
+    },
+    {
+      "id": 99,
+      "name": "Grant Writing",
+      "category": "Professional"
+    },
+    {
+      "id": 100,
+      "name": "Policy Research",
+      "category": "Professional"
+    },
+    {
+      "id": 101,
+      "name": "Data Analysis",
+      "category": "Professional"
+    },
+    {
+      "id": 102,
+      "name": "Financial Planning",
+      "category": "Professional"
+    },
+    {
+      "id": 103,
+      "name": "Teaching",
+      "category": "Professional"
+    },
+    {
+      "id": 104,
+      "name": "Coaching",
+      "category": "Professional"
+    },
+    {
+      "id": 105,
+      "name": "Consulting",
+      "category": "Professional"
+    },
+    {
+      "id": 106,
+      "name": "Debate Coaching",
+      "category": "Professional"
+    },
+    {
+      "id": 107,
+      "name": "Data Visualization",
+      "category": "Professional"
+    },
+    {
+      "id": 108,
+      "name": "Survey Design",
+      "category": "Professional"
+    },
+    {
+      "id": 109,
+      "name": "Interview Techniques",
+      "category": "Professional"
+    },
+    {
+      "id": 110,
+      "name": "Automotive Engineering",
+      "category": "Automotive"
+    },
+    {
+      "id": 111,
+      "name": "Car Restoration",
+      "category": "Automotive"
+    },
+    {
+      "id": 112,
+      "name": "Mechanical Repair",
+      "category": "Automotive"
+    },
+    {
+      "id": 113,
+      "name": "Welding",
+      "category": "Automotive"
+    },
+    {
+      "id": 114,
+      "name": "Motorcycle Maintenance",
+      "category": "Automotive"
+    },
+    {
+      "id": 115,
+      "name": "Engine Diagnostics",
+      "category": "Automotive"
+    },
+    {
+      "id": 116,
+      "name": "Hiking",
+      "category": "Outdoors"
+    },
+    {
+      "id": 117,
+      "name": "Camping",
+      "category": "Outdoors"
+    },
+    {
+      "id": 118,
+      "name": "Survival Skills",
+      "category": "Outdoors"
+    },
+    {
+      "id": 119,
+      "name": "Photography",
+      "category": "Outdoors"
+    },
+    {
+      "id": 120,
+      "name": "Travel Planning",
+      "category": "Outdoors"
+    },
+    {
+      "id": 121,
+      "name": "Surfing",
+      "category": "Outdoors"
+    },
+    {
+      "id": 122,
+      "name": "Sailing",
+      "category": "Outdoors"
+    },
+    {
+      "id": 123,
+      "name": "Plant Care",
+      "category": "Home"
+    },
+    {
+      "id": 124,
+      "name": "Sustainable Living",
+      "category": "Home"
+    },
+    {
+      "id": 125,
+      "name": "Home Renovation",
+      "category": "Home"
+    },
+    {
+      "id": 126,
+      "name": "Gardening",
+      "category": "Home"
+    },
+    {
+      "id": 127,
+      "name": "Landscaping",
+      "category": "Home"
+    }
+  ],
+  "user_skills_offered": [
+    {
+      "id": 1,
+      "user_id": "user1",
+      "skill_id": 119
+    },
+    {
+      "id": 2,
+      "user_id": "user1",
+      "skill_id": 1
+    },
+    {
+      "id": 3,
+      "user_id": "user1",
+      "skill_id": 6
+    },
+    {
+      "id": 4,
+      "user_id": "user1",
+      "skill_id": 85
+    },
+    {
+      "id": 5,
+      "user_id": "user2",
+      "skill_id": 14
+    },
+    {
+      "id": 6,
+      "user_id": "user2",
+      "skill_id": 17
+    },
+    {
+      "id": 7,
+      "user_id": "user2",
+      "skill_id": 15
+    },
+    {
+      "id": 8,
+      "user_id": "user2",
+      "skill_id": 16
+    },
+    {
+      "id": 9,
+      "user_id": "user2",
+      "skill_id": 23
+    },
+    {
+      "id": 10,
+      "user_id": "user3",
+      "skill_id": 26
+    },
+    {
+      "id": 11,
+      "user_id": "user3",
+      "skill_id": 56
+    },
+    {
+      "id": 12,
+      "user_id": "user4",
+      "skill_id": 76
+    },
+    {
+      "id": 13,
+      "user_id": "user4",
+      "skill_id": 17
+    },
+    {
+      "id": 14,
+      "user_id": "user4",
+      "skill_id": 77
+    },
+    {
+      "id": 15,
+      "user_id": "user5",
+      "skill_id": 2
+    },
+    {
+      "id": 16,
+      "user_id": "user5",
+      "skill_id": 8
+    },
+    {
+      "id": 17,
+      "user_id": "user6",
+      "skill_id": 26
+    },
+    {
+      "id": 18,
+      "user_id": "user6",
+      "skill_id": 55
+    },
+    {
+      "id": 19,
+      "user_id": "user6",
+      "skill_id": 27
+    },
+    {
+      "id": 20,
+      "user_id": "user7",
+      "skill_id": 17
+    },
+    {
+      "id": 21,
+      "user_id": "user8",
+      "skill_id": 1
+    },
+    {
+      "id": 22,
+      "user_id": "user8",
+      "skill_id": 116
+    },
+    {
+      "id": 23,
+      "user_id": "user8",
+      "skill_id": 57
+    },
+    {
+      "id": 24,
+      "user_id": "user9",
+      "skill_id": 97
+    },
+    {
+      "id": 25,
+      "user_id": "user9",
+      "skill_id": 70
+    },
+    {
+      "id": 26,
+      "user_id": "user10",
+      "skill_id": 102
+    },
+    {
+      "id": 27,
+      "user_id": "user10",
+      "skill_id": 86
+    },
+    {
+      "id": 28,
+      "user_id": "user10",
+      "skill_id": 87
+    },
+    {
+      "id": 29,
+      "user_id": "user11",
+      "skill_id": 15
+    },
+    {
+      "id": 30,
+      "user_id": "user11",
+      "skill_id": 16
+    },
+    {
+      "id": 31,
+      "user_id": "user11",
+      "skill_id": 56
+    },
+    {
+      "id": 32,
+      "user_id": "user12",
+      "skill_id": 71
+    },
+    {
+      "id": 33,
+      "user_id": "user12",
+      "skill_id": 66
+    },
+    {
+      "id": 34,
+      "user_id": "user13",
+      "skill_id": 101
+    },
+    {
+      "id": 35,
+      "user_id": "user16",
+      "skill_id": 12
+    },
+    {
+      "id": 36,
+      "user_id": "user16",
+      "skill_id": 124
+    },
+    {
+      "id": 37,
+      "user_id": "user16",
+      "skill_id": 9
+    },
+    {
+      "id": 38,
+      "user_id": "user16",
+      "skill_id": 11
+    },
+    {
+      "id": 39,
+      "user_id": "user17",
+      "skill_id": 20
+    },
+    {
+      "id": 40,
+      "user_id": "user17",
+      "skill_id": 21
+    },
+    {
+      "id": 41,
+      "user_id": "user17",
+      "skill_id": 57
+    },
+    {
+      "id": 42,
+      "user_id": "user17",
+      "skill_id": 65
+    },
+    {
+      "id": 43,
+      "user_id": "user18",
+      "skill_id": 46
+    },
+    {
+      "id": 44,
+      "user_id": "user18",
+      "skill_id": 50
+    },
+    {
+      "id": 45,
+      "user_id": "user18",
+      "skill_id": 51
+    },
+    {
+      "id": 46,
+      "user_id": "user18",
+      "skill_id": 52
+    },
+    {
+      "id": 47,
+      "user_id": "user19",
+      "skill_id": 110
+    },
+    {
+      "id": 48,
+      "user_id": "user19",
+      "skill_id": 111
+    },
+    {
+      "id": 49,
+      "user_id": "user19",
+      "skill_id": 112
+    },
+    {
+      "id": 50,
+      "user_id": "user19",
+      "skill_id": 113
+    },
+    {
+      "id": 51,
+      "user_id": "user20",
+      "skill_id": 100
+    },
+    {
+      "id": 52,
+      "user_id": "user20",
+      "skill_id": 106
+    },
+    {
+      "id": 53,
+      "user_id": "user20",
+      "skill_id": 97
+    },
+    {
+      "id": 54,
+      "user_id": "user20",
+      "skill_id": 99
+    },
+    {
+      "id": 58,
+      "user_id": "user14",
+      "skill_id": 13
+    },
+    {
+      "id": 59,
+      "user_id": "user14",
+      "skill_id": 14
+    },
+    {
+      "id": 60,
+      "user_id": "user14",
+      "skill_id": 101
+    },
+    {
+      "id": 61,
+      "user_id": "user15",
+      "skill_id": 27
+    },
+    {
+      "id": 62,
+      "user_id": "user15",
+      "skill_id": 28
+    },
+    {
+      "id": 63,
+      "user_id": "user15",
+      "skill_id": 103
+    },
+    {
+      "id": 85,
+      "user_id": "user_1752820480180_q6ja2w12d",
+      "skill_id": 111
+    }
+  ],
+  "user_skills_wanted": [
+    {
+      "id": 1,
+      "user_id": "user1",
+      "skill_id": 13
+    },
+    {
+      "id": 2,
+      "user_id": "user1",
+      "skill_id": 14
+    },
+    {
+      "id": 3,
+      "user_id": "user1",
+      "skill_id": 15
+    },
+    {
+      "id": 4,
+      "user_id": "user2",
+      "skill_id": 26
+    },
+    {
+      "id": 5,
+      "user_id": "user3",
+      "skill_id": 101
+    },
+    {
+      "id": 6,
+      "user_id": "user3",
+      "skill_id": 97
+    },
+    {
+      "id": 7,
+      "user_id": "user4",
+      "skill_id": 2
+    },
+    {
+      "id": 8,
+      "user_id": "user4",
+      "skill_id": 8
+    },
+    {
+      "id": 9,
+      "user_id": "user5",
+      "skill_id": 15
+    },
+    {
+      "id": 10,
+      "user_id": "user6",
+      "skill_id": 85
+    },
+    {
+      "id": 11,
+      "user_id": "user7",
+      "skill_id": 119
+    },
+    {
+      "id": 12,
+      "user_id": "user7",
+      "skill_id": 28
+    },
+    {
+      "id": 13,
+      "user_id": "user8",
+      "skill_id": 84
+    },
+    {
+      "id": 14,
+      "user_id": "user8",
+      "skill_id": 13
+    },
+    {
+      "id": 15,
+      "user_id": "user9",
+      "skill_id": 71
+    },
+    {
+      "id": 16,
+      "user_id": "user10",
+      "skill_id": 82
+    },
+    {
+      "id": 17,
+      "user_id": "user10",
+      "skill_id": 125
+    },
+    {
+      "id": 18,
+      "user_id": "user11",
+      "skill_id": 2
+    },
+    {
+      "id": 19,
+      "user_id": "user12",
+      "skill_id": 85
+    },
+    {
+      "id": 20,
+      "user_id": "user12",
+      "skill_id": 74
+    },
+    {
+      "id": 21,
+      "user_id": "user12",
+      "skill_id": 67
+    },
+    {
+      "id": 22,
+      "user_id": "user13",
+      "skill_id": 77
+    },
+    {
+      "id": 23,
+      "user_id": "user15",
+      "skill_id": 30
+    },
+    {
+      "id": 24,
+      "user_id": "user16",
+      "skill_id": 81
+    },
+    {
+      "id": 25,
+      "user_id": "user16",
+      "skill_id": 87
+    },
+    {
+      "id": 26,
+      "user_id": "user16",
+      "skill_id": 123
+    },
+    {
+      "id": 27,
+      "user_id": "user17",
+      "skill_id": 84
+    },
+    {
+      "id": 28,
+      "user_id": "user17",
+      "skill_id": 120
+    },
+    {
+      "id": 29,
+      "user_id": "user17",
+      "skill_id": 121
+    },
+    {
+      "id": 30,
+      "user_id": "user18",
+      "skill_id": 53
+    },
+    {
+      "id": 31,
+      "user_id": "user18",
+      "skill_id": 54
+    },
+    {
+      "id": 32,
+      "user_id": "user18",
+      "skill_id": 49
+    },
+    {
+      "id": 33,
+      "user_id": "user19",
+      "skill_id": 82
+    },
+    {
+      "id": 34,
+      "user_id": "user19",
+      "skill_id": 83
+    },
+    {
+      "id": 35,
+      "user_id": "user19",
+      "skill_id": 114
+    },
+    {
+      "id": 36,
+      "user_id": "user20",
+      "skill_id": 107
+    },
+    {
+      "id": 37,
+      "user_id": "user20",
+      "skill_id": 108
+    },
+    {
+      "id": 38,
+      "user_id": "user20",
+      "skill_id": 109
+    },
+    {
+      "id": 42,
+      "user_id": "user14",
+      "skill_id": 1
+    },
+    {
+      "id": 43,
+      "user_id": "user14",
+      "skill_id": 15
+    },
+    {
+      "id": 61,
+      "user_id": "user_1752820480180_q6ja2w12d",
+      "skill_id": 115
+    }
+  ],
+  "swap_requests": [
+    {
+      "id": "req3",
+      "sender_id": "user3",
+      "receiver_id": "user4",
+      "sender_skill": "Digital Marketing",
+      "receiver_skill": "Data Analysis",
+      "message": "Hi Alex! Your data science background is impressive. I'd love to learn data analysis for marketing campaigns. In return, I can teach you content marketing and social media strategy.",
+      "status": "accepted",
+      "created_at": "2025-07-07T05:29:16.353Z",
+      "updated_at": "2025-07-10T05:29:16.353Z",
+      "rating": null,
+      "feedback": null
+    },
+    {
+      "id": "req4",
+      "sender_id": "user5",
+      "receiver_id": "user1",
+      "sender_skill": "UI/UX Design",
+      "receiver_skill": "Video Editing",
+      "message": "Sarah, your video work is fantastic! I'd love to learn video editing techniques. I can help you with user experience design and prototyping in Figma.",
+      "status": "completed",
+      "created_at": "2025-06-30T05:29:16.353Z",
+      "updated_at": "2025-07-07T05:29:16.353Z",
+      "rating": 5,
+      "feedback": "Lisa was an amazing teacher! Her UX design insights completely transformed how I approach video projects. Highly recommend!"
+    },
+    {
+      "id": "req5",
+      "sender_id": "user6",
+      "receiver_id": "user8",
+      "sender_skill": "Digital Marketing",
+      "receiver_skill": "Graphic Design",
+      "message": "David, I love your outdoor-themed designs! Could you help me with graphic design for my marketing campaigns? I can teach you SEO and digital marketing strategies.",
+      "status": "pending",
+      "created_at": "2025-07-13T05:29:16.353Z",
+      "updated_at": "2025-07-13T05:29:16.353Z",
+      "rating": null,
+      "feedback": null
+    },
+    {
+      "id": "req6",
+      "sender_id": "user7",
+      "receiver_id": "user11",
+      "sender_skill": "Python",
+      "receiver_skill": "React",
+      "message": "Hi Priya! I'd love to learn React from an experienced developer. I can teach you Django and backend Python development in return.",
+      "status": "accepted",
+      "created_at": "2025-07-11T05:29:16.353Z",
+      "updated_at": "2025-07-13T05:29:16.353Z",
+      "rating": null,
+      "feedback": null
+    },
+    {
+      "id": "req7",
+      "sender_id": "user9",
+      "receiver_id": "user12",
+      "sender_skill": "Voice Training",
+      "receiver_skill": "Music Production",
+      "message": "Thomas, your music production skills are incredible! I'd love to learn music production. I can help you with voice training and vocal techniques for your recordings.",
+      "status": "pending",
+      "created_at": "2025-07-08T05:29:16.353Z",
+      "updated_at": "2025-07-08T05:29:16.353Z",
+      "rating": null,
+      "feedback": null
+    },
+    {
+      "id": "req8",
+      "sender_id": "user10",
+      "receiver_id": "user14",
+      "sender_skill": "Woodworking",
+      "receiver_skill": "Architecture",
+      "message": "James, I'm fascinated by your architectural work! Could you teach me about design principles? I can show you woodworking and furniture making techniques.",
+      "status": "accepted",
+      "created_at": "2025-07-06T05:29:16.353Z",
+      "updated_at": "2025-07-09T05:29:16.353Z",
+      "rating": null,
+      "feedback": null
+    },
+    {
+      "id": "req9",
+      "sender_id": "user13",
+      "receiver_id": "user4",
+      "sender_skill": "Chinese Cooking",
+      "receiver_skill": "Machine Learning",
+      "message": "Alex, I'd love to dive deeper into machine learning algorithms. In exchange, I can teach you authentic Chinese cooking techniques and recipes.",
+      "status": "pending",
+      "created_at": "2025-07-10T05:29:16.353Z",
+      "updated_at": "2025-07-10T05:29:16.353Z",
+      "rating": null,
+      "feedback": null
+    },
+    {
+      "id": "req10",
+      "sender_id": "user15",
+      "receiver_id": "user6",
+      "sender_skill": "Content Writing",
+      "receiver_skill": "Spanish Language",
+      "message": "Carlos, I need to improve my Spanish for international clients. Could you help me learn Spanish? I can teach you content writing and copywriting strategies.",
+      "status": "rejected",
+      "created_at": "2025-07-04T05:29:16.353Z",
+      "updated_at": "2025-07-06T05:29:16.353Z",
+      "rating": null,
+      "feedback": null
+    },
+    {
+      "id": "swap_1752820798618_kyfo6rn1q",
+      "sender_id": "user_1752820786720_qemunpz3h",
+      "receiver_id": "user1",
+      "sender_skill": "Teaching",
+      "receiver_skill": "Graphic Design",
+      "message": "Hi! I would love to teach you some skills in exchange for learning graphic design!",
+      "status": "accepted",
+      "created_at": "2025-07-18T06:39:58.738Z",
+      "updated_at": "2025-07-18T06:40:36.771Z",
+      "rating": null,
+      "feedback": null
+    },
+    {
+      "id": "swap_1752821031434_94hfu7m1a",
+      "sender_id": "user_1752820480180_q6ja2w12d",
+      "receiver_id": "user16",
+      "sender_skill": "Car Restoration",
+      "receiver_skill": "Space Planning",
+      "message": "Hi Leila Hosseini! I'd like to swap skills with you.",
+      "status": "pending",
+      "created_at": "2025-07-18T06:43:51.553Z",
+      "updated_at": "2025-07-18T06:43:51.553Z",
+      "rating": null,
+      "feedback": null
+    }
+  ],
+  "swap_ratings": [
+    {
+      "id": "rating_sample_1",
+      "swap_request_id": "req3",
+      "rater_id": "user3",
+      "rated_id": "user4",
+      "rating": 5,
+      "feedback": "Great communication and very responsive! Looking forward to our skill exchange.",
+      "created_at": "2025-07-13 13:27:19.097611+00",
+      "rating_type": "post_request"
+    },
+    {
+      "id": "rating_sample_2",
+      "swap_request_id": "req6",
+      "rater_id": "user7",
+      "rated_id": "user11",
+      "rating": 4,
+      "feedback": "Seems knowledgeable and professional. Excited to learn from them.",
+      "created_at": "2025-07-14 13:27:19.097611+00",
+      "rating_type": "post_request"
+    },
+    {
+      "id": "rating_sample_3",
+      "swap_request_id": "req8",
+      "rater_id": "user10",
+      "rated_id": "user14",
+      "rating": 5,
+      "feedback": "Very friendly and clear about expectations. Perfect match!",
+      "created_at": "2025-07-12 13:27:19.097611+00",
+      "rating_type": "post_request"
+    },
+    {
+      "id": "rating_sample_4",
+      "swap_request_id": "req5",
+      "rater_id": "user6",
+      "rated_id": "user8",
+      "rating": 4,
+      "feedback": "Quick to respond and well-organized. This should be a good exchange.",
+      "created_at": "2025-07-14 13:27:19.097611+00",
+      "rating_type": "post_request"
+    },
+    {
+      "id": "rating_sample_5",
+      "swap_request_id": "req7",
+      "rater_id": "user9",
+      "rated_id": "user12",
+      "rating": 3,
+      "feedback": "Decent communication, hope the actual session goes well.",
+      "created_at": "2025-07-13 13:27:19.097611+00",
+      "rating_type": "post_request"
+    },
+    {
+      "id": "rating_sample_6",
+      "swap_request_id": "req3",
+      "rater_id": "user4",
+      "rated_id": "user3",
+      "rating": 5,
+      "feedback": "Fantastic teacher! Very patient and thorough. Learned so much about web development.",
+      "created_at": "2025-07-10 13:27:19.097611+00",
+      "rating_type": "post_completion"
+    },
+    {
+      "id": "rating_sample_7",
+      "swap_request_id": "req6",
+      "rater_id": "user11",
+      "rated_id": "user7",
+      "rating": 4,
+      "feedback": "Great session on marketing. Clear explanations and good examples.",
+      "created_at": "2025-07-12 13:27:19.097611+00",
+      "rating_type": "post_completion"
+    },
+    {
+      "id": "rating_sample_8",
+      "swap_request_id": "req8",
+      "rater_id": "user14",
+      "rated_id": "user10",
+      "rating": 5,
+      "feedback": "Outstanding instruction! Really helped improve my skills.",
+      "created_at": "2025-07-09 13:27:19.097611+00",
+      "rating_type": "post_completion"
+    }
+  ],
+  "notifications": [
+    {
+      "id": "notif_1752820786954_52lcznoug",
+      "user_id": "user_1752820786720_qemunpz3h",
+      "type": "system",
+      "title": "Welcome to SkillSwap!",
+      "content": "Welcome to SkillSwap! Start by adding your skills and browsing other users to find skill exchange opportunities.",
+      "related_id": null,
+      "is_read": false,
+      "created_at": "2025-07-18 06:39:47.074357+00"
+    },
+    {
+      "id": "notif_1752820799325_quksvx8yg",
+      "user_id": "user1",
+      "type": "swap_request",
+      "title": "New Skill Swap Request",
+      "content": "New Test User wants to exchange skills with you: Teaching for Graphic Design",
+      "related_id": "swap_1752820798618_kyfo6rn1q",
+      "is_read": false,
+      "created_at": "2025-07-18 06:39:59.445273+00"
+    },
+    {
+      "id": "notif_1752821032127_x10bnbwol",
+      "user_id": "user16",
+      "type": "swap_request",
+      "title": "New Skill Swap Request",
+      "content": "Harsh Kumar Saw wants to exchange skills with you: Car Restoration for Space Planning",
+      "related_id": "swap_1752821031434_94hfu7m1a",
+      "is_read": false,
+      "created_at": "2025-07-18 06:43:52.244326+00"
+    }
+  ]
+}

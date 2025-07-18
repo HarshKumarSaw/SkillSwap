@@ -1,0 +1,13 @@
+{
+  "name": "skillswap-backup-scripts",
+  "type": "module",
+  "version": "1.0.0",
+  "description": "Database backup and restoration scripts for SkillSwap platform",
+  "scripts": {
+    "backup": "node backup-database.js",
+    "test-restore": "node test-restore.js"
+  },
+  "dependencies": {
+    "pg": "^8.11.3"
+  }
+}
