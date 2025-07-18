@@ -1151,7 +1151,7 @@ export class DatabaseStorage implements IStorage {
       console.log(`Admin deletion: Deleted skills for user ${userId}`);
       
       // Delete skill endorsements
-      await client.query('DELETE FROM skill_endorsements WHERE endorser_id = $1 OR endorsed_user_id = $1', [userId]);
+      await client.query('DELETE FROM skill_endorsements WHERE endorser_id = $1 OR user_id = $1', [userId]);
       console.log(`Admin deletion: Deleted skill endorsements for user ${userId}`);
       
       // Delete reported content by the user
