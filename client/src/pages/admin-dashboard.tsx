@@ -197,101 +197,177 @@ export default function AdminDashboard() {
   }
 
   return (
-    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8">
-      <div className="mb-6 sm:mb-8">
-        <h1 className="text-2xl sm:text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-sm sm:text-base text-muted-foreground">Manage users, content, and platform settings</p>
-      </div>
-
-      {/* Stats Overview */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mb-6 sm:mb-8">
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Total Users</CardTitle>
-            <Users className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <div className="text-lg sm:text-2xl font-bold">{users?.totalCount || 0}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Swap Requests</CardTitle>
-            <TrendingUp className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <div className="text-lg sm:text-2xl font-bold">{swapRequests?.totalCount || 0}</div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">Pending Reports</CardTitle>
-            <Shield className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <div className="text-lg sm:text-2xl font-bold">
-              {reports?.data?.filter((r: Report) => r.status === 'pending').length || 0}
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 dark:from-slate-950 dark:to-blue-950">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        {/* Header */}
+        <div className="mb-8 sm:mb-12">
+          <div className="flex items-center gap-3 mb-3">
+            <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+              <Shield className="w-6 h-6" />
             </div>
-          </CardContent>
-        </Card>
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 px-3 sm:px-6 pt-3 sm:pt-6">
-            <CardTitle className="text-xs sm:text-sm font-medium">System Messages</CardTitle>
-            <MessageSquare className="h-3 w-3 sm:h-4 sm:w-4 text-muted-foreground" />
-          </CardHeader>
-          <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-            <div className="text-lg sm:text-2xl font-bold">{systemMessages?.length || 0}</div>
-          </CardContent>
-        </Card>
-      </div>
+            <div>
+              <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent">
+                Admin Dashboard
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 text-sm sm:text-base mt-1">
+                Comprehensive platform management and insights
+              </p>
+            </div>
+          </div>
+        </div>
 
-      <Tabs defaultValue="users" className="space-y-4 sm:space-y-6">
-        <TabsList className="grid w-full grid-cols-3 sm:grid-cols-6 gap-1 sm:gap-2 h-auto p-1">
-          <TabsTrigger value="users" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Users</TabsTrigger>
-          <TabsTrigger value="swap-requests" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Requests</TabsTrigger>
-          <TabsTrigger value="reports" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Reports</TabsTrigger>
-          <TabsTrigger value="downloads" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Downloads</TabsTrigger>
-          <TabsTrigger value="messages" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Messages</TabsTrigger>
-          <TabsTrigger value="actions" className="text-xs sm:text-sm px-2 sm:px-4 py-2">Actions</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="users">
-          <Card>
-            <CardHeader className="px-3 sm:px-6 py-3 sm:py-6">
-              <CardTitle className="text-lg sm:text-xl">User Management</CardTitle>
-              <CardDescription className="text-sm">Manage user accounts and permissions</CardDescription>
+        {/* Stats Overview */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8 sm:mb-12">
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-950 dark:to-blue-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-sm font-semibold text-blue-800 dark:text-blue-200">Total Users</CardTitle>
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white shadow-md">
+                <Users className="w-5 h-5" />
+              </div>
             </CardHeader>
-            <CardContent className="px-3 sm:px-6 pb-3 sm:pb-6">
-              <div className="space-y-3 sm:space-y-4">
-                {users?.data?.map((user: User) => (
-                  <div key={user.id} className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 sm:p-4 border rounded-lg space-y-3 sm:space-y-0">
-                    <div className="flex-1">
-                      <h3 className="font-medium text-sm sm:text-base">{user.name}</h3>
-                      <p className="text-xs sm:text-sm text-muted-foreground break-all">{user.email}</p>
-                      <div className="flex gap-2 mt-2 flex-wrap">
-                        <Badge variant={user.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
-                          {user.role}
-                        </Badge>
-                        {user.isBanned && (
-                          <Badge variant="destructive" className="text-xs">Banned</Badge>
+            <CardContent>
+              <div className="text-3xl font-bold text-blue-900 dark:text-blue-100 mb-1">
+                {users?.totalCount || 0}
+              </div>
+              <p className="text-xs text-blue-700 dark:text-blue-300">Active platform members</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-green-50 to-green-100 dark:from-green-950 dark:to-green-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-sm font-semibold text-green-800 dark:text-green-200">Swap Requests</CardTitle>
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-green-600 text-white shadow-md">
+                <TrendingUp className="w-5 h-5" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-green-900 dark:text-green-100 mb-1">
+                {swapRequests?.totalCount || 0}
+              </div>
+              <p className="text-xs text-green-700 dark:text-green-300">Total skill exchanges</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-950 dark:to-orange-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-sm font-semibold text-orange-800 dark:text-orange-200">Pending Reports</CardTitle>
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-orange-600 text-white shadow-md">
+                <Shield className="w-5 h-5" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-orange-900 dark:text-orange-100 mb-1">
+                {reports?.data?.filter((r: Report) => r.status === 'pending').length || 0}
+              </div>
+              <p className="text-xs text-orange-700 dark:text-orange-300">Awaiting review</p>
+            </CardContent>
+          </Card>
+
+          <Card className="relative overflow-hidden border-0 shadow-lg bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-950 dark:to-purple-900">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
+              <CardTitle className="text-sm font-semibold text-purple-800 dark:text-purple-200">System Messages</CardTitle>
+              <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-purple-600 text-white shadow-md">
+                <MessageSquare className="w-5 h-5" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-3xl font-bold text-purple-900 dark:text-purple-100 mb-1">
+                {systemMessages?.length || 0}
+              </div>
+              <p className="text-xs text-purple-700 dark:text-purple-300">Active announcements</p>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Navigation Tabs */}
+        <Tabs defaultValue="users" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 bg-white/50 dark:bg-slate-900/50 p-2 rounded-xl shadow-sm backdrop-blur-sm">
+            <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
+              <Users className="w-4 h-4 mr-2" />
+              Users
+            </TabsTrigger>
+            <TabsTrigger value="swap-requests" className="data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
+              <TrendingUp className="w-4 h-4 mr-2" />
+              Requests
+            </TabsTrigger>
+            <TabsTrigger value="reports" className="data-[state=active]:bg-orange-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
+              <Shield className="w-4 h-4 mr-2" />
+              Reports
+            </TabsTrigger>
+            <TabsTrigger value="downloads" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
+              <Download className="w-4 h-4 mr-2" />
+              Downloads
+            </TabsTrigger>
+            <TabsTrigger value="messages" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
+              <MessageSquare className="w-4 h-4 mr-2" />
+              Messages
+            </TabsTrigger>
+            <TabsTrigger value="actions" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
+              <UserCheck className="w-4 h-4 mr-2" />
+              Actions
+            </TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="users">
+            <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
+              <CardHeader className="border-b border-slate-200/50 dark:border-slate-700/50 pb-6">
+                <div className="flex items-center gap-3">
+                  <div className="flex items-center justify-center w-10 h-10 rounded-lg bg-blue-600 text-white">
+                    <Users className="w-5 h-5" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-xl font-bold">User Management</CardTitle>
+                    <CardDescription className="text-slate-600 dark:text-slate-400">
+                      Manage user accounts, permissions, and platform access
+                    </CardDescription>
+                  </div>
+                </div>
+              </CardHeader>
+              <CardContent className="p-6">
+                <div className="space-y-4">
+                  {users?.data?.map((user: User) => (
+                    <div key={user.id} className="group flex flex-col sm:flex-row sm:items-center sm:justify-between p-5 border border-slate-200 dark:border-slate-700 rounded-xl hover:shadow-md transition-all duration-200 bg-gradient-to-r from-white to-slate-50 dark:from-slate-800 dark:to-slate-800/50">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-3 mb-2">
+                          <div className="w-10 h-10 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-semibold text-sm">
+                            {user.name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-slate-900 dark:text-white">{user.name}</h3>
+                            <p className="text-sm text-slate-600 dark:text-slate-400 break-all">{user.email}</p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2 flex-wrap">
+                          <Badge 
+                            variant={user.role === 'admin' ? 'default' : 'secondary'} 
+                            className={user.role === 'admin' ? 'bg-blue-600 hover:bg-blue-700' : 'bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-300'}
+                          >
+                            {user.role}
+                          </Badge>
+                          {user.isBanned && (
+                            <Badge variant="destructive" className="bg-red-600 hover:bg-red-700">
+                              Banned
+                            </Badge>
+                          )}
+                        </div>
+                        {user.banReason && (
+                          <p className="text-sm text-slate-500 dark:text-slate-400 mt-2 italic">
+                            Reason: {user.banReason}
+                          </p>
                         )}
                       </div>
-                      {user.banReason && (
-                        <p className="text-xs text-muted-foreground mt-1">Reason: {user.banReason}</p>
-                      )}
-                    </div>
-                    <div className="flex gap-2 sm:ml-4 justify-end">
-                      <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                          <Button
-                            size="sm"
-                            variant="destructive"
-                            onClick={() => setSelectedUser(user)}
-                            className="text-xs sm:text-sm px-2 sm:px-3"
-                          >
-                            <Ban className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                            Remove
-                          </Button>
+                      <div className="flex gap-3 mt-4 sm:mt-0 sm:ml-6">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              onClick={() => setSelectedUser(user)}
+                              className="bg-red-600 hover:bg-red-700 text-white shadow-md hover:shadow-lg transition-all"
+                            >
+                              <Ban className="w-4 h-4 mr-2" />
+                              Remove
+                            </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent className="w-[95%] sm:w-full max-w-md mx-auto">
                           <AlertDialogHeader>
@@ -644,6 +720,7 @@ export default function AdminDashboard() {
           </Card>
         </TabsContent>
       </Tabs>
+      </div>
     </div>
   );
 }
