@@ -12,6 +12,7 @@ import { UserWithSkills } from "@shared/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
 import { NotificationBell } from "@/components/notification-bell";
+import { Logo } from "@/components/logo";
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -197,8 +198,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-16 gap-4">
             <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-              <h1 className="text-xl sm:text-2xl font-bold text-foreground">SkillSwap</h1>
-              <div className="hidden lg:block text-sm text-muted-foreground">Browse & Connect</div>
+              <Logo size="md" showIcon={true} showTagline={true} />
+              <div className="hidden lg:block text-sm text-muted-foreground border-l border-border pl-4 ml-2">
+                Discover skills • Share knowledge
+              </div>
             </div>
             
 
