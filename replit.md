@@ -2,11 +2,13 @@
 
 ## Overview
 
-This is a full-stack skill swapping platform where users can offer skills they have and request skills they want to learn from other users. The application allows users to discover each other, send skill exchange requests, manage profiles, and communicate through a messaging system with comprehensive admin functionality.
+This is a comprehensive React-based skill swapping platform that enables users to discover, match, and exchange skills through an advanced interface with real-time features, mobile optimization, and administrative tools. The platform includes professional branding, extensive documentation, and is optimized for GitHub hosting and production deployment.
 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Documentation style: Professional GitHub format with cross-referencing and proper structure.
+Design preference: Modern, professional UI with gradient branding and mobile-first approach.
 
 ## System Architecture
 

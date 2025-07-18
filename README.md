@@ -53,7 +53,7 @@ A dynamic React-based skill swap platform that enables global skill discovery an
 
 ### Prerequisites
 - Node.js (18+)
-- PostgreSQL database
+- PostgreSQL database - See [Database Config Guide](./docs/DATABASE_CONFIG.md)
 - Cloudinary account (for image uploads)
 
 ### Installation
@@ -110,9 +110,10 @@ A dynamic React-based skill swap platform that enables global skill discovery an
 
 ## 🗄 Database Setup
 
-This application requires a PostgreSQL database. You can use:
+This application requires a PostgreSQL database. For detailed setup instructions, see [Database Configuration Guide](./docs/DATABASE_CONFIG.md).
 
-- **Local PostgreSQL**: Install PostgreSQL locally
+**Quick Options:**
+- **Cloud databases**: Neon, Supabase, Railway (recommended)
 - **Cloud Providers**: Neon, Supabase, Heroku Postgres, etc.
 - **Docker**: Run PostgreSQL in a container
 
@@ -128,6 +129,19 @@ This application requires a PostgreSQL database. You can use:
 - Frontend and backend are served on the same port (5000)
 - Database migrations are handled by Drizzle Kit (`npm run db:push`)
 - No separate database setup needed - schema is automatically synced
+
+### Common Commands
+```bash
+npm run dev        # Start development server
+npm run build      # Build for production
+npm run db:push    # Sync database schema
+npm start          # Start production server
+```
+
+### Troubleshooting
+- **Database connection issues?** → See [Database Config](./docs/DATABASE_CONFIG.md#-troubleshooting)
+- **Build errors?** → Check Node.js version (18+ required)
+- **Environment variables?** → Verify all required variables in [.env.example](./.env.example)
 
 ## 🛡 Security
 
@@ -148,7 +162,18 @@ This application requires a PostgreSQL database. You can use:
 
 ## 📚 Documentation
 
-For detailed project documentation, system architecture, and development guidelines, see the [docs](./docs/) folder.
+**Main Documentation Hub:** [docs/README.md](./docs/README.md)
+
+### Quick Links
+- **[Database Setup](./docs/DATABASE_CONFIG.md)** - PostgreSQL configuration and troubleshooting
+- **[Deployment Guide](./docs/DEPLOYMENT.md)** - Production deployment instructions  
+- **[Project Documentation](./docs/replit.md)** - Complete project history and architecture
+- **[Environment Variables](./.env.example)** - Required configuration template
+
+### For Developers
+- **Setup Issues?** → [Database Config](./docs/DATABASE_CONFIG.md#-troubleshooting)
+- **Deployment?** → [Deployment Guide](./docs/DEPLOYMENT.md) 
+- **Architecture?** → [Project Docs](./docs/replit.md)
 
 ## 📄 License
 
