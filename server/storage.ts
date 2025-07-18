@@ -51,7 +51,7 @@ export interface IStorage {
   
   // Admin Functions
   getAllUsers(page?: number, limit?: number): Promise<PaginatedResult<User>>;
-  deleteUserAccount(userId: string, reason: string, adminId: string): Promise<void>;
+  adminDeleteUserAccount(userId: string, reason: string, adminId: string): Promise<void>;
   getAllSwapRequests(page?: number, limit?: number): Promise<PaginatedResult<SwapRequestWithUsers>>;
   createAdminAction(action: InsertAdminAction): Promise<AdminAction>;
   getAdminActions(page?: number, limit?: number): Promise<PaginatedResult<AdminAction & { admin: User }>>;
@@ -1117,7 +1117,7 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async deleteUserAccount(userId: string, reason: string, adminId: string): Promise<void> {
+  async adminDeleteUserAccount(userId: string, reason: string, adminId: string): Promise<void> {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
@@ -1138,11 +1138,11 @@ export class DatabaseStorage implements IStorage {
       console.log(`Admin deletion: Deleted conversations for user ${userId}`);
       
       // Delete swap ratings given by or about the user
-      await client.query('DELETE FROM swap_ratings WHERE rater_id = $1 OR rated_user_id = $1', [userId]);
+      await client.query('DELETE FROM swap_ratings WHERE rater_id = $1 OR rated_id = $1', [userId]);
       console.log(`Admin deletion: Deleted swap ratings for user ${userId}`);
       
       // Delete swap requests involving the user
-      await client.query('DELETE FROM swap_requests WHERE requester_id = $1 OR target_id = $1', [userId]);
+      await client.query('DELETE FROM swap_requests WHERE sender_id = $1 OR receiver_id = $1', [userId]);
       console.log(`Admin deletion: Deleted swap requests for user ${userId}`);
       
       // Delete user skills

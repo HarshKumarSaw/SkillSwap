@@ -547,7 +547,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Deletion reason is required" });
       }
       
-      await storage.deleteUserAccount(req.params.id, reason, adminUser.id);
+      await storage.adminDeleteUserAccount(req.params.id, reason, adminUser.id);
       res.json({ message: "User account deleted successfully" });
     } catch (error) {
       console.error("Error deleting user account:", error);
