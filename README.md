@@ -115,6 +115,20 @@ The application will be available at `http://localhost:5000`
 - Input validation and sanitization
 - Secure file upload handling
 
+## Project Structure
+
+```
+├── client/                 # Frontend React application
+├── server/                 # Backend Express.js API
+├── shared/                 # Shared TypeScript schemas
+├── docs/                   # Documentation and assets
+│   ├── DATABASE_CONFIG.md  # Database setup guide
+│   ├── replit.md          # Project documentation
+│   └── assets/            # Design files and diagrams
+├── .env.example           # Environment variables template
+└── README.md              # Main setup instructions
+```
+
 ## Contributing
 
 1. Fork the repository
@@ -122,6 +136,10 @@ The application will be available at `http://localhost:5000`
 3. Make your changes
 4. Test thoroughly
 5. Submit a pull request
+
+## Documentation
+
+For detailed project documentation, see the [docs](./docs/) folder.
 
 ## License
 
