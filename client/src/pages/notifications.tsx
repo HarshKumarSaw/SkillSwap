@@ -61,7 +61,7 @@ export default function NotificationsPage() {
   const getNotificationColor = (type: string) => {
     switch (type) {
       case "message":
-        return "bg-blue-500";
+        return "bg-blue-500 dark:bg-[#0b3675]";
       case "swap_request":
         return "bg-green-500";
       case "rating":

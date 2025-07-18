@@ -112,7 +112,7 @@ export default function SwapRequests() {
     switch (status) {
       case "pending": return "text-orange-600";
       case "accepted": return "text-green-600";
-      case "completed": return "text-blue-600";
+      case "completed": return "text-blue-600 dark:text-[#6ba6f5]";
       case "rejected": return "text-red-600";
       case "cancelled": return "text-gray-600";
       default: return "text-gray-600";

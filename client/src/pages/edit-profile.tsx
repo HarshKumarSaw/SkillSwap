@@ -460,19 +460,19 @@ export default function EditProfile() {
                     <Label className="text-sm font-semibold text-foreground">
                       Skills You Want to Learn ({skillsWanted.length})
                     </Label>
-                    <div className="bg-blue-50 dark:bg-blue-900/10 p-4 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <div className="bg-blue-50 dark:bg-[#0b3675]/10 p-4 rounded-lg border border-blue-200 dark:border-[#0b3675]/30">
                       <div className="flex flex-wrap gap-3">
                         {skillsWanted.map((skill) => (
                           <Badge
                             key={skill}
                             variant="secondary"
-                            className="bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200 px-4 py-2 text-sm font-medium"
+                            className="bg-blue-100 text-blue-800 dark:bg-[#0b3675] dark:text-blue-200 px-4 py-2 text-sm font-medium"
                           >
                             {skill}
                             <Button
                               variant="ghost"
                               size="sm"
-                              className="ml-2 h-5 w-5 p-0 hover:bg-blue-200 dark:hover:bg-blue-800 rounded-full"
+                              className="ml-2 h-5 w-5 p-0 hover:bg-blue-200 dark:hover:bg-[#0b3675]/80 rounded-full"
                               onClick={() => removeSkill(skill, 'wanted')}
                             >
                               <X className="h-3 w-3" />
