@@ -51,8 +51,7 @@ export interface IStorage {
   
   // Admin Functions
   getAllUsers(page?: number, limit?: number): Promise<PaginatedResult<User>>;
-  banUser(userId: string, reason: string, adminId: string): Promise<void>;
-  unbanUser(userId: string, adminId: string): Promise<void>;
+  deleteUserAccount(userId: string, reason: string, adminId: string): Promise<void>;
   getAllSwapRequests(page?: number, limit?: number): Promise<PaginatedResult<SwapRequestWithUsers>>;
   createAdminAction(action: InsertAdminAction): Promise<AdminAction>;
   getAdminActions(page?: number, limit?: number): Promise<PaginatedResult<AdminAction & { admin: User }>>;
@@ -1118,54 +1117,64 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
-  async banUser(userId: string, reason: string, adminId: string): Promise<void> {
+  async deleteUserAccount(userId: string, reason: string, adminId: string): Promise<void> {
     const client = await pool.connect();
     try {
       await client.query('BEGIN');
       
-      // Ban the user
-      await client.query(
-        'UPDATE users SET is_banned = true, ban_reason = $1, banned_at = NOW() WHERE id = $2',
-        [reason, userId]
-      );
+      // Delete all user-related data in the correct order to avoid foreign key constraints
+      console.log(`Admin deletion: Deleting account for user ${userId} by admin ${adminId}`);
+      
+      // Delete user notifications
+      await client.query('DELETE FROM notifications WHERE user_id = $1', [userId]);
+      console.log(`Admin deletion: Deleted notifications for user ${userId}`);
+      
+      // Delete user messages
+      await client.query('DELETE FROM messages WHERE sender_id = $1', [userId]);
+      console.log(`Admin deletion: Deleted messages from user ${userId}`);
+      
+      // Delete conversations where user is participant
+      await client.query('DELETE FROM conversations WHERE participant1_id = $1 OR participant2_id = $1', [userId]);
+      console.log(`Admin deletion: Deleted conversations for user ${userId}`);
+      
+      // Delete swap ratings given by or about the user
+      await client.query('DELETE FROM swap_ratings WHERE rater_id = $1 OR rated_user_id = $1', [userId]);
+      console.log(`Admin deletion: Deleted swap ratings for user ${userId}`);
+      
+      // Delete swap requests involving the user
+      await client.query('DELETE FROM swap_requests WHERE requester_id = $1 OR target_id = $1', [userId]);
+      console.log(`Admin deletion: Deleted swap requests for user ${userId}`);
+      
+      // Delete user skills
+      await client.query('DELETE FROM user_skills_offered WHERE user_id = $1', [userId]);
+      await client.query('DELETE FROM user_skills_wanted WHERE user_id = $1', [userId]);
+      console.log(`Admin deletion: Deleted skills for user ${userId}`);
+      
+      // Delete skill endorsements
+      await client.query('DELETE FROM skill_endorsements WHERE endorser_id = $1 OR endorsed_user_id = $1', [userId]);
+      console.log(`Admin deletion: Deleted skill endorsements for user ${userId}`);
+      
+      // Delete reported content by the user
+      await client.query('DELETE FROM reported_content WHERE reporter_id = $1', [userId]);
+      console.log(`Admin deletion: Deleted reports by user ${userId}`);
+      
+      // Finally, delete the user account
+      await client.query('DELETE FROM users WHERE id = $1', [userId]);
+      console.log(`Admin deletion: Deleted user account ${userId}`);
       
       // Log admin action
       const actionId = `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       await client.query(
         'INSERT INTO admin_actions (id, admin_id, action, target_id, target_type, reason, created_at) VALUES ($1, $2, $3, $4, $5, $6, NOW())',
-        [actionId, adminId, 'ban_user', userId, 'user', reason]
+        [actionId, adminId, 'delete_user', userId, 'user', reason]
       );
+      
+      console.log(`Admin deletion: Logged admin action for user ${userId} deletion`);
       
       await client.query('COMMIT');
     } catch (error) {
       await client.query('ROLLBACK');
-      throw error;
-    } finally {
-      client.release();
-    }
-  }
-
-  async unbanUser(userId: string, adminId: string): Promise<void> {
-    const client = await pool.connect();
-    try {
-      await client.query('BEGIN');
-      
-      // Unban the user
-      await client.query(
-        'UPDATE users SET is_banned = false, ban_reason = NULL, banned_at = NULL WHERE id = $1',
-        [userId]
-      );
-      
-      // Log admin action
-      const actionId = `action_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-      await client.query(
-        'INSERT INTO admin_actions (id, admin_id, action, target_id, target_type, created_at) VALUES ($1, $2, $3, $4, $5, NOW())',
-        [actionId, adminId, 'unban_user', userId, 'user']
-      );
-      
-      await client.query('COMMIT');
-    } catch (error) {
-      await client.query('ROLLBACK');
+      console.error(`Admin deletion error for user ${userId}:`, error);
       throw error;
     } finally {
       client.release();

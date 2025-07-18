@@ -538,32 +538,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post("/api/admin/users/:id/ban", requireAdmin, async (req, res) => {
+  app.delete("/api/admin/users/:id", requireAdmin, async (req, res) => {
     try {
       const { reason } = req.body;
       const adminUser = req.session.user;
       
       if (!reason) {
-        return res.status(400).json({ message: "Ban reason is required" });
+        return res.status(400).json({ message: "Deletion reason is required" });
       }
       
-      await storage.banUser(req.params.id, reason, adminUser.id);
-      res.json({ message: "User banned successfully" });
+      await storage.deleteUserAccount(req.params.id, reason, adminUser.id);
+      res.json({ message: "User account deleted successfully" });
     } catch (error) {
-      console.error("Error banning user:", error);
-      res.status(500).json({ message: "Failed to ban user" });
-    }
-  });
-
-  app.post("/api/admin/users/:id/unban", requireAdmin, async (req, res) => {
-    try {
-      const adminUser = req.session.user;
-      
-      await storage.unbanUser(req.params.id, adminUser.id);
-      res.json({ message: "User unbanned successfully" });
-    } catch (error) {
-      console.error("Error unbanning user:", error);
-      res.status(500).json({ message: "Failed to unban user" });
+      console.error("Error deleting user account:", error);
+      res.status(500).json({ message: "Failed to delete user account" });
     }
   });
 

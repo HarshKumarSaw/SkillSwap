@@ -135,35 +135,20 @@ export default function AdminDashboard() {
   };
 
   // Mutations - Call all hooks before conditional returns
-  const banUserMutation = useMutation({
+  const deleteUserMutation = useMutation({
     mutationFn: async ({ userId, reason }: { userId: string; reason: string }) => {
-      const response = await apiRequest("POST", `/api/admin/users/${userId}/ban`, { reason });
+      const response = await apiRequest("DELETE", `/api/admin/users/${userId}`, { reason });
       return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
       queryClient.invalidateQueries({ queryKey: ['/api/admin/actions'] });
-      toast({ title: "User banned successfully" });
+      toast({ title: "User account deleted successfully" });
       setSelectedUser(null);
       setBanReason("");
     },
     onError: () => {
-      toast({ title: "Failed to ban user", variant: "destructive" });
-    },
-  });
-
-  const unbanUserMutation = useMutation({
-    mutationFn: async (userId: string) => {
-      const response = await apiRequest("POST", `/api/admin/users/${userId}/unban`);
-      return response.json();
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/users'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/admin/actions'] });
-      toast({ title: "User unbanned successfully" });
-    },
-    onError: () => {
-      toast({ title: "Failed to unban user", variant: "destructive" });
+      toast({ title: "Failed to delete user account", variant: "destructive" });
     },
   });
 
@@ -296,67 +281,54 @@ export default function AdminDashboard() {
                       )}
                     </div>
                     <div className="flex gap-2 sm:ml-4 justify-end">
-                      {user.isBanned ? (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={() => unbanUserMutation.mutate(user.id)}
-                          disabled={unbanUserMutation.isPending}
-                          className="text-xs sm:text-sm px-2 sm:px-3"
-                        >
-                          <UserCheck className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                          Unban
-                        </Button>
-                      ) : (
-                        <AlertDialog>
-                          <AlertDialogTrigger asChild>
-                            <Button
-                              size="sm"
-                              variant="destructive"
-                              onClick={() => setSelectedUser(user)}
-                              className="text-xs sm:text-sm px-2 sm:px-3"
+                      <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                          <Button
+                            size="sm"
+                            variant="destructive"
+                            onClick={() => setSelectedUser(user)}
+                            className="text-xs sm:text-sm px-2 sm:px-3"
+                          >
+                            <Ban className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
+                            Remove
+                          </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent className="w-[95%] sm:w-full max-w-md mx-auto">
+                          <AlertDialogHeader>
+                            <AlertDialogTitle className="text-lg">Remove User Account</AlertDialogTitle>
+                            <AlertDialogDescription className="text-sm">
+                              Are you sure you want to permanently delete {selectedUser?.name}'s account? This action cannot be undone and will remove all their data including profile, skills, swap requests, and messages.
+                            </AlertDialogDescription>
+                          </AlertDialogHeader>
+                          <div className="py-4">
+                            <Label htmlFor="removal-reason" className="text-sm">Reason for removal</Label>
+                            <Textarea
+                              id="removal-reason"
+                              value={banReason}
+                              onChange={(e) => setBanReason(e.target.value)}
+                              placeholder="Enter reason for removing this user account..."
+                              className="mt-2 text-sm"
+                            />
+                          </div>
+                          <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+                            <AlertDialogCancel onClick={() => {
+                              setSelectedUser(null);
+                              setBanReason("");
+                            }} className="w-full sm:w-auto text-sm">Cancel</AlertDialogCancel>
+                            <AlertDialogAction
+                              onClick={() => {
+                                if (selectedUser && banReason.trim()) {
+                                  deleteUserMutation.mutate({ userId: selectedUser.id, reason: banReason });
+                                }
+                              }}
+                              disabled={!banReason.trim() || deleteUserMutation.isPending}
+                              className="w-full sm:w-auto text-sm bg-red-600 hover:bg-red-700"
                             >
-                              <Ban className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-                              Ban
-                            </Button>
-                          </AlertDialogTrigger>
-                          <AlertDialogContent className="w-[95%] sm:w-full max-w-md mx-auto">
-                            <AlertDialogHeader>
-                              <AlertDialogTitle className="text-lg">Ban User</AlertDialogTitle>
-                              <AlertDialogDescription className="text-sm">
-                                Are you sure you want to ban {selectedUser?.name}? This action will prevent them from accessing the platform.
-                              </AlertDialogDescription>
-                            </AlertDialogHeader>
-                            <div className="py-4">
-                              <Label htmlFor="ban-reason" className="text-sm">Reason for ban</Label>
-                              <Textarea
-                                id="ban-reason"
-                                value={banReason}
-                                onChange={(e) => setBanReason(e.target.value)}
-                                placeholder="Enter reason for banning this user..."
-                                className="mt-2 text-sm"
-                              />
-                            </div>
-                            <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                              <AlertDialogCancel onClick={() => {
-                                setSelectedUser(null);
-                                setBanReason("");
-                              }} className="w-full sm:w-auto text-sm">Cancel</AlertDialogCancel>
-                              <AlertDialogAction
-                                onClick={() => {
-                                  if (selectedUser && banReason.trim()) {
-                                    banUserMutation.mutate({ userId: selectedUser.id, reason: banReason });
-                                  }
-                                }}
-                                disabled={!banReason.trim() || banUserMutation.isPending}
-                                className="w-full sm:w-auto text-sm"
-                              >
-                                Ban User
-                              </AlertDialogAction>
-                            </AlertDialogFooter>
-                          </AlertDialogContent>
-                        </AlertDialog>
-                      )}
+                              Remove User
+                            </AlertDialogAction>
+                          </AlertDialogFooter>
+                        </AlertDialogContent>
+                      </AlertDialog>
                     </div>
                   </div>
                 ))}
