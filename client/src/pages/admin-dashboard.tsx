@@ -281,32 +281,34 @@ export default function AdminDashboard() {
 
         {/* Navigation Tabs */}
         <Tabs defaultValue="users" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-2 bg-white/50 dark:bg-slate-900/50 p-2 rounded-xl shadow-sm backdrop-blur-sm">
-            <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
-              <Users className="w-4 h-4 mr-2" />
-              Users
-            </TabsTrigger>
-            <TabsTrigger value="swap-requests" className="data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
-              <TrendingUp className="w-4 h-4 mr-2" />
-              Requests
-            </TabsTrigger>
-            <TabsTrigger value="reports" className="data-[state=active]:bg-orange-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
-              <Shield className="w-4 h-4 mr-2" />
-              Reports
-            </TabsTrigger>
-            <TabsTrigger value="downloads" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
-              <Download className="w-4 h-4 mr-2" />
-              Downloads
-            </TabsTrigger>
-            <TabsTrigger value="messages" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
-              <MessageSquare className="w-4 h-4 mr-2" />
-              Messages
-            </TabsTrigger>
-            <TabsTrigger value="actions" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg font-medium transition-all">
-              <UserCheck className="w-4 h-4 mr-2" />
-              Actions
-            </TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-2">
+            <TabsList className="flex w-max min-w-full lg:grid lg:grid-cols-6 gap-1 bg-white/80 dark:bg-slate-900/80 p-1.5 rounded-xl shadow-sm backdrop-blur-sm h-auto">
+              <TabsTrigger value="users" className="data-[state=active]:bg-blue-600 data-[state=active]:text-white rounded-lg font-medium transition-all flex-shrink-0 text-xs px-2 py-2.5 min-w-[60px] sm:min-w-0 sm:px-4">
+                <Users className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline ml-1">Users</span>
+              </TabsTrigger>
+              <TabsTrigger value="swap-requests" className="data-[state=active]:bg-green-600 data-[state=active]:text-white rounded-lg font-medium transition-all flex-shrink-0 text-xs px-2 py-2.5 min-w-[60px] sm:min-w-0 sm:px-4">
+                <TrendingUp className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline ml-1">Requests</span>
+              </TabsTrigger>
+              <TabsTrigger value="reports" className="data-[state=active]:bg-orange-600 data-[state=active]:text-white rounded-lg font-medium transition-all flex-shrink-0 text-xs px-2 py-2.5 min-w-[60px] sm:min-w-0 sm:px-4">
+                <Shield className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline ml-1">Reports</span>
+              </TabsTrigger>
+              <TabsTrigger value="downloads" className="data-[state=active]:bg-purple-600 data-[state=active]:text-white rounded-lg font-medium transition-all flex-shrink-0 text-xs px-2 py-2.5 min-w-[60px] sm:min-w-0 sm:px-4">
+                <Download className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline ml-1">Downloads</span>
+              </TabsTrigger>
+              <TabsTrigger value="messages" className="data-[state=active]:bg-indigo-600 data-[state=active]:text-white rounded-lg font-medium transition-all flex-shrink-0 text-xs px-2 py-2.5 min-w-[60px] sm:min-w-0 sm:px-4">
+                <MessageSquare className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline ml-1">Messages</span>
+              </TabsTrigger>
+              <TabsTrigger value="actions" className="data-[state=active]:bg-slate-600 data-[state=active]:text-white rounded-lg font-medium transition-all flex-shrink-0 text-xs px-2 py-2.5 min-w-[60px] sm:min-w-0 sm:px-4">
+                <UserCheck className="w-4 h-4 sm:mr-2" />
+                <span className="hidden sm:inline ml-1">Actions</span>
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
           <TabsContent value="users">
             <Card className="border-0 shadow-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm">
