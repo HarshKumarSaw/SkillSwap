@@ -11,6 +11,7 @@ import { Search, Plus, Loader2, ChevronLeft, ChevronRight, Filter, X } from "luc
 import { UserWithSkills } from "@shared/schema";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { UserMenu } from "@/components/user-menu";
+import { NotificationBell } from "@/components/notification-bell";
 
 export default function Home() {
   const [searchTerm, setSearchTerm] = useState("");
@@ -204,6 +205,7 @@ export default function Home() {
 
             <div className="flex items-center space-x-2 flex-shrink-0">
               <ThemeToggle />
+              <NotificationBell />
               <UserMenu />
             </div>
           </div>

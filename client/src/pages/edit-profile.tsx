@@ -17,6 +17,7 @@ import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { UserWithSkills } from "@shared/schema";
 import { ProfilePhotoUpload } from "@/components/profile-photo-upload";
+import { NotificationBell } from "@/components/notification-bell";
 
 export default function EditProfile() {
   const { user, isAuthenticated } = useAuth();
@@ -198,15 +199,18 @@ export default function EditProfile() {
               </Button>
               <h1 className="text-lg sm:text-xl font-bold text-foreground">Edit Profile</h1>
             </div>
-            <Button
-              onClick={handleSubmit}
-              disabled={isLoading}
-              className="bg-primary hover:bg-primary/90 hidden sm:flex"
-              size="sm"
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {isLoading ? "Saving..." : "Save"}
-            </Button>
+            <div className="flex items-center space-x-2">
+              <NotificationBell />
+              <Button
+                onClick={handleSubmit}
+                disabled={isLoading}
+                className="bg-primary hover:bg-primary/90 hidden sm:flex"
+                size="sm"
+              >
+                <Save className="w-4 h-4 mr-2" />
+                {isLoading ? "Saving..." : "Save"}
+              </Button>
+            </div>
           </div>
         </div>
       </header>
