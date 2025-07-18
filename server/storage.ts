@@ -39,6 +39,7 @@ export interface IStorage {
   
   // Swap Requests
   createSwapRequest(request: InsertSwapRequest): Promise<SwapRequest>;
+  getSwapRequestById(requestId: string): Promise<SwapRequest | undefined>;
   getUserSwapRequests(userId: string): Promise<SwapRequestWithUsers[]>;
   updateSwapRequestStatus(requestId: string, status: string, userId: string): Promise<SwapRequest>;
   deleteSwapRequest(requestId: string, userId: string): Promise<boolean>;
@@ -805,6 +806,19 @@ export class DatabaseStorage implements IStorage {
           profilePhoto: row.target_photo,
         }
       }));
+    } finally {
+      client.release();
+    }
+  }
+
+  async getSwapRequestById(requestId: string): Promise<SwapRequest | undefined> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT * FROM swap_requests WHERE id = $1',
+        [requestId]
+      );
+      return result.rows[0];
     } finally {
       client.release();
     }

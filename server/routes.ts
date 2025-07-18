@@ -73,6 +73,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Create new user account
       const user = await storage.createUserAccount(name, email, password, location, securityQuestion, securityAnswer);
       
+      // Create welcome notification
+      await storage.createNotification({
+        userId: user.id,
+        type: "system",
+        title: "Welcome to SkillSwap!",
+        content: "Welcome to SkillSwap! Start by adding your skills and browsing other users to find skill exchange opportunities.",
+        relatedId: null
+      });
+      
       // Store in session
       (req as any).session.user = user;
       (req as any).session.userId = user.id;
@@ -330,6 +339,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.log(`Creating swap request from ${validatedData.requesterId} to ${validatedData.targetId}`);
       const swapRequest = await storage.createSwapRequest(validatedData);
       console.log(`Swap request created successfully: ${swapRequest.id}`);
+      
+      // Get current user for notification
+      const user = (req as any).session?.user;
+      
+      // Get target user details for notification
+      const targetUser = await storage.getUserWithSkills(validatedData.targetId);
+      if (targetUser && user) {
+        // Create notification for the target user
+        await storage.createNotification({
+          userId: validatedData.targetId,
+          type: "swap_request",
+          title: "New Skill Swap Request",
+          content: `${user.name} wants to exchange skills with you: ${validatedData.senderSkill} for ${validatedData.receiverSkill}`,
+          relatedId: swapRequest.id
+        });
+      }
+      
       res.status(201).json(swapRequest);
     } catch (error) {
       if (error instanceof z.ZodError) {
@@ -388,6 +414,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const updatedRequest = await storage.updateSwapRequestStatus(req.params.id, status, user.id);
+      
+      // Create notification for status updates
+      if (updatedRequest) {
+        // Get the other user involved in the swap request
+        const otherUserId = updatedRequest.requesterId === user.id ? updatedRequest.targetId : updatedRequest.requesterId;
+        const otherUser = await storage.getUserWithSkills(otherUserId);
+        
+        if (otherUser) {
+          let notificationTitle = "";
+          let notificationContent = "";
+          
+          switch (status) {
+            case "accepted":
+              notificationTitle = "Swap Request Accepted";
+              notificationContent = `${user.name} accepted your skill swap request! You can now start exchanging skills.`;
+              break;
+            case "rejected":
+              notificationTitle = "Swap Request Declined";
+              notificationContent = `${user.name} declined your skill swap request.`;
+              break;
+            case "completed":
+              notificationTitle = "Swap Request Completed";
+              notificationContent = `${user.name} marked your skill swap as completed! Consider leaving feedback.`;
+              break;
+            case "cancelled":
+              notificationTitle = "Swap Request Cancelled";
+              notificationContent = `${user.name} cancelled the skill swap request.`;
+              break;
+          }
+          
+          if (notificationTitle) {
+            await storage.createNotification({
+              userId: otherUserId,
+              type: "swap_request",
+              title: notificationTitle,
+              content: notificationContent,
+              relatedId: updatedRequest.id
+            });
+          }
+        }
+      }
+      
       res.json(updatedRequest);
     } catch (error) {
       console.error("Error updating swap request:", error);
@@ -469,6 +537,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const rating = await storage.createSwapRating(validatedData);
+      
+      // Create notification for the rated user when someone leaves feedback
+      if (rating.ratingType === 'post_completion') {
+        // Get the swap request to find the other user
+        const swapRequest = await storage.getSwapRequestById(req.params.id);
+        if (swapRequest) {
+          const ratedUserId = swapRequest.requesterId === user.id ? swapRequest.targetId : swapRequest.requesterId;
+          const ratedUser = await storage.getUserWithSkills(ratedUserId);
+          
+          if (ratedUser) {
+            await storage.createNotification({
+              userId: ratedUserId,
+              type: "rating",
+              title: "New Rating Received",
+              content: `${user.name} left you a ${rating.score}-star rating with feedback: "${rating.feedback || 'No feedback provided'}"`,
+              relatedId: swapRequest.id
+            });
+          }
+        }
+      }
+      
       res.status(201).json(rating);
     } catch (error) {
       if (error instanceof z.ZodError) {
