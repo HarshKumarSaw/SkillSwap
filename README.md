@@ -44,27 +44,69 @@ A full-stack web application for skill swapping, where users can offer skills th
 - **Image Storage:** Cloudinary
 - **Build Tool:** Vite
 
-## Environment Variables
+## Setup Instructions
 
-The application requires the following environment variables:
+### 1. Environment Variables
+
+Create a `.env` file in the root directory (copy from `.env.example`):
+
+```bash
+cp .env.example .env
+```
+
+Configure the following required environment variables:
 
 - `DATABASE_URL`: PostgreSQL connection string
 - `CLOUDINARY_API_KEY`: Cloudinary API key for image uploads
-- `CLOUDINARY_API_SECRET`: Cloudinary API secret
+- `CLOUDINARY_API_SECRET`: Cloudinary API secret  
 - `CLOUDINARY_CLOUD_NAME`: Cloudinary cloud name
-- `NODE_ENV`: Application environment (development/production)
+- `SESSION_SECRET`: Secret key for session management (generate a secure random string)
+
+Optional variables:
+- `NODE_ENV`: Application environment (default: development)
 - `PORT`: Server port (default: 5000)
-- `SESSION_SECRET`: Secret key for session management
 
-## Database Setup
+### 2. Database Setup
 
-The application uses an external PostgreSQL database. Ensure your `DATABASE_URL` is properly configured in the `.env` file.
+This application requires a PostgreSQL database. You can use:
+- Local PostgreSQL installation
+- Cloud providers (Neon, Supabase, Heroku Postgres, etc.)
+- Docker PostgreSQL container
 
-## Development
+Set your `DATABASE_URL` in the `.env` file:
+```
+DATABASE_URL=postgresql://username:password@host:port/database
+```
+
+### 3. Cloudinary Setup
+
+For profile photo uploads, create a free account at [Cloudinary](https://cloudinary.com/) and add your credentials to the `.env` file.
+
+### 4. Installation & Running
+
+Install dependencies:
+```bash
+npm install
+```
+
+Push database schema (first time setup):
+```bash
+npm run db:push
+```
+
+Start the development server:
+```bash
+npm run dev
+```
+
+The application will be available at `http://localhost:5000`
+
+## Development Notes
 
 - The application uses hot module replacement for fast development
 - Frontend and backend are served on the same port (5000)
-- Database migrations are handled by Drizzle Kit
+- Database migrations are handled by Drizzle Kit (`npm run db:push`)
+- No separate database setup needed - schema is automatically synced
 
 ## Security
 
