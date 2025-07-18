@@ -1,6 +1,24 @@
-# Skill Swap Platform
+<div align="center">
+
+<img src="./docs/assets/skillswap-logo.svg" alt="SkillSwap Platform" width="300" />
+
+# SkillSwap Platform
 
 A dynamic React-based skill swap platform that enables global skill discovery and matching through an advanced, performance-optimized interface with enhanced user interaction capabilities.
+
+<p align="center">
+  <a href="https://skillswap-vzjn.onrender.com/" target="_blank">
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-Visit_App-blue?style=for-the-badge&logo=render" alt="Live Demo">
+  </a>
+  <a href="#-quick-start">
+    <img src="https://img.shields.io/badge/📚_Get_Started-Documentation-green?style=for-the-badge" alt="Get Started">
+  </a>
+  <a href="./docs/QUICK_BACKUP_GUIDE.md">
+    <img src="https://img.shields.io/badge/🗄️_Backup-Database_Guide-orange?style=for-the-badge" alt="Backup Guide">
+  </a>
+</p>
+
+</div>
 
 ## 📁 Project Structure
 
@@ -142,6 +160,9 @@ npm start          # Start production server
 - **Database connection issues?** → See [Database Config](./docs/DATABASE_CONFIG.md#-troubleshooting)
 - **Build errors?** → Check Node.js version (18+ required)
 - **Environment variables?** → Verify all required variables in [.env.example](./.env.example)
+
+### 🌐 Live Demo
+Check out the live application: **[https://skillswap-vzjn.onrender.com/](https://skillswap-vzjn.onrender.com/)**
 
 ## 🛡 Security
 

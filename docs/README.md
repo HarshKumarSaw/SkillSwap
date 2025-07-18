@@ -5,6 +5,7 @@ Welcome to the SkillSwap platform documentation. This folder contains comprehens
 ## 📖 Documentation Index
 
 ### 🚀 Getting Started
+- **[🌐 Live Demo](https://skillswap-vzjn.onrender.com/)** - Try the platform now
 - **[Main Setup Guide](../README.md)** - Quick start and installation instructions
 - **[Environment Setup](./.env.example)** - Required environment variables template
 
