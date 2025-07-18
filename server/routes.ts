@@ -704,7 +704,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             u.email,
             u.location,
             u.rating,
-            u.review_count,
             u.is_public,
             u.is_banned,
             u.created_at,
@@ -717,14 +716,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           LEFT JOIN swap_requests sr_received ON u.id = sr_received.receiver_id
           LEFT JOIN swap_ratings ratings_given ON u.id = ratings_given.rater_id
           LEFT JOIN swap_ratings ratings_received ON u.id = ratings_received.rated_id
-          GROUP BY u.id, u.name, u.email, u.location, u.rating, u.review_count, u.is_public, u.is_banned, u.created_at
+          GROUP BY u.id, u.name, u.email, u.location, u.rating, u.is_public, u.is_banned, u.created_at
           ORDER BY u.created_at DESC
         `);
 
         const csvContent = [
-          'ID,Name,Email,Location,Rating,Review Count,Is Public,Is Banned,Created At,Swap Requests Sent,Swap Requests Received,Ratings Given,Ratings Received',
+          'ID,Name,Email,Location,Rating,Is Public,Is Banned,Created At,Swap Requests Sent,Swap Requests Received,Ratings Given,Ratings Received',
           ...result.rows.map(row => 
-            `"${row.id}","${row.name}","${row.email}","${row.location || ''}",${row.rating},${row.review_count},${row.is_public},${row.is_banned},"${row.created_at}",${row.swap_requests_sent},${row.swap_requests_received},${row.ratings_given},${row.ratings_received}`
+            `"${row.id}","${row.name}","${row.email}","${row.location || ''}",${row.rating},${row.is_public},${row.is_banned},"${row.created_at}",${row.swap_requests_sent},${row.swap_requests_received},${row.ratings_given},${row.ratings_received}`
           )
         ].join('\n');
 
