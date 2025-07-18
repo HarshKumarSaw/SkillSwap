@@ -5,13 +5,15 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Bell, MessageSquare, Users, Star, Info, Check, CheckCheck } from "lucide-react";
+import { Bell, MessageSquare, Users, Star, Info, Check, CheckCheck, ArrowLeft, Home } from "lucide-react";
+import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import type { Notification } from "@shared/schema";
 
 export default function NotificationsPage() {
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
+  const [, setLocation] = useLocation();
 
   // Fetch notifications
   const { data: notifications, isLoading } = useQuery({
@@ -81,8 +83,21 @@ export default function NotificationsPage() {
 
   if (!isAuthenticated) {
     return (
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-4xl">
         <Card>
+          <CardHeader>
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setLocation("/")}
+                className="p-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              <CardTitle className="text-lg sm:text-xl">Notifications</CardTitle>
+            </div>
+          </CardHeader>
           <CardContent className="flex items-center justify-center py-8">
             <p>Please log in to view your notifications.</p>
           </CardContent>
@@ -92,85 +107,96 @@ export default function NotificationsPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-2 sm:px-4 py-4 sm:py-8 max-w-4xl">
       <Card>
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="flex items-center gap-2">
-              <Bell className="h-5 w-5" />
-              Notifications
+          <div className="flex items-center gap-3 mb-4">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setLocation("/")}
+              className="p-2 flex-shrink-0"
+            >
+              <ArrowLeft className="h-4 w-4" />
+            </Button>
+            <CardTitle className="flex items-center gap-2 text-lg sm:text-xl flex-1 min-w-0">
+              <Bell className="h-5 w-5 flex-shrink-0" />
+              <span className="truncate">Notifications</span>
               {unreadCount > 0 && (
-                <Badge variant="destructive" className="text-xs">
+                <Badge variant="destructive" className="text-xs flex-shrink-0">
                   {unreadCount}
                 </Badge>
               )}
             </CardTitle>
-            {unreadCount > 0 && (
+          </div>
+          {unreadCount > 0 && (
+            <div className="flex justify-end">
               <Button
                 variant="outline"
                 size="sm"
                 onClick={() => markAllAsReadMutation.mutate()}
                 disabled={markAllAsReadMutation.isPending}
-                className="flex items-center gap-2"
+                className="flex items-center gap-2 text-xs sm:text-sm"
               >
-                <CheckCheck className="h-4 w-4" />
-                Mark all as read
+                <CheckCheck className="h-3 w-3 sm:h-4 sm:w-4" />
+                <span className="hidden sm:inline">Mark all as read</span>
+                <span className="sm:hidden">Mark all</span>
               </Button>
-            )}
-          </div>
+            </div>
+          )}
         </CardHeader>
-        <CardContent>
-          <ScrollArea className="h-[600px]">
+        <CardContent className="px-3 sm:px-6">
+          <ScrollArea className="h-[calc(100vh-280px)] sm:h-[600px]">
             {isLoading ? (
-              <div className="space-y-4">
+              <div className="space-y-3 sm:space-y-4">
                 {[...Array(5)].map((_, i) => (
                   <div key={i} className="animate-pulse">
-                    <div className="flex items-start space-x-3 p-4">
-                      <div className="w-10 h-10 bg-gray-200 dark:bg-gray-700 rounded-full"></div>
-                      <div className="flex-1 space-y-2">
-                        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+                    <div className="flex items-start space-x-3 p-3 sm:p-4">
+                      <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gray-200 dark:bg-gray-700 rounded-full flex-shrink-0"></div>
+                      <div className="flex-1 space-y-2 min-w-0">
+                        <div className="h-3 sm:h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
                         <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/2"></div>
-                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+                        <div className="h-2 sm:h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             ) : notifications?.length === 0 ? (
-              <div className="text-center py-12">
-                <Bell className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-                <p className="text-muted-foreground">No notifications yet</p>
-                <p className="text-sm text-muted-foreground mt-2">
+              <div className="text-center py-8 sm:py-12 px-4">
+                <Bell className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
+                <p className="text-muted-foreground text-sm sm:text-base">No notifications yet</p>
+                <p className="text-xs sm:text-sm text-muted-foreground mt-2 max-w-sm mx-auto">
                   You'll receive notifications when users send you messages, swap requests, and more.
                 </p>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1 sm:space-y-2">
                 {notifications?.map((notification: Notification, index: number) => (
                   <div key={notification.id}>
                     <div
-                      className={`flex items-start space-x-3 p-4 rounded-lg transition-colors ${
+                      className={`flex items-start space-x-3 p-3 sm:p-4 rounded-lg transition-colors ${
                         !notification.isRead
                           ? "bg-muted/50 border-l-4 border-primary"
                           : "hover:bg-muted/30"
                       }`}
                     >
                       <div
-                        className={`flex items-center justify-center w-10 h-10 rounded-full text-white ${getNotificationColor(
+                        className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full text-white flex-shrink-0 ${getNotificationColor(
                           notification.type
                         )}`}
                       >
                         {getNotificationIcon(notification.type)}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <h3 className="font-medium text-sm">{notification.title}</h3>
-                            <p className="text-sm text-muted-foreground mt-1">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="flex-1 min-w-0">
+                            <h3 className="font-medium text-sm sm:text-base overflow-hidden text-ellipsis">{notification.title}</h3>
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-1 overflow-hidden">
                               {notification.content}
                             </p>
                             <p className="text-xs text-muted-foreground mt-2">
-                              {new Date(notification.createdAt).toLocaleString()}
+                              {new Date(notification.createdAt).toLocaleDateString()} {new Date(notification.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                             </p>
                           </div>
                           {!notification.isRead && (
@@ -179,7 +205,7 @@ export default function NotificationsPage() {
                               size="sm"
                               onClick={() => handleMarkAsRead(notification.id)}
                               disabled={markAsReadMutation.isPending}
-                              className="text-xs"
+                              className="text-xs p-1 sm:p-2 flex-shrink-0"
                             >
                               <Check className="h-3 w-3" />
                             </Button>
@@ -187,7 +213,7 @@ export default function NotificationsPage() {
                         </div>
                       </div>
                     </div>
-                    {index < notifications.length - 1 && <Separator className="my-2" />}
+                    {index < notifications.length - 1 && <Separator className="my-1 sm:my-2" />}
                   </div>
                 ))}
               </div>
