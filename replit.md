@@ -142,9 +142,10 @@ Design preference: Modern, professional UI with gradient branding and mobile-fir
 - Session storage optimization with PostgreSQL backend
 
 ### Security Measures
-- Password hashing with secure algorithms
-- Session-based authentication with HTTP-only cookies
-- SQL injection prevention through parameterized queries
-- CORS configuration for API security
-- File upload validation and size limits
-- Admin role verification for sensitive operations
+- **Password Security**: bcrypt hashing with 12 rounds for all user passwords
+- **Password Migration**: Completed migration of existing plain text passwords to secure bcrypt hashes
+- **Authentication**: Session-based authentication with HTTP-only cookies
+- **Database Security**: SQL injection prevention through parameterized queries
+- **API Security**: CORS configuration for cross-origin request protection
+- **File Upload Security**: Validation and size limits for profile photo uploads
+- **Admin Security**: Role verification for sensitive administrative operations

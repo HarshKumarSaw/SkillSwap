@@ -164,6 +164,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Password migration endpoint (for converting existing plain text passwords to hashed)
+  app.post("/api/admin/migrate-passwords", async (req, res) => {
+    try {
+      console.log("Starting password migration process...");
+      const migrationResult = await storage.migratePasswordsToHash();
+      
+      console.log("Password migration completed:", migrationResult);
+      res.json({
+        message: "Password migration completed",
+        results: migrationResult
+      });
+    } catch (error) {
+      console.error("Password migration error:", error);
+      res.status(500).json({ message: "Password migration failed" });
+    }
+  });
+
   // Profile photo upload endpoint
   app.post("/api/upload/profile-photo", upload.single('photo'), async (req, res) => {
     try {

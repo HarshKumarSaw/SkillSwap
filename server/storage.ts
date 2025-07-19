@@ -1,6 +1,7 @@
 import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating, type AdminAction, type InsertAdminAction, type SystemMessage, type InsertSystemMessage, type ReportedContent, type InsertReportedContent, type Conversation, type InsertConversation, type ConversationWithUsers, type Message, type InsertMessage, type MessageWithSender, type Notification, type InsertNotification, type SkillEndorsement, type InsertSkillEndorsement, users } from "@shared/schema";
 import { pool, db } from "./db";
 import { eq, and } from "drizzle-orm";
+import bcrypt from "bcrypt";
 
 export interface PaginatedResult<T> {
   data: T[];
@@ -29,6 +30,10 @@ export interface IStorage {
   // Password Reset
   getSecurityQuestion(email: string): Promise<string | null>;
   resetPassword(email: string, securityAnswer: string, newPassword: string): Promise<boolean>;
+  
+  // Password Migration
+  migratePasswordsToHash(): Promise<{ migrated: number; alreadyHashed: number; errors: number }>;
+  isPasswordHashed(password: string): boolean;
   
   // Skills
   getAllSkills(): Promise<Skill[]>;
@@ -1019,11 +1024,24 @@ export class DatabaseStorage implements IStorage {
   async authenticateUser(email: string, password: string): Promise<User | null> {
     const client = await pool.connect();
     try {
+      // First get the user with the hashed password
       const result = await client.query(
-        'SELECT * FROM users WHERE email = $1 AND password = $2',
-        [email, password]
+        'SELECT * FROM users WHERE email = $1',
+        [email]
       );
-      return result.rows[0] || null;
+      
+      const user = result.rows[0];
+      if (!user) {
+        return null;
+      }
+
+      // Compare the provided password with the hashed password
+      const isValidPassword = await bcrypt.compare(password, user.password);
+      if (!isValidPassword) {
+        return null;
+      }
+
+      return user;
     } finally {
       client.release();
     }
@@ -1035,6 +1053,9 @@ export class DatabaseStorage implements IStorage {
       // Generate a unique user ID
       const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
       
+      // Hash the password with bcrypt (12 rounds for good security)
+      const hashedPassword = await bcrypt.hash(password, 12);
+      
       const result = await client.query(
         `INSERT INTO users (id, name, email, password, location, profile_photo, availability, is_public, rating, join_date, bio, is_admin, is_banned, security_question, security_answer) 
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15) 
@@ -1043,7 +1064,7 @@ export class DatabaseStorage implements IStorage {
           userId,
           name,
           email,
-          password,
+          hashedPassword,
           location || null,
           "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
           JSON.stringify({ dates: ["weekends"], times: ["evening"] }),
@@ -1089,15 +1110,76 @@ export class DatabaseStorage implements IStorage {
         return false; // Incorrect answer or email
       }
 
+      // Hash the new password with bcrypt
+      const hashedPassword = await bcrypt.hash(newPassword, 12);
+
       // Update the password
       await db.update(users)
-        .set({ password: newPassword })
+        .set({ password: hashedPassword })
         .where(eq(users.email, email));
       
       return true;
     } catch (error) {
       console.error('Error resetting password:', error);
       return false;
+    }
+  }
+
+  // Helper method to check if a password is already hashed
+  isPasswordHashed(password: string): boolean {
+    // bcrypt hashes start with $2a$, $2b$, $2x$, or $2y$ and are 60 characters long
+    return /^\$2[abxy]\$\d{2}\$.{53}$/.test(password);
+  }
+
+  // Migration method to hash existing plain text passwords
+  async migratePasswordsToHash(): Promise<{ migrated: number; alreadyHashed: number; errors: number }> {
+    const client = await pool.connect();
+    let migrated = 0;
+    let alreadyHashed = 0;
+    let errors = 0;
+
+    try {
+      // Get all users with their current passwords
+      const result = await client.query('SELECT id, password FROM users WHERE password IS NOT NULL');
+      const users = result.rows;
+
+      console.log(`Starting password migration for ${users.length} users...`);
+
+      for (const user of users) {
+        try {
+          // Check if password is already hashed
+          if (this.isPasswordHashed(user.password)) {
+            alreadyHashed++;
+            continue;
+          }
+
+          // Hash the plain text password
+          const hashedPassword = await bcrypt.hash(user.password, 12);
+
+          // Update the password in database
+          await client.query(
+            'UPDATE users SET password = $1 WHERE id = $2',
+            [hashedPassword, user.id]
+          );
+
+          migrated++;
+          console.log(`✓ Migrated password for user: ${user.id}`);
+
+        } catch (error) {
+          errors++;
+          console.error(`✗ Error migrating password for user ${user.id}:`, error);
+        }
+      }
+
+      console.log(`Password migration completed: ${migrated} migrated, ${alreadyHashed} already hashed, ${errors} errors`);
+      
+      return { migrated, alreadyHashed, errors };
+
+    } catch (error) {
+      console.error('Error during password migration:', error);
+      throw error;
+    } finally {
+      client.release();
     }
   }
 
