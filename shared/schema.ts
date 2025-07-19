@@ -7,7 +7,7 @@ export const users = pgTable("users", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
-  password: text("password"), // For authentication
+  password: text("password"), // For authentication (nullable for social login only users)
   bio: text("bio"), // User biography
   location: text("location"),
   profilePhoto: text("profile_photo"),
@@ -21,6 +21,20 @@ export const users = pgTable("users", {
   bannedAt: text("banned_at"),
   securityQuestion: text("security_question"), // The chosen security question
   securityAnswer: text("security_answer"), // Hashed answer to the security question
+  
+  // Social login provider IDs
+  googleId: text("google_id"),
+  facebookId: text("facebook_id"),  
+  appleId: text("apple_id"),
+  
+  // Provider-specific data and authentication method tracking
+  providers: jsonb("providers").$type<{
+    google?: { id: string; email: string; verified: boolean; profilePicture?: string };
+    facebook?: { id: string; email: string; profilePicture?: string };
+    apple?: { id: string; email: string };
+  }>(),
+  authMethod: text("auth_method").default("email"), // 'email', 'google', 'facebook', 'apple', 'mixed'
+  
   createdAt: text("created_at").default("NOW()"),
 });
 

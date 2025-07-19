@@ -6,6 +6,8 @@ import { z } from "zod";
 import { pool } from "./db";
 import multer from "multer";
 import { uploadToCloudinary } from "./cloudinary";
+import passport from "passport";
+import { setupPassport } from "./passport-config";
 
 /**
  * 🚨 DATABASE REFERENCE 🚨
@@ -14,6 +16,11 @@ import { uploadToCloudinary } from "./cloudinary";
  */
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Initialize Passport.js
+  setupPassport();
+  app.use(passport.initialize());
+  app.use(passport.session());
+
   // Configure multer for file uploads
   const upload = multer({
     storage: multer.memoryStorage(),
@@ -179,6 +186,56 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Password migration error:", error);
       res.status(500).json({ message: "Password migration failed" });
     }
+  });
+
+  // Social Authentication Routes
+  
+  // Google OAuth
+  app.get("/api/auth/google", 
+    passport.authenticate("google", { 
+      scope: ["profile", "email"] 
+    })
+  );
+
+  app.get("/api/auth/google/callback",
+    passport.authenticate("google", { 
+      failureRedirect: "/?error=google-auth-failed",
+      successRedirect: "/?success=google-auth"
+    })
+  );
+
+  // Facebook OAuth  
+  app.get("/api/auth/facebook",
+    passport.authenticate("facebook", { 
+      scope: ["email"] 
+    })
+  );
+
+  app.get("/api/auth/facebook/callback",
+    passport.authenticate("facebook", { 
+      failureRedirect: "/?error=facebook-auth-failed",
+      successRedirect: "/?success=facebook-auth" 
+    })
+  );
+
+  // Apple OAuth
+  app.get("/api/auth/apple",
+    passport.authenticate("apple")
+  );
+
+  app.get("/api/auth/apple/callback",
+    passport.authenticate("apple", { 
+      failureRedirect: "/?error=apple-auth-failed",
+      successRedirect: "/?success=apple-auth"
+    })
+  );
+
+  // Social auth status endpoint
+  app.get("/api/auth/social-status", (req, res) => {
+    res.json({ 
+      authenticated: req.isAuthenticated(),
+      user: req.isAuthenticated() ? req.user : null
+    });
   });
 
   // Profile photo upload endpoint

@@ -27,6 +27,22 @@ export interface IStorage {
   authenticateUser(email: string, password: string): Promise<User | null>;
   createUserAccount(name: string, email: string, password: string, location?: string, securityQuestion?: string, securityAnswer?: string): Promise<User>;
   
+  // Social Login Methods
+  getUserById(id: string): Promise<User | undefined>;
+  getUserByGoogleId(googleId: string): Promise<User | undefined>;
+  getUserByFacebookId(facebookId: string): Promise<User | undefined>;
+  getUserByAppleId(appleId: string): Promise<User | undefined>;
+  
+  // Social Account Creation
+  createUserWithGoogle(profile: { id: string; email?: string; name: string; profilePicture?: string; verified?: boolean }): Promise<User>;
+  createUserWithFacebook(profile: { id: string; email?: string; name: string; profilePicture?: string }): Promise<User>;
+  createUserWithApple(profile: { id: string; email?: string; name: string }): Promise<User>;
+  
+  // Social Account Linking
+  linkGoogleAccount(userId: string, profile: { id: string; email?: string; verified?: boolean; profilePicture?: string }): Promise<void>;
+  linkFacebookAccount(userId: string, profile: { id: string; email?: string; profilePicture?: string }): Promise<void>;
+  linkAppleAccount(userId: string, profile: { id: string; email?: string }): Promise<void>;
+  
   // Password Reset
   getSecurityQuestion(email: string): Promise<string | null>;
   resetPassword(email: string, securityAnswer: string, newPassword: string): Promise<boolean>;
@@ -1178,6 +1194,258 @@ export class DatabaseStorage implements IStorage {
     } catch (error) {
       console.error('Error during password migration:', error);
       throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  // Social Login Methods Implementation
+
+  async getUserById(id: string): Promise<User | undefined> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users WHERE id = $1', [id]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserByGoogleId(googleId: string): Promise<User | undefined> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users WHERE google_id = $1', [googleId]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserByFacebookId(facebookId: string): Promise<User | undefined> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users WHERE facebook_id = $1', [facebookId]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async getUserByAppleId(appleId: string): Promise<User | undefined> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query('SELECT * FROM users WHERE apple_id = $1', [appleId]);
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async createUserWithGoogle(profile: { id: string; email?: string; name: string; profilePicture?: string; verified?: boolean }): Promise<User> {
+    const client = await pool.connect();
+    try {
+      const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const providers = {
+        google: {
+          id: profile.id,
+          email: profile.email,
+          verified: profile.verified || false,
+          profilePicture: profile.profilePicture
+        }
+      };
+
+      const result = await client.query(
+        `INSERT INTO users (
+          id, name, email, google_id, providers, auth_method, profile_photo,
+          availability, is_public, rating, created_at, bio, is_admin, is_banned
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+        RETURNING *`,
+        [
+          userId,
+          profile.name,
+          profile.email,
+          profile.id,
+          JSON.stringify(providers),
+          'google',
+          profile.profilePicture || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+          JSON.stringify({ dates: ["weekends"], times: ["evening"] }),
+          true,
+          "0.0",
+          new Date().toISOString(),
+          `New user on skill swap platform`,
+          false,
+          false
+        ]
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async createUserWithFacebook(profile: { id: string; email?: string; name: string; profilePicture?: string }): Promise<User> {
+    const client = await pool.connect();
+    try {
+      const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const providers = {
+        facebook: {
+          id: profile.id,
+          email: profile.email,
+          profilePicture: profile.profilePicture
+        }
+      };
+
+      const result = await client.query(
+        `INSERT INTO users (
+          id, name, email, facebook_id, providers, auth_method, profile_photo,
+          availability, is_public, rating, created_at, bio, is_admin, is_banned
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+        RETURNING *`,
+        [
+          userId,
+          profile.name,
+          profile.email,
+          profile.id,
+          JSON.stringify(providers),
+          'facebook',
+          profile.profilePicture || "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+          JSON.stringify({ dates: ["weekends"], times: ["evening"] }),
+          true,
+          "0.0",
+          new Date().toISOString(),
+          `New user on skill swap platform`,
+          false,
+          false
+        ]
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async createUserWithApple(profile: { id: string; email?: string; name: string }): Promise<User> {
+    const client = await pool.connect();
+    try {
+      const userId = `user_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      const providers = {
+        apple: {
+          id: profile.id,
+          email: profile.email
+        }
+      };
+
+      const result = await client.query(
+        `INSERT INTO users (
+          id, name, email, apple_id, providers, auth_method, profile_photo,
+          availability, is_public, rating, created_at, bio, is_admin, is_banned
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) 
+        RETURNING *`,
+        [
+          userId,
+          profile.name,
+          profile.email,
+          profile.id,
+          JSON.stringify(providers),
+          'apple',
+          "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&auto=format&fit=crop&w=150&h=150",
+          JSON.stringify({ dates: ["weekends"], times: ["evening"] }),
+          true,
+          "0.0",
+          new Date().toISOString(),
+          `New user on skill swap platform`,
+          false,
+          false
+        ]
+      );
+      
+      return result.rows[0];
+    } finally {
+      client.release();
+    }
+  }
+
+  async linkGoogleAccount(userId: string, profile: { id: string; email?: string; verified?: boolean; profilePicture?: string }): Promise<void> {
+    const client = await pool.connect();
+    try {
+      // Get current providers data
+      const userResult = await client.query('SELECT providers FROM users WHERE id = $1', [userId]);
+      const currentProviders = userResult.rows[0]?.providers || {};
+      
+      // Add Google provider data
+      const updatedProviders = {
+        ...currentProviders,
+        google: {
+          id: profile.id,
+          email: profile.email,
+          verified: profile.verified || false,
+          profilePicture: profile.profilePicture
+        }
+      };
+
+      // Update user with Google account info
+      await client.query(
+        'UPDATE users SET google_id = $1, providers = $2, auth_method = $3 WHERE id = $4',
+        [profile.id, JSON.stringify(updatedProviders), 'mixed', userId]
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  async linkFacebookAccount(userId: string, profile: { id: string; email?: string; profilePicture?: string }): Promise<void> {
+    const client = await pool.connect();
+    try {
+      // Get current providers data
+      const userResult = await client.query('SELECT providers FROM users WHERE id = $1', [userId]);
+      const currentProviders = userResult.rows[0]?.providers || {};
+      
+      // Add Facebook provider data
+      const updatedProviders = {
+        ...currentProviders,
+        facebook: {
+          id: profile.id,
+          email: profile.email,
+          profilePicture: profile.profilePicture
+        }
+      };
+
+      // Update user with Facebook account info
+      await client.query(
+        'UPDATE users SET facebook_id = $1, providers = $2, auth_method = $3 WHERE id = $4',
+        [profile.id, JSON.stringify(updatedProviders), 'mixed', userId]
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  async linkAppleAccount(userId: string, profile: { id: string; email?: string }): Promise<void> {
+    const client = await pool.connect();
+    try {
+      // Get current providers data
+      const userResult = await client.query('SELECT providers FROM users WHERE id = $1', [userId]);
+      const currentProviders = userResult.rows[0]?.providers || {};
+      
+      // Add Apple provider data
+      const updatedProviders = {
+        ...currentProviders,
+        apple: {
+          id: profile.id,
+          email: profile.email
+        }
+      };
+
+      // Update user with Apple account info
+      await client.query(
+        'UPDATE users SET apple_id = $1, providers = $2, auth_method = $3 WHERE id = $4',
+        [profile.id, JSON.stringify(updatedProviders), 'mixed', userId]
+      );
     } finally {
       client.release();
     }
