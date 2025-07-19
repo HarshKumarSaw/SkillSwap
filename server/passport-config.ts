@@ -13,6 +13,12 @@ const getCallbackURL = (provider: string) => {
 };
 
 export function setupPassport() {
+  console.log('Setting up Passport strategies...');
+  console.log('Google OAuth credentials available:', {
+    clientId: !!process.env.GOOGLE_CLIENT_ID,
+    clientSecret: !!process.env.GOOGLE_CLIENT_SECRET
+  });
+
   // Serialize user to session
   passport.serializeUser((user: any, done) => {
     done(null, user.id);
@@ -30,6 +36,7 @@ export function setupPassport() {
 
   // Google OAuth Strategy
   if (process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET) {
+    console.log('Registering Google OAuth strategy with callback URL:', getCallbackURL('google'));
     passport.use(new GoogleStrategy({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
