@@ -6,6 +6,7 @@ import { z } from "zod";
 import { pool } from "./db";
 import multer from "multer";
 import { uploadToCloudinary } from "./cloudinary";
+import { generateOTP, sendOTPEmail, sendWelcomeEmail } from "./emailService";
 
 /**
  * 🚨 DATABASE REFERENCE 🚨
@@ -178,6 +179,138 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Password migration error:", error);
       res.status(500).json({ message: "Password migration failed" });
+    }
+  });
+
+  // Email verification routes
+  app.post("/api/auth/send-otp", async (req, res) => {
+    try {
+      const { email, userName } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Check rate limiting - max 3 attempts per 15 minutes
+      const attempts = await storage.getEmailVerificationAttempts(email);
+      if (attempts >= 3) {
+        return res.status(429).json({ 
+          message: "Too many verification attempts. Please wait 15 minutes before trying again." 
+        });
+      }
+      
+      // Generate OTP
+      const otp = generateOTP();
+      
+      // Create verification record
+      await storage.createEmailVerification(email, otp);
+      
+      // Send OTP email
+      const emailSent = await sendOTPEmail(email, otp, userName);
+      
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send verification email" });
+      }
+      
+      res.json({ 
+        message: "Verification code sent to your email",
+        expiresIn: "10 minutes"
+      });
+      
+    } catch (error) {
+      console.error("Send OTP error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/auth/verify-otp", async (req, res) => {
+    try {
+      const { email, otpCode } = req.body;
+      
+      if (!email || !otpCode) {
+        return res.status(400).json({ message: "Email and OTP code are required" });
+      }
+      
+      // Check attempts before verifying
+      const attempts = await storage.getEmailVerificationAttempts(email);
+      if (attempts >= 5) {
+        return res.status(429).json({ 
+          message: "Too many failed attempts. Please request a new verification code." 
+        });
+      }
+      
+      // Verify OTP
+      const isValid = await storage.verifyOTP(email, otpCode);
+      
+      if (!isValid) {
+        // Increment attempts
+        await storage.incrementVerificationAttempts(email);
+        return res.status(400).json({ 
+          message: "Invalid or expired verification code",
+          attemptsRemaining: Math.max(0, 4 - attempts)
+        });
+      }
+      
+      // Mark email as verified in users table
+      await storage.markEmailAsVerified(email);
+      
+      // Clean up verification record
+      await storage.deleteEmailVerification(email);
+      
+      // Send welcome email
+      const user = await storage.getUserByEmail(email);
+      if (user) {
+        await sendWelcomeEmail(email, user.name);
+      }
+      
+      res.json({ 
+        message: "Email verified successfully!",
+        emailVerified: true
+      });
+      
+    } catch (error) {
+      console.error("Verify OTP error:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  app.post("/api/auth/resend-otp", async (req, res) => {
+    try {
+      const { email, userName } = req.body;
+      
+      if (!email) {
+        return res.status(400).json({ message: "Email is required" });
+      }
+      
+      // Check rate limiting
+      const attempts = await storage.getEmailVerificationAttempts(email);
+      if (attempts >= 3) {
+        return res.status(429).json({ 
+          message: "Too many verification attempts. Please wait 15 minutes before trying again." 
+        });
+      }
+      
+      // Generate new OTP
+      const otp = generateOTP();
+      
+      // Create new verification record (this will delete any existing one)
+      await storage.createEmailVerification(email, otp);
+      
+      // Send OTP email
+      const emailSent = await sendOTPEmail(email, otp, userName);
+      
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send verification email" });
+      }
+      
+      res.json({ 
+        message: "New verification code sent to your email",
+        expiresIn: "10 minutes"
+      });
+      
+    } catch (error) {
+      console.error("Resend OTP error:", error);
+      res.status(500).json({ message: "Internal server error" });
     }
   });
 

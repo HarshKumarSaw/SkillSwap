@@ -1,4 +1,4 @@
-import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating, type AdminAction, type InsertAdminAction, type SystemMessage, type InsertSystemMessage, type ReportedContent, type InsertReportedContent, type Conversation, type InsertConversation, type ConversationWithUsers, type Message, type InsertMessage, type MessageWithSender, type Notification, type InsertNotification, type SkillEndorsement, type InsertSkillEndorsement, users } from "@shared/schema";
+import { type User, type InsertUser, type Skill, type UserWithSkills, type SwapRequest, type InsertSwapRequest, type SwapRequestWithUsers, type SwapRating, type InsertSwapRating, type AdminAction, type InsertAdminAction, type SystemMessage, type InsertSystemMessage, type ReportedContent, type InsertReportedContent, type Conversation, type InsertConversation, type ConversationWithUsers, type Message, type InsertMessage, type MessageWithSender, type Notification, type InsertNotification, type SkillEndorsement, type InsertSkillEndorsement, type EmailVerification, type InsertEmailVerification, users, emailVerifications } from "@shared/schema";
 import { pool, db } from "./db";
 import { eq, and } from "drizzle-orm";
 import bcrypt from "bcrypt";
@@ -34,6 +34,14 @@ export interface IStorage {
   // Password Migration
   migratePasswordsToHash(): Promise<{ migrated: number; alreadyHashed: number; errors: number }>;
   isPasswordHashed(password: string): boolean;
+  
+  // Email Verification
+  createEmailVerification(email: string, otpCode: string): Promise<string>;
+  verifyOTP(email: string, otpCode: string): Promise<boolean>;
+  markEmailAsVerified(email: string): Promise<boolean>;
+  getEmailVerificationAttempts(email: string): Promise<number>;
+  incrementVerificationAttempts(email: string): Promise<void>;
+  deleteEmailVerification(email: string): Promise<void>;
   
   // Skills
   getAllSkills(): Promise<Skill[]>;
@@ -1897,6 +1905,105 @@ export class DatabaseStorage implements IStorage {
       // Rollback transaction on error
       await client.query('ROLLBACK');
       throw error;
+    } finally {
+      client.release();
+    }
+  }
+
+  // Email Verification Methods
+  async createEmailVerification(email: string, otpCode: string): Promise<string> {
+    const client = await pool.connect();
+    try {
+      // Generate unique ID
+      const verificationId = `verification_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+      
+      // Set expiration to 10 minutes from now
+      const expiresAt = new Date(Date.now() + 10 * 60 * 1000).toISOString();
+      
+      // Delete any existing verification for this email
+      await client.query('DELETE FROM email_verifications WHERE email = $1', [email]);
+      
+      // Create new verification record
+      await client.query(
+        'INSERT INTO email_verifications (id, email, otp_code, expires_at, attempts, verified) VALUES ($1, $2, $3, $4, $5, $6)',
+        [verificationId, email, otpCode, expiresAt, 0, false]
+      );
+      
+      return verificationId;
+    } finally {
+      client.release();
+    }
+  }
+
+  async verifyOTP(email: string, otpCode: string): Promise<boolean> {
+    const client = await pool.connect();
+    try {
+      // Get verification record
+      const result = await client.query(
+        'SELECT * FROM email_verifications WHERE email = $1 AND otp_code = $2 AND verified = false AND expires_at > NOW()',
+        [email, otpCode]
+      );
+      
+      if (result.rows.length === 0) {
+        return false; // Invalid or expired OTP
+      }
+      
+      // Mark as verified
+      await client.query(
+        'UPDATE email_verifications SET verified = true WHERE email = $1',
+        [email]
+      );
+      
+      return true;
+    } finally {
+      client.release();
+    }
+  }
+
+  async markEmailAsVerified(email: string): Promise<boolean> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'UPDATE users SET email_verified = true, email_verified_at = NOW() WHERE email = $1',
+        [email]
+      );
+      
+      return result.rowCount > 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  async getEmailVerificationAttempts(email: string): Promise<number> {
+    const client = await pool.connect();
+    try {
+      const result = await client.query(
+        'SELECT attempts FROM email_verifications WHERE email = $1',
+        [email]
+      );
+      
+      return result.rows[0]?.attempts || 0;
+    } finally {
+      client.release();
+    }
+  }
+
+  async incrementVerificationAttempts(email: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query(
+        'UPDATE email_verifications SET attempts = attempts + 1 WHERE email = $1',
+        [email]
+      );
+    } finally {
+      client.release();
+    }
+  }
+
+  async deleteEmailVerification(email: string): Promise<void> {
+    const client = await pool.connect();
+    try {
+      await client.query('DELETE FROM email_verifications WHERE email = $1', [email]);
     } finally {
       client.release();
     }

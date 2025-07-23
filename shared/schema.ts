@@ -21,6 +21,8 @@ export const users = pgTable("users", {
   bannedAt: text("banned_at"),
   securityQuestion: text("security_question"), // The chosen security question
   securityAnswer: text("security_answer"), // Hashed answer to the security question
+  emailVerified: boolean("email_verified").default(false), // Track if email is verified
+  emailVerifiedAt: text("email_verified_at"), // When email was verified
   createdAt: text("created_at").default("NOW()"),
 });
 
@@ -136,6 +138,16 @@ export const skillEndorsements = pgTable("skill_endorsements", {
   skillId: integer("skill_id").notNull().references(() => skills.id, { onDelete: "cascade" }),
   endorserId: text("endorser_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   comment: text("comment"),
+  createdAt: text("created_at").default("NOW()"),
+});
+
+export const emailVerifications = pgTable("email_verifications", {
+  id: text("id").primaryKey(),
+  email: text("email").notNull(),
+  otpCode: text("otp_code").notNull(),
+  expiresAt: text("expires_at").notNull(),
+  attempts: integer("attempts").default(0),
+  verified: boolean("verified").default(false),
   createdAt: text("created_at").default("NOW()"),
 });
 
@@ -355,6 +367,11 @@ export const insertSkillEndorsementSchema = createInsertSchema(skillEndorsements
   createdAt: true,
 });
 
+export const insertEmailVerificationSchema = createInsertSchema(emailVerifications).omit({
+  id: true,
+  createdAt: true,
+});
+
 // Types
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
@@ -378,6 +395,8 @@ export type Notification = typeof notifications.$inferSelect;
 export type InsertNotification = z.infer<typeof insertNotificationSchema>;
 export type SkillEndorsement = typeof skillEndorsements.$inferSelect;
 export type InsertSkillEndorsement = z.infer<typeof insertSkillEndorsementSchema>;
+export type EmailVerification = typeof emailVerifications.$inferSelect;
+export type InsertEmailVerification = z.infer<typeof insertEmailVerificationSchema>;
 
 // Extended types for frontend use
 export type UserWithSkills = User & {
