@@ -11,10 +11,11 @@ export function NotificationBell() {
   const [, setLocation] = useLocation();
 
   // Fetch notifications to get unread count
-  const { data: notifications } = useQuery({
+  const { data: notifications } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
     enabled: isAuthenticated,
-    refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
+    refetchInterval: 60000, // Reduced to 1 minute to prevent conflicts
+    staleTime: 30000, // 30 seconds stale time
   });
 
   const unreadCount = notifications?.filter((n: Notification) => !n.isRead).length || 0;

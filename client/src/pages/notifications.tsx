@@ -17,11 +17,14 @@ export default function NotificationsPage() {
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
+  const [processingNotifications, setProcessingNotifications] = useState<Set<string>>(new Set());
 
   // Fetch notifications
   const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
     enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000, // 5 minutes - prevent excessive refetching
+    refetchInterval: false, // Disable automatic refetching to prevent race conditions
   });
 
   // Mark notification as read mutation
@@ -30,10 +33,21 @@ export default function NotificationsPage() {
       const response = await apiRequest("PATCH", `/api/notifications/${notificationId}/read`);
       return response.json();
     },
-    onSuccess: () => {
-      // Refresh the notifications data immediately
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
+    onSuccess: (_, notificationId) => {
+      // Ensure the notification remains marked as read
+      queryClient.setQueryData<Notification[]>(["/api/notifications"], (oldData = []) => {
+        return oldData.map(notif => 
+          notif.id === notificationId ? { ...notif, isRead: true } : notif
+        );
+      });
+    },
+    onError: (_, notificationId) => {
+      // Revert optimistic update on error
+      queryClient.setQueryData<Notification[]>(["/api/notifications"], (oldData = []) => {
+        return oldData.map(notif => 
+          notif.id === notificationId ? { ...notif, isRead: false } : notif
+        );
+      });
     },
   });
 
@@ -44,9 +58,10 @@ export default function NotificationsPage() {
       return response.json();
     },
     onSuccess: () => {
-      // Refresh the notifications data immediately
-      queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
-      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
+      // Ensure all notifications remain marked as read
+      queryClient.setQueryData<Notification[]>(["/api/notifications"], (oldData = []) => {
+        return oldData.map(notif => ({ ...notif, isRead: true }));
+      });
     },
   });
 
@@ -81,6 +96,12 @@ export default function NotificationsPage() {
   };
 
   const handleMarkAsRead = (notificationId: string) => {
+    // Prevent multiple calls for the same notification
+    if (processingNotifications.has(notificationId)) return;
+    
+    // Add notification to processing set
+    setProcessingNotifications(prev => new Set(prev).add(notificationId));
+    
     // Optimistic update - immediately mark as read in UI
     queryClient.setQueryData<Notification[]>(["/api/notifications"], (oldData = []) => {
       return oldData.map(notif => 
@@ -88,7 +109,16 @@ export default function NotificationsPage() {
       );
     });
     
-    markAsReadMutation.mutate(notificationId);
+    markAsReadMutation.mutate(notificationId, {
+      onSettled: () => {
+        // Remove from processing set when complete
+        setProcessingNotifications(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(notificationId);
+          return newSet;
+        });
+      }
+    });
   };
 
   const handleNotificationClick = (notification: Notification) => {
@@ -166,6 +196,8 @@ export default function NotificationsPage() {
                 variant="outline"
                 size="sm"
                 onClick={() => {
+                  if (markAllAsReadMutation.isPending) return;
+                  
                   // Optimistic update - immediately mark all as read in UI
                   queryClient.setQueryData<Notification[]>(["/api/notifications"], (oldData = []) => {
                     return oldData.map(notif => ({ ...notif, isRead: true }));
