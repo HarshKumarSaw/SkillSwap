@@ -34,12 +34,15 @@ export default function NotificationsPage() {
       return response.json();
     },
     onSuccess: (_, notificationId) => {
-      // Ensure the notification remains marked as read
+      // Ensure the notification remains marked as read with proper boolean value
       queryClient.setQueryData<Notification[]>(["/api/notifications"], (oldData = []) => {
         return oldData.map(notif => 
           notif.id === notificationId ? { ...notif, isRead: true } : notif
         );
       });
+      
+      // Force a background refetch to sync with server state
+      queryClient.invalidateQueries({ queryKey: ["/api/notifications"], exact: true });
     },
     onError: (_, notificationId) => {
       // Revert optimistic update on error
@@ -124,7 +127,7 @@ export default function NotificationsPage() {
   const handleNotificationClick = (notification: Notification) => {
     setSelectedNotification(notification);
     // Mark as read when clicked
-    if (!notification.isRead) {
+    if (!isNotificationRead(notification)) {
       handleMarkAsRead(notification.id);
     }
   };
@@ -140,7 +143,15 @@ export default function NotificationsPage() {
     }
   };
 
-  const unreadCount = notifications.filter((n: Notification) => !n.isRead).length || 0;
+  // Utility function to properly handle isRead field from PostgreSQL
+  const isNotificationRead = (notification: Notification) => {
+    return typeof notification.isRead === 'string' 
+      ? notification.isRead === 'true' || notification.isRead === 't'
+      : notification.isRead;
+  };
+
+  // Handle both boolean and string representations of isRead from PostgreSQL
+  const unreadCount = notifications.filter((n: Notification) => !isNotificationRead(n)).length || 0;
 
   if (!isAuthenticated) {
     return (
@@ -245,7 +256,7 @@ export default function NotificationsPage() {
                   <div key={notification.id}>
                     <div
                       className={`flex items-start space-x-3 p-3 sm:p-4 rounded-lg transition-colors cursor-pointer ${
-                        !notification.isRead
+                        !isNotificationRead(notification)
                           ? "bg-muted/50 border-l-4 border-primary"
                           : "hover:bg-muted/30"
                       }`}
@@ -281,7 +292,7 @@ export default function NotificationsPage() {
                             >
                               <Eye className="h-3 w-3" />
                             </Button>
-                            {!notification.isRead && (
+                            {!isNotificationRead(notification) && (
                               <Button
                                 variant="ghost"
                                 size="sm"

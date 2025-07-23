@@ -18,7 +18,11 @@ export function NotificationBell() {
     staleTime: 30000, // 30 seconds stale time
   });
 
-  const unreadCount = notifications?.filter((n: Notification) => !n.isRead).length || 0;
+  // Handle both boolean and string representations of isRead from PostgreSQL
+  const unreadCount = notifications?.filter((n: Notification) => {
+    const isRead = typeof n.isRead === 'string' ? n.isRead === 'true' || n.isRead === 't' : n.isRead;
+    return !isRead;
+  }).length || 0;
 
   // Don't render for unauthenticated users
   if (!isAuthenticated) {
