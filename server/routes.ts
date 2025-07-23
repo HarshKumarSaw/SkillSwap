@@ -71,23 +71,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "User with this email already exists" });
       }
       
-      // Create new user account
+      // Create new user account (email not verified)
       const user = await storage.createUserAccount(name, email, password, location, securityQuestion, securityAnswer);
       
-      // Create welcome notification
-      await storage.createNotification({
-        userId: user.id,
-        type: "system",
-        title: "Welcome to SkillSwap!",
-        content: "Welcome to SkillSwap! Start by adding your skills and browsing other users to find skill exchange opportunities.",
-        relatedId: null
+      // Generate OTP and create verification record
+      const otp = generateOTP();
+      await storage.createEmailVerification(email, otp);
+      
+      // Send OTP email
+      const emailSent = await sendOTPEmail(email, otp, name);
+      
+      if (!emailSent) {
+        return res.status(500).json({ message: "Failed to send verification email. Please try again." });
+      }
+      
+      // Don't log user in yet - they need to verify email first
+      // Return success message with email for frontend to use
+      res.status(201).json({ 
+        message: "Account created successfully! Please check your email for verification code.",
+        email: email,
+        name: name,
+        requiresVerification: true
       });
-      
-      // Store in session
-      (req as any).session.user = user;
-      (req as any).session.userId = user.id;
-      
-      res.status(201).json(user);
     } catch (error) {
       console.error("Signup error:", error);
       res.status(500).json({ message: "Failed to create account" });
@@ -257,16 +262,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Clean up verification record
       await storage.deleteEmailVerification(email);
       
-      // Send welcome email
+      // Get the verified user and log them in
       const user = await storage.getUserByEmail(email);
       if (user) {
+        // Send welcome email
         await sendWelcomeEmail(email, user.name);
+        
+        // Create welcome notification
+        await storage.createNotification({
+          userId: user.id,
+          type: "system",
+          title: "Welcome to SkillSwap!",
+          content: "Welcome to SkillSwap! Start by adding your skills and browsing other users to find skill exchange opportunities.",
+          relatedId: null
+        });
+        
+        // Store in session to log user in
+        (req as any).session.user = user;
+        (req as any).session.userId = user.id;
+        
+        res.json({ 
+          message: "Email verified successfully!",
+          emailVerified: true,
+          user: user
+        });
+      } else {
+        res.status(404).json({ message: "User not found" });
       }
-      
-      res.json({ 
-        message: "Email verified successfully!",
-        emailVerified: true
-      });
       
     } catch (error) {
       console.error("Verify OTP error:", error);

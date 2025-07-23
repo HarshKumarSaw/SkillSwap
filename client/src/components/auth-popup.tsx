@@ -134,34 +134,42 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
     mutationFn: async (data: SignupForm) => {
       const response = await apiRequest("POST", "/api/auth/signup", data);
       if (!response.ok) {
-        throw new Error("Signup failed");
+        const error = await response.json();
+        throw new Error(error.message || "Signup failed");
       }
       return response.json();
     },
     onSuccess: (data) => {
-      // Update auth context immediately
-      setUser(data);
-      
-      toast({
-        title: "Account created!",
-        description: "You have successfully signed up and logged in.",
-      });
-      
-      // Close popup and trigger success handler
-      onOpenChange(false);
-      signupForm.reset();
-      
-      // Redirect admin users to admin dashboard
-      if (data.role === 'admin') {
-        setLocation('/admin');
+      if (data.requiresVerification) {
+        // Store verification data for the email verification page
+        localStorage.setItem('pendingVerificationEmail', data.email);
+        localStorage.setItem('pendingVerificationName', data.name);
+        
+        toast({
+          title: "Account created!",
+          description: "Please check your email for a verification code.",
+        });
+        
+        // Close popup and redirect to verification page
+        onOpenChange(false);
+        signupForm.reset();
+        setLocation(`/verify-email?email=${encodeURIComponent(data.email)}&name=${encodeURIComponent(data.name)}`);
       } else {
+        // Fallback for immediate login (shouldn't happen with new flow)
+        setUser(data);
+        toast({
+          title: "Account created!",
+          description: "You have successfully signed up and logged in.",
+        });
+        onOpenChange(false);
+        signupForm.reset();
         onAuthSuccess();
       }
     },
-    onError: (error) => {
+    onError: (error: Error) => {
       toast({
         title: "Signup failed",
-        description: "Please try again with different credentials.",
+        description: error.message,
         variant: "destructive",
       });
     },

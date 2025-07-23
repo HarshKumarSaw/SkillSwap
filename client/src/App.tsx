@@ -13,6 +13,7 @@ import AdminDashboard from "@/pages/admin-dashboard";
 import MessagesPage from "@/pages/messages";
 import NotificationsPage from "@/pages/notifications";
 import Settings from "@/pages/settings";
+import { VerifyEmailPage } from "@/pages/verify-email";
 import NotFound from "@/pages/not-found";
 
 function Router() {
@@ -25,6 +26,7 @@ function Router() {
       <Route path="/messages" component={MessagesPage} />
       <Route path="/notifications" component={NotificationsPage} />
       <Route path="/settings" component={Settings} />
+      <Route path="/verify-email" component={VerifyEmailPage} />
       <Route path="/admin" component={AdminDashboard} />
       <Route component={NotFound} />
     </Switch>
