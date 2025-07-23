@@ -594,15 +594,26 @@ export class DatabaseStorage implements IStorage {
       const result = await client.query(usersWithSkillsQuery, [userIds]);
       
       const usersWithSkills: UserWithSkills[] = result.rows.map(user => ({
-        id: user.id, // Keep as string since the database uses text IDs
+        id: user.id,
         name: user.name,
         email: user.email,
+        password: user.password || null,
+        bio: user.bio || null,
         location: user.location,
         profilePhoto: user.profile_photo,
         availability: user.availability,
         isPublic: user.is_public,
         rating: user.rating,
-        reviewCount: 0, // Default since it's not in the database
+        reviewCount: user.review_count || 0,
+        role: user.role || 'user',
+        isBanned: user.is_banned || false,
+        banReason: user.ban_reason || null,
+        bannedAt: user.banned_at || null,
+        securityQuestion: user.security_question || null,
+        securityAnswer: user.security_answer || null,
+        emailVerified: user.email_verified || false,
+        emailVerifiedAt: user.email_verified_at || null,
+        createdAt: user.created_at || null,
         skillsOffered: user.skills_offered_json || [],
         skillsWanted: user.skills_wanted_json || [],
       }));
@@ -705,12 +716,23 @@ export class DatabaseStorage implements IStorage {
         id: user.id,
         name: user.name,
         email: user.email,
+        password: user.password || null,
+        bio: user.bio || null,
         location: user.location,
         profilePhoto: user.profile_photo,
         availability: user.availability,
         isPublic: user.is_public,
         rating: user.rating,
-        reviewCount: 0, // Default since it's not in the database
+        reviewCount: user.review_count || 0,
+        role: user.role || 'user',
+        isBanned: user.is_banned || false,
+        banReason: user.ban_reason || null,
+        bannedAt: user.banned_at || null,
+        securityQuestion: user.security_question || null,
+        securityAnswer: user.security_answer || null,
+        emailVerified: user.email_verified || false,
+        emailVerifiedAt: user.email_verified_at || null,
+        createdAt: user.created_at || null,
         skillsOffered: user.skills_offered_json || [],
         skillsWanted: user.skills_wanted_json || [],
       }));
