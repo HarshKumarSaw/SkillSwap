@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/use-auth";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -5,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Bell, MessageSquare, Users, Star, Info, Check, CheckCheck, ArrowLeft, Home } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Bell, MessageSquare, Users, Star, Info, Check, CheckCheck, ArrowLeft, Eye } from "lucide-react";
 import { useLocation } from "wouter";
 import { apiRequest } from "@/lib/queryClient";
 import type { Notification } from "@shared/schema";
@@ -14,9 +16,10 @@ export default function NotificationsPage() {
   const { isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
   const [, setLocation] = useLocation();
+  const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
   // Fetch notifications
-  const { data: notifications, isLoading } = useQuery({
+  const { data: notifications = [], isLoading } = useQuery({
     queryKey: ["/api/notifications"],
     enabled: isAuthenticated,
   });
@@ -24,9 +27,11 @@ export default function NotificationsPage() {
   // Mark notification as read mutation
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
-      return apiRequest(`/api/notifications/${notificationId}/read`, {
-        method: "PATCH",
-      });
+      const response = await apiRequest("PATCH", `/api/notifications/${notificationId}/read`);
+      if (!response.ok) {
+        throw new Error("Failed to mark notification as read");
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
@@ -36,9 +41,11 @@ export default function NotificationsPage() {
   // Mark all notifications as read mutation
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/notifications/read-all", {
-        method: "PATCH",
-      });
+      const response = await apiRequest("PATCH", "/api/notifications/read-all");
+      if (!response.ok) {
+        throw new Error("Failed to mark all notifications as read");
+      }
+      return response.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
@@ -79,7 +86,26 @@ export default function NotificationsPage() {
     markAsReadMutation.mutate(notificationId);
   };
 
-  const unreadCount = notifications?.filter((n: Notification) => !n.isRead).length || 0;
+  const handleNotificationClick = (notification: Notification) => {
+    setSelectedNotification(notification);
+    // Mark as read when clicked
+    if (!notification.isRead) {
+      handleMarkAsRead(notification.id);
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return "Unknown date";
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) return "Invalid date";
+      return `${date.toLocaleDateString()} ${date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+    } catch {
+      return "Invalid date";
+    }
+  };
+
+  const unreadCount = notifications.filter((n: Notification) => !n.isRead).length || 0;
 
   if (!isAuthenticated) {
     return (
@@ -162,7 +188,7 @@ export default function NotificationsPage() {
                   </div>
                 ))}
               </div>
-            ) : notifications?.length === 0 ? (
+            ) : notifications.length === 0 ? (
               <div className="text-center py-8 sm:py-12 px-4">
                 <Bell className="h-10 w-10 sm:h-12 sm:w-12 text-muted-foreground mx-auto mb-4" />
                 <p className="text-muted-foreground text-sm sm:text-base">No notifications yet</p>
@@ -172,14 +198,15 @@ export default function NotificationsPage() {
               </div>
             ) : (
               <div className="space-y-1 sm:space-y-2">
-                {notifications?.map((notification: Notification, index: number) => (
+                {notifications.map((notification: Notification, index: number) => (
                   <div key={notification.id}>
                     <div
-                      className={`flex items-start space-x-3 p-3 sm:p-4 rounded-lg transition-colors ${
+                      className={`flex items-start space-x-3 p-3 sm:p-4 rounded-lg transition-colors cursor-pointer ${
                         !notification.isRead
                           ? "bg-muted/50 border-l-4 border-primary"
                           : "hover:bg-muted/30"
                       }`}
+                      onClick={() => handleNotificationClick(notification)}
                     >
                       <div
                         className={`flex items-center justify-center w-8 h-8 sm:w-10 sm:h-10 rounded-full text-white flex-shrink-0 ${getNotificationColor(
@@ -192,24 +219,40 @@ export default function NotificationsPage() {
                         <div className="flex items-start justify-between gap-2">
                           <div className="flex-1 min-w-0">
                             <h3 className="font-medium text-sm sm:text-base overflow-hidden text-ellipsis">{notification.title}</h3>
-                            <p className="text-xs sm:text-sm text-muted-foreground mt-1 overflow-hidden">
+                            <p className="text-xs sm:text-sm text-muted-foreground mt-1 overflow-hidden line-clamp-2">
                               {notification.content}
                             </p>
                             <p className="text-xs text-muted-foreground mt-2">
-                              {new Date(notification.createdAt).toLocaleDateString()} {new Date(notification.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              {formatDate(notification.createdAt)}
                             </p>
                           </div>
-                          {!notification.isRead && (
+                          <div className="flex items-center gap-1 flex-shrink-0">
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => handleMarkAsRead(notification.id)}
-                              disabled={markAsReadMutation.isPending}
-                              className="text-xs p-1 sm:p-2 flex-shrink-0"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleNotificationClick(notification);
+                              }}
+                              className="text-xs p-1 sm:p-2"
                             >
-                              <Check className="h-3 w-3" />
+                              <Eye className="h-3 w-3" />
                             </Button>
-                          )}
+                            {!notification.isRead && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleMarkAsRead(notification.id);
+                                }}
+                                disabled={markAsReadMutation.isPending}
+                                className="text-xs p-1 sm:p-2"
+                              >
+                                <Check className="h-3 w-3" />
+                              </Button>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -221,6 +264,51 @@ export default function NotificationsPage() {
           </ScrollArea>
         </CardContent>
       </Card>
+
+      {/* Notification Detail Modal */}
+      <Dialog open={!!selectedNotification} onOpenChange={() => setSelectedNotification(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3">
+              <div
+                className={`flex items-center justify-center w-8 h-8 rounded-full text-white flex-shrink-0 ${getNotificationColor(
+                  selectedNotification?.type || ''
+                )}`}
+              >
+                {getNotificationIcon(selectedNotification?.type || '')}
+              </div>
+              {selectedNotification?.title}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <span className="capitalize">{selectedNotification?.type.replace('_', ' ')}</span>
+              <span>•</span>
+              <span>{formatDate(selectedNotification?.createdAt || null)}</span>
+            </div>
+            <div className="prose prose-sm max-w-none dark:prose-invert">
+              <p className="whitespace-pre-wrap leading-relaxed">
+                {selectedNotification?.content}
+              </p>
+            </div>
+            {selectedNotification && !selectedNotification.isRead && (
+              <div className="flex justify-end pt-4 border-t">
+                <Button
+                  onClick={() => {
+                    handleMarkAsRead(selectedNotification.id);
+                    setSelectedNotification(null);
+                  }}
+                  size="sm"
+                  disabled={markAsReadMutation.isPending}
+                >
+                  <Check className="h-4 w-4 mr-2" />
+                  Mark as Read
+                </Button>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
