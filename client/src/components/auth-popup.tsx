@@ -16,7 +16,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { UserPlus, LogIn, Mail, Lock, User, MapPin, Loader2, KeyRound, ArrowLeft } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useLocation } from "wouter";
-import { SocialLoginButtons } from "@/components/SocialLoginButtons";
 
 const loginSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
@@ -347,8 +346,6 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
                 </Button>
               </form>
             </Form>
-            
-            <SocialLoginButtons mode="login" />
           </TabsContent>
           
           <TabsContent value="signup" className="p-6 pt-4 space-y-6">
@@ -503,8 +500,6 @@ export function AuthPopup({ isOpen, onOpenChange, onAuthSuccess }: AuthPopupProp
                 </Button>
               </form>
             </Form>
-            
-            <SocialLoginButtons mode="signup" />
           </TabsContent>
           
           <TabsContent value="reset" className="p-6 pt-4 space-y-6">
