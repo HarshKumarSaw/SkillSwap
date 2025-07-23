@@ -1938,14 +1938,22 @@ export class DatabaseStorage implements IStorage {
   async verifyOTP(email: string, otpCode: string): Promise<boolean> {
     const client = await pool.connect();
     try {
-      // Get verification record
+      // Get verification record and check expiration in JavaScript instead of SQL
       const result = await client.query(
-        'SELECT * FROM email_verifications WHERE email = $1 AND otp_code = $2 AND verified = false AND expires_at > NOW()',
+        'SELECT * FROM email_verifications WHERE email = $1 AND otp_code = $2 AND verified = false',
         [email, otpCode]
       );
       
       if (result.rows.length === 0) {
-        return false; // Invalid or expired OTP
+        return false; // Invalid OTP or already verified
+      }
+      
+      const verification = result.rows[0];
+      const expiresAt = new Date(verification.expires_at);
+      const now = new Date();
+      
+      if (now > expiresAt) {
+        return false; // Expired OTP
       }
       
       // Mark as verified
