@@ -19,7 +19,7 @@ export default function NotificationsPage() {
   const [selectedNotification, setSelectedNotification] = useState<Notification | null>(null);
 
   // Fetch notifications
-  const { data: notifications = [], isLoading } = useQuery({
+  const { data: notifications = [], isLoading } = useQuery<Notification[]>({
     queryKey: ["/api/notifications"],
     enabled: isAuthenticated,
   });
@@ -28,13 +28,12 @@ export default function NotificationsPage() {
   const markAsReadMutation = useMutation({
     mutationFn: async (notificationId: string) => {
       const response = await apiRequest("PATCH", `/api/notifications/${notificationId}/read`);
-      if (!response.ok) {
-        throw new Error("Failed to mark notification as read");
-      }
       return response.json();
     },
     onSuccess: () => {
+      // Refresh the notifications data immediately
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
     },
   });
 
@@ -42,13 +41,12 @@ export default function NotificationsPage() {
   const markAllAsReadMutation = useMutation({
     mutationFn: async () => {
       const response = await apiRequest("PATCH", "/api/notifications/read-all");
-      if (!response.ok) {
-        throw new Error("Failed to mark all notifications as read");
-      }
       return response.json();
     },
     onSuccess: () => {
+      // Refresh the notifications data immediately
       queryClient.invalidateQueries({ queryKey: ["/api/notifications"] });
+      queryClient.refetchQueries({ queryKey: ["/api/notifications"] });
     },
   });
 
@@ -83,6 +81,13 @@ export default function NotificationsPage() {
   };
 
   const handleMarkAsRead = (notificationId: string) => {
+    // Optimistic update - immediately mark as read in UI
+    queryClient.setQueryData<Notification[]>(["/api/notifications"], (oldData = []) => {
+      return oldData.map(notif => 
+        notif.id === notificationId ? { ...notif, isRead: true } : notif
+      );
+    });
+    
     markAsReadMutation.mutate(notificationId);
   };
 
@@ -160,7 +165,13 @@ export default function NotificationsPage() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => markAllAsReadMutation.mutate()}
+                onClick={() => {
+                  // Optimistic update - immediately mark all as read in UI
+                  queryClient.setQueryData<Notification[]>(["/api/notifications"], (oldData = []) => {
+                    return oldData.map(notif => ({ ...notif, isRead: true }));
+                  });
+                  markAllAsReadMutation.mutate();
+                }}
                 disabled={markAllAsReadMutation.isPending}
                 className="flex items-center gap-2 text-xs sm:text-sm"
               >
